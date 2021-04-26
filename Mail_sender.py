@@ -1,16 +1,12 @@
-from flask import Flask, request, jsonify
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
 from email.mime.application import MIMEApplication
-
-app = Flask(__name__)
 
 
 def send_test_mail(body):
-    sender_email = "*********"
-    receiver_email = "********"
+    sender_email = "mail"
+    receiver_email = "mail"
 
     msg = MIMEMultipart()
     msg['Subject'] = '[Email Test]'
@@ -28,7 +24,7 @@ def send_test_mail(body):
     #     img.add_header('Content-Disposition', 'attachment', filename="example.jpg")
     #     msg.attach(img)
 
-    pdf = MIMEApplication(open("bubu_lulu.pdf", 'rb').read())
+    pdf = MIMEApplication(open("2021/01/babu_lulu.pdf", 'rb').read())
     pdf.add_header('Content-Disposition', 'attachment', filename="example.pdf")
     msg.attach(pdf)
 
@@ -36,9 +32,9 @@ def send_test_mail(body):
         with smtplib.SMTP('smtp.free.fr', 587) as smtpObj:
             smtpObj.ehlo()
             smtpObj.starttls()
-            smtpObj.login("******", "******")
+            smtpObj.login("mail", "pw")
             smtpObj.sendmail(sender_email, receiver_email, msg.as_string())
     except Exception as e:
         print(e)
 
-send_test_mail("Quittance ")
+send_test_mail("Quittance")
