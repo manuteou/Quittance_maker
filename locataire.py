@@ -28,17 +28,3 @@ class locataire:
     def del_contact(self):
         pass
 
-nom = "bubu"
-prenom = "lulu"
-adresse = "15 rue des lolo"
-ville = "labas"
-tel = "0105030632"
-mail = "zaeazr@eaze.fr"
-sci = "SCI"
-loyer = 1500
-charges = 200
-
-client1 = locataire(nom, prenom, adresse, ville, tel, mail, sci, loyer, charges)
-
-client1.get_locataire()
-client1.save_contact()

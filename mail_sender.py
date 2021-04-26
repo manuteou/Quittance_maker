@@ -3,8 +3,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 
-
-def send_test_mail(body):
+def send__mail(body):
     sender_email = "mail"
     receiver_email = "mail"
 
@@ -37,4 +36,4 @@ def send_test_mail(body):
     except Exception as e:
         print(e)
 
-send_test_mail("Quittance")
+send__mail("Quittance")
