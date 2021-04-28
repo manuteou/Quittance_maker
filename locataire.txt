@@ -1,0 +1,12 @@
+{
+    "nom": "Bubu",
+    "prenom": "prenom",
+    "adresse": "adresse",
+    "ville": "ville",
+    "tel": "tel",
+    "mail": "frogenmanu@hotmail.com",
+    "sci": "sci",
+    "loyer": 1200,
+    "charges": 100,
+    "cat": "a"
+}
