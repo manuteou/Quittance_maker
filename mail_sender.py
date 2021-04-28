@@ -25,11 +25,6 @@ class send_mail:
         filename = "example.txt"
         msg.attach(MIMEText(open(filename).read()))
 
-        # with open('example.jpg', 'rb') as fp:
-        #     img = MIMEImage(fp.read())
-        #     img.add_header('Content-Disposition', 'attachment', filename="example.jpg")
-        #     msg.attach(img)
-
         pdf = MIMEApplication(open(self.path, 'rb').read())
         pdf.add_header('Content-Disposition', 'attachment', filename="example.pdf")
         msg.attach(pdf)

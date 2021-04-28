@@ -1,4 +1,4 @@
-import json
+from tinydb import TinyDB, where, Query
 
 class locataire:
     def __init__(self, nom, prenom, adresse, ville, tel, mail, sci, loyer, charges, cat='a'):
@@ -22,17 +22,21 @@ class locataire:
     def get_contact(self):
         return print(f" telephone : {self.tel} \n mail : {self.mail}")
 
-    def save_contact(self)  :# a transformer en json
-        person_dict = {"nom": self.nom, "prenom": self.prenom, "adresse": self.adresse,
+    def save_contact(self):
+        db = TinyDB('db.json')
+        locataire_db = db.table('locataire')
+        # user = Query()
+        # if db.search(user.nom =='self.nom') is None:
+        locataire_db.insert( {"nom": self.nom, "prenom": self.prenom, "adresse": self.adresse,
                 "ville": self.ville, "tel": self.tel, "mail": self.mail,
-                "sci": self.sci, "loyer": self.loyer, "charges": self.charge, "cat": self.cat}
-
-        with open('locataire.txt', 'a') as json_file:
-            json.dump(person_dict, json_file, indent=4)
-            json_file.write(",")
+                "sci": self.sci, "loyer": self.loyer, "charges": self.charge, "cat": self.cat})
 
     def del_contact(self):
-        pass
+        db = TinyDB('db.json')
+        locataire_db = db.table('locataire')
+        user = Query()
+        locataire_db.remove(user.nom == self.nom)
+
 
 if __name__ == "__main__":
     mail = 'frogenmanu@hotmail.com'
@@ -43,3 +47,14 @@ if __name__ == "__main__":
 
     client1.save_contact()
     client2.save_contact()
+    #client2.del_contact()
+    # db = TinyDB('db.json')
+    # locataire_db = db.table('locataire')
+    #
+    # # locataire_db.insert({'nom' :'Budu', 'prenom' :'dsds'})
+    # # locataire_db.insert({'nom' :'Badu', 'prenom' :'asde'})
+    # print(locataire_db.all())
+    # user = Query()
+    # el = locataire_db.get(user.nom == 'Budu')
+    # print(el.doc_id)
+    # locataire_db.remove(user.nom =='Budu')
