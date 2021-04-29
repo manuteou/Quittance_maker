@@ -1,5 +1,5 @@
 from reportlab.pdfgen import canvas
-import csv
+from tinydb import TinyDB, where, Query
 import os
 
 # pdf function generator
@@ -82,6 +82,8 @@ class pdf_generator:
             self.pdf.drawString(350, 420, f"{float(self.loyer) * 1.20 +float(self.charge)} €")
 
 if __name__ == "__main__":
+    db = TinyDB('db.json')
+    locataire_db = db.table('locataire')
 
     years = "2021"
     month = "02"
@@ -95,12 +97,18 @@ if __name__ == "__main__":
         if not os.path.exists(dir):
             os.makedirs(dir)
 
-    with open('locataire.txt', 'r') as csvfile:  # we open the client's files
-        info_locataire = csv.reader(csvfile)
-        for row in info_locataire:
-            nom, prenom, adresse, ville, tel, mail, sci, loyer, charge, cat = [w for w in row]
-            name_pdf = directory + "\\" + sci + "\\" + years + "\\" + month + "\\" + str(nom) + ".pdf"
-            pdf = canvas.Canvas(name_pdf)  # we generate pdf
-            pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer, charge, day, month, years, cat)
-            pdf.showPage()
-            pdf.save()  # we save them in the director
+
+
+    print (len(locataire_db))
+    user = Query()
+    el = locataire_db.all()[0]
+    print(el['nom'])
+    for i in range(len(locataire_db)):
+        el = locataire_db.all()[i]
+        name_pdf = directory + "\\" + el['sci'] + "\\" + years + "\\" + month + "\\" + el['nom'] + ".pdf"
+        pdf = canvas.Canvas(name_pdf)
+        pdf_generator(pdf, el['nom'], el['prenom'], el['adresse'],el['ville'], el['sci'], el['loyer'],\
+                            el['charges'], day, month, years, el['cat'])
+        pdf.showPage()
+        pdf.save()
+

@@ -2,16 +2,19 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
+from tinydb import TinyDB, where, Query
 import json
 import os
 
 class send_mail:
-    def __init__(self, body, sender_email, password, receiver_email, path):
+    def __init__(self, body, sender_email, password, receiver_email, smtp, port, path):
         self.body = body
         self.sender_email = sender_email
         self.receiver_email = receiver_email
         self.path = path
         self.password = password
+        self.smtp = smtp
+        self.port = port
 
     def send(self):
         msg = MIMEMultipart()
@@ -30,7 +33,7 @@ class send_mail:
         msg.attach(pdf)
 
         try:
-            with smtplib.SMTP('smtp.free.fr', 587) as smtpObj:
+            with smtplib.SMTP(self.smtp, self.port) as smtpObj:
                 smtpObj.ehlo()
                 smtpObj.starttls()
                 smtpObj.login(self.sender_email, self.password)
@@ -41,15 +44,18 @@ class send_mail:
 
 if __name__ == "__main__":
 
+    db = TinyDB('db.json')
+    locataire_db = db.table('locataire')
+
     directory = os.path.dirname(__file__)
     years = "2021"
     month = "02"
-
-    with open("config.json") as json_file:
-        config = json.load(json_file)
-
-    with open("locataire.txt") as json_file:
-        locataire = json.load(json_file)
-        path = os.path.join(directory, locataire['sci'] + "\\" + years + "\\" + month + "\\") + locataire["nom"] + ".pdf"
-        mail = send_mail("Quittance", config["master_mail"], config["password"], locataire["mail"], path)
+    with open('config.json','r') as json_files:
+        config = json.load(json_files
+                           )
+    for i in range(len(locataire_db)):
+        el = locataire_db.all()[i]
+        path = os.path.join(directory, el['sci'] + "\\" + years + "\\" + month + "\\") + el["nom"] + ".pdf"
+        mail = send_mail("Quittance", config["master_mail"], config["password"], el["mail"], path)
         mail.send()
+

@@ -54,16 +54,4 @@ if __name__ == "__main__":
     client4.save_contact()
     #client1.del_contact()
 
-    # db = TinyDB('db.json')
-    # locataire_db = db.table('locataire')
-    #
-    # #locataire_db.insert({'nom' :'Budu', 'prenom' :'dsds'})
-    # locataire_db.insert({'nom' :'Badu', 'prenom' :'asde'})
-    # print(locataire_db.all())
-    # user = Query()
-    # el = locataire_db.search(user.nom == 'Budu')
-    # if el == []:
-    #     locataire_db.insert({'nom' :'Budu', 'prenom' :'dsds'})
-    #     locataire_db.insert({'nom': 'Badu', 'prenom': 'asde'})
-    # else:
-    #     print('tap tap')
+
