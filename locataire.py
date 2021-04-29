@@ -25,11 +25,14 @@ class locataire:
     def save_contact(self):
         db = TinyDB('db.json')
         locataire_db = db.table('locataire')
-        # user = Query()
-        # if db.search(user.nom =='self.nom') is None:
-        locataire_db.insert( {"nom": self.nom, "prenom": self.prenom, "adresse": self.adresse,
+        user = Query()
+        check = locataire_db.search(user.nom == self.nom)
+        if check == []:
+            locataire_db.insert({"nom": self.nom, "prenom": self.prenom, "adresse": self.adresse,
                 "ville": self.ville, "tel": self.tel, "mail": self.mail,
                 "sci": self.sci, "loyer": self.loyer, "charges": self.charge, "cat": self.cat})
+        else:
+            print(f'Utilisateur {self.nom} déjà dans la base')
 
     def del_contact(self):
         db = TinyDB('db.json')
@@ -47,14 +50,20 @@ if __name__ == "__main__":
 
     client1.save_contact()
     client2.save_contact()
-    #client2.del_contact()
+    client3.save_contact()
+    client4.save_contact()
+    #client1.del_contact()
+
     # db = TinyDB('db.json')
     # locataire_db = db.table('locataire')
     #
-    # # locataire_db.insert({'nom' :'Budu', 'prenom' :'dsds'})
-    # # locataire_db.insert({'nom' :'Badu', 'prenom' :'asde'})
+    # #locataire_db.insert({'nom' :'Budu', 'prenom' :'dsds'})
+    # locataire_db.insert({'nom' :'Badu', 'prenom' :'asde'})
     # print(locataire_db.all())
     # user = Query()
-    # el = locataire_db.get(user.nom == 'Budu')
-    # print(el.doc_id)
-    # locataire_db.remove(user.nom =='Budu')
+    # el = locataire_db.search(user.nom == 'Budu')
+    # if el == []:
+    #     locataire_db.insert({'nom' :'Budu', 'prenom' :'dsds'})
+    #     locataire_db.insert({'nom': 'Badu', 'prenom': 'asde'})
+    # else:
+    #     print('tap tap')
