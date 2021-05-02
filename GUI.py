@@ -1,4 +1,5 @@
 import tkinter as tk
+from datetime import date
 from locataire import locataire
 
 class creation_gui(tk.Frame):
@@ -13,7 +14,7 @@ class creation_gui(tk.Frame):
         self.createWidgets()
 
     def createWidgets(self):
-        # création variable
+        # varaibles' creation
         self.nomVar = tk.StringVar()
         self.nomVar.set("Mini")
         self.prenomVar = tk.StringVar()
@@ -33,56 +34,56 @@ class creation_gui(tk.Frame):
         self.chargesVar = tk.StringVar()
         self.chargesVar.set("200")
 
-        # création widgets
-        mainFrame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
-        mainFrame.columnconfigure(0, weight=0)
-        mainFrame.columnconfigure(1, weight=1)
-        nomLabel = tk.Label(mainFrame, text="Nom")
-        prenomLabel = tk.Label(mainFrame, text="Prenom")
-        adresseLabel = tk.Label(mainFrame, text="Adresse")
-        villeLabel = tk.Label(mainFrame, text="ville")
-        telLabel = tk.Label(mainFrame, text="Telephone")
-        mailLabel = tk.Label(mainFrame, text="mail")
-        sciLabel = tk.Label(mainFrame, text="SCI")
-        loyerLabel = tk.Label(mainFrame, text="loyer")
-        chargesLabel = tk.Label(mainFrame, text="charges")
+        # widgets' creation
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
+        main_frame.columnconfigure(0, weight=0)
+        main_frame.columnconfigure(1, weight=1)
+        nom_label = tk.Label(main_frame, text="Nom")
+        prenom_label = tk.Label(main_frame, text="Prenom")
+        adresse_label = tk.Label(main_frame, text="Adresse")
+        ville_label = tk.Label(main_frame, text="ville")
+        tel_label = tk.Label(main_frame, text="Telephone")
+        mail_label = tk.Label(main_frame, text="mail")
+        sci_label = tk.Label(main_frame, text="SCI")
+        loyer_label = tk.Label(main_frame, text="loyer")
+        charges_label = tk.Label(main_frame, text="charges")
         # Catégorieselecteur à faire
 
-        nomEntry = tk.Entry(mainFrame, textvariable=self.nomVar)
-        prenomEntry = tk.Entry(mainFrame, textvariable=self.prenomVar)
-        adresseEntry = tk.Entry(mainFrame, textvariable=self.adresseVar)
-        villeEntry = tk.Entry(mainFrame, textvariable=self.villeVar)
-        telEntry = tk.Entry(mainFrame, textvariable=self.telVar)
-        mailEntry = tk.Entry(mainFrame, textvariable=self.mailVar)
-        sciEntry = tk.Entry(mainFrame, textvariable=self.sciVar)
-        loyerEntry = tk.Entry(mainFrame, textvariable=self.loyerVar)
-        chargesEntry = tk.Entry(mainFrame, textvariable=self.chargesVar)
+        nom_entry = tk.Entry(main_frame, textvariable=self.nomVar)
+        prenom_entry = tk.Entry(main_frame, textvariable=self.prenomVar)
+        adresse_entry = tk.Entry(main_frame, textvariable=self.adresseVar)
+        ville_entry = tk.Entry(main_frame, textvariable=self.villeVar)
+        tel_entry = tk.Entry(main_frame, textvariable=self.telVar)
+        mail_entry = tk.Entry(main_frame, textvariable=self.mailVar)
+        sci_entry = tk.Entry(main_frame, textvariable=self.sciVar)
+        loyer_entry = tk.Entry(main_frame, textvariable=self.loyerVar)
+        charges_entry = tk.Entry(main_frame, textvariable=self.chargesVar)
 
-        button = tk.Button(mainFrame, text="Valider la saisie", command=self.validation_tenant) # faire un bouton system etes vous sur de vouloir ajoueter le client
-        button2 = tk.Button(mainFrame, text="Quitter et revenir")
+        button = tk.Button(main_frame, text="Valider la saisie", command=self.validation_tenant) # faire un bouton system etes vous sur de vouloir ajoueter le client
+        button2 = tk.Button(main_frame, text="Quitter et revenir", command=self.quit)
 
-        # position widgets
-        mainFrame.grid(column=0, row=0, sticky="NSEW")
-        nomLabel.grid(column=0, row=0, sticky="EW")
-        nomEntry.grid(column=1, row=0, sticky="EW")
-        prenomLabel.grid(column=0, row=1, sticky="EW")
-        prenomEntry.grid(column=1, row=1, sticky="EW")
-        adresseLabel.grid(column=0, row=2, sticky="EW")
-        adresseEntry.grid(column=1, row=2, sticky="EW")
-        villeLabel.grid(column=0, row=3, sticky="EW")
-        villeEntry.grid(column=1, row=3, sticky="EW")
-        telLabel.grid(column=0, row=4, sticky="EW")
-        telEntry.grid(column=1, row=4, sticky="EW")
-        mailLabel.grid(column=0, row=5, sticky="EW")
-        mailEntry.grid(column=1, row=5, sticky="EW")
-        mailLabel.grid(column=0, row=6, sticky="EW")
-        mailEntry.grid(column=1, row=6, sticky="EW")
-        sciLabel.grid(column=0, row=7, sticky="EW")
-        sciEntry.grid(column=1, row=7, sticky="EW")
-        loyerLabel.grid(column=0, row=8, sticky="EW")
-        loyerEntry.grid(column=1, row=8, sticky="EW")
-        chargesLabel.grid(column=0, row=9, sticky="EW")
-        chargesEntry.grid(column=1, row=9, sticky="EW")
+        # widgets' position
+        main_frame.grid(column=0, row=0, sticky="NSEW")
+        nom_label.grid(column=0, row=0, sticky="EW")
+        nom_entry.grid(column=1, row=0, sticky="EW")
+        prenom_label.grid(column=0, row=1, sticky="EW")
+        prenom_entry.grid(column=1, row=1, sticky="EW")
+        adresse_label.grid(column=0, row=2, sticky="EW")
+        adresse_entry.grid(column=1, row=2, sticky="EW")
+        ville_label.grid(column=0, row=3, sticky="EW")
+        ville_entry.grid(column=1, row=3, sticky="EW")
+        tel_label.grid(column=0, row=4, sticky="EW")
+        tel_entry.grid(column=1, row=4, sticky="EW")
+        mail_label.grid(column=0, row=5, sticky="EW")
+        mail_entry.grid(column=1, row=5, sticky="EW")
+        mail_label.grid(column=0, row=6, sticky="EW")
+        mail_entry.grid(column=1, row=6, sticky="EW")
+        sci_label.grid(column=0, row=7, sticky="EW")
+        sci_entry.grid(column=1, row=7, sticky="EW")
+        loyer_label.grid(column=0, row=8, sticky="EW")
+        loyer_entry.grid(column=1, row=8, sticky="EW")
+        charges_label.grid(column=0, row=9, sticky="EW")
+        charges_entry.grid(column=1, row=9, sticky="EW")
 
         button.grid(column=1, columnspan=1, row=10, sticky='NSEW')
         button2.grid(column=0, columnspan=1, row=10, sticky='NSEW')
@@ -98,6 +99,9 @@ class creation_gui(tk.Frame):
               self.mailVar.get(), self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get())
 
 
+    def quit(self):
+        self.destroy()
+
 class main_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
@@ -109,7 +113,71 @@ class main_gui(tk.Frame):
         self.grid(sticky="NSEW")
         self.createWidgets()
 
+
     def createWidgets(self):
+        # variable's creation
+        self.today = date.today()
+        self.date_s = tk.StringVar()
+        self.date_s.set(f"{self.today.day}/{self.today.month}/{self.today.year}")
+
+        # widget's Creation
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
+        main_frame.columnconfigure(0, weight=0)
+        main_frame.columnconfigure(1, weight=1)
+        frame1 = tk.LabelFrame(self, main_frame, text="LOCATAIRES", borderwidth=2, relief=tk.GROOVE)
+        frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE)
+        frame3 = tk.Frame(self, main_frame)
+        # widgets on the left side
+        tenant_list = tk.Listbox(frame1, selectmode=tk.MULTIPLE) # recuperer la list des locataires
+        tenant_list.insert(1, "test")
+        tenant_list.insert(2, "test2")
+        tenant_list.insert(2, "test3")
+        # widgets under left
+        date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1, relief=tk.GROOVE)
+        date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE)
+
+        button_all = tk.Button(frame2, text="Créer  PDF et envoyer pour tous", borderwidth=2, relief=tk.GROOVE,
+                               command=self.validation_button)
+        button_selection = tk.Button(frame2, text="Créer PDF et envoyer pour selection", borderwidth=2, relief=tk.GROOVE
+                                     , command=self.validation_button)
+        # widgets on right
+        button_new = tk.Button(frame3, text='Nouvelle Entrée', borderwidth=2, relief=tk.GROOVE, command=self.new_entry)
+        button_modify = tk.Button(frame3, text="Modifier un locataire", borderwidth=2, relief=tk.GROOVE, command=self.modify_entry)
+        button_del = tk.Button(frame3, text="Suprimer un locataire", borderwidth=2, relief=tk.GROOVE, command=self.del_entry)
+
+        #widgets' position
+        frame1.grid(column=0, row=0, sticky='NSEW')
+        frame2.grid(column=0, row=1, sticky='NSEW')
+        frame3.grid(column=1, row=0)
+        ##position widgets 1
+        tenant_list.grid(column=0, row=0, rowspan=10)
+        ##position widget 2
+        date_s_label.grid(column=0, row=0, sticky='NW')
+        date_s_entry.grid(column=0, row=0, sticky='NE')
+        button_all.grid(column=0, row=10, sticky='NW')
+        button_selection.grid(column=0, row=9, sticky='NW')
+        ##position widgets3
+        button_new.grid(column=0, row=0, sticky='NW')
+        button_modify.grid(column=0, row=1, sticky='NW')
+        button_del.grid(column=0, row=2, sticky='NW')
+
+    def tenant_list(self):
+        pass
+
+
+    def validation_button(self):
+        pass
+
+
+    def new_entry(self):
+        creation_gui().mainloop()
+
+
+    def modify_entry(self):
+        pass
+
+    @classmethod
+    def del_entry(cls):
         pass
 
 class modification_gui(tk.Frame):
@@ -141,4 +209,5 @@ class config_gui(tk.Frame):
         pass
 
 if __name__ == "__main__":
-    creation_gui().mainloop()
+    #creation_gui().mainloop()
+    main_gui().mainloop()
