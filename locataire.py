@@ -41,8 +41,7 @@ class sql_database():
 
         self.c.execute(sql_create_tenant_table)
         self.c.execute(sql_create_location_table)
-        print(sql_create_tenant_table)
-        print(sql_create_location_table)
+
 
     def create_entry(self, table, insert: dict):
         field_name = ""
@@ -66,20 +65,29 @@ class sql_database():
         print(sql_insert_entry)
 
     def delete_entry(self, table, entry):
-        sql_delete_entry = f"""DELETE FROM {table} WHERE name= '{entry}'"""
-        # self.c.execute(sql_delete_entry
+        sql_delete_entry = f"""DELETE FROM {table} WHERE nom= '{entry}'"""
+        self.c.execute(sql_delete_entry)
+        self.conn.commit()
         print(sql_delete_entry)
 
     def update_entry(self):
         pass
 
-if __name__ == "__main__":
-    client = locataire('Bubu', 'prenom', 'adresse treze', 'ville', 'tel', 'mail', 'sci_1', 1200, 100)
-    db = sql_database()
-    insert_tenant = {'nom': client.nom, 'prenom': client.prenom, 'adresse': client.adresse, 'CP_ville': client.cp_ville,
-                     'tel': client.tel, 'mail': client.mail}
-    insert_location = ({'SCI': client.sci, 'nom': client.nom, 'type': client.cat, 'loyer': client.loyer,
-                       'charges': client.charges})
+    def list_table(self, table):
+        sql_list_table = f"""SELECT * from {table}"""
+        self.c.execute(sql_list_table)
+        rows = self.c.fetchall()
+        return rows
 
-    db.create_entry("tenant", insert_tenant)
-    db.create_entry("location", insert_location)
+if __name__ == "__main__":
+    # client = locataire('Bubu', 'prenom', 'adresse treze', 'ville', 'tel', 'mail', 'sci_1', 1200, 100)
+    db = sql_database()
+    # insert_tenant = {'nom': client.nom, 'prenom': client.prenom, 'adresse': client.adresse, 'CP_ville': client.cp_ville,
+    #                  'tel': client.tel, 'mail': client.mail}
+    # insert_location = ({'SCI': client.sci, 'nom': client.nom, 'type': client.cat, 'loyer': client.loyer,
+    #                    'charges': client.charges})
+    #
+    # db.create_entry("tenant", insert_tenant)
+    # db.create_entry("location", insert_location)
+    for i, row in enumerate(db.list_table("tenant")):
+        print (i, row)

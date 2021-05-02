@@ -5,12 +5,15 @@ from locataire import locataire, sql_database
 class main_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
+        self.master.geometry("600x300")
+        self.master.minsize(300, 150)
         self.master.title("Quittances")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
+        self.database = sql_database()
         self.createWidgets()
 
 
@@ -24,14 +27,15 @@ class main_gui(tk.Frame):
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
         main_frame.columnconfigure(0, weight=0)
         main_frame.columnconfigure(1, weight=1)
+
         frame1 = tk.LabelFrame(self, main_frame, text="LOCATAIRES", borderwidth=2, relief=tk.GROOVE)
         frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE)
         frame3 = tk.Frame(self, main_frame)
         # widgets on the left side
-        tenant_list = tk.Listbox(frame1, selectmode=tk.MULTIPLE) # recuperer la list des locataires
-        tenant_list.insert(1, "test")
-        tenant_list.insert(2, "test2")
-        tenant_list.insert(2, "test3")
+        tenant_list = tk.Listbox(frame1, selectmode=tk.MULTIPLE, font=("Helvetica", 15), width=600)
+        for i, row in enumerate(self.database.list_table("tenant")):
+            tenant_list.insert(i, row)
+
         # widgets under left
         date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1, relief=tk.GROOVE)
         date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE)
@@ -43,7 +47,7 @@ class main_gui(tk.Frame):
         # widgets on right
         button_new = tk.Button(frame3, text='Nouvelle Entrée', borderwidth=2, relief=tk.GROOVE, command=self.new_entry)
         button_modify = tk.Button(frame3, text="Modifier un locataire", borderwidth=2, relief=tk.GROOVE, command=self.modify_entry)
-        button_del = tk.Button(frame3, text="Suprimer un locataire", borderwidth=2, relief=tk.GROOVE, command=self.del_entry)
+        button_del = tk.Button(frame3, text="Supprimer un locataire", borderwidth=2, relief=tk.GROOVE, command=self.del_entry)
 
         #widgets' position
         frame1.grid(column=0, row=0, sticky='NSEW')
@@ -54,30 +58,23 @@ class main_gui(tk.Frame):
         ##position widget 2
         date_s_label.grid(column=0, row=0, sticky='NW')
         date_s_entry.grid(column=0, row=0, sticky='NE')
-        button_all.grid(column=0, row=10, sticky='NW')
-        button_selection.grid(column=0, row=9, sticky='NW')
+        button_all.grid(column=0, row=10, sticky='NSEW')
+        button_selection.grid(column=0, row=9, sticky='NSEW')
         ##position widgets3
-        button_new.grid(column=0, row=0, sticky='NW')
-        button_modify.grid(column=0, row=1, sticky='NW')
-        button_del.grid(column=0, row=2, sticky='NW')
-
-    def tenant_list(self):
-        pass
-
+        button_new.grid(column=0, row=0, sticky='NSEW')
+        button_modify.grid(column=0, row=1, sticky='NSEW')
+        button_del.grid(column=0, row=2, sticky='NSEW')
 
     def validation_button(self):
         pass
-
 
     def new_entry(self):
         self.destroy()
         creation_gui().mainloop()
 
-
     def modify_entry(self):
         self.destroy()
-        pass
-
+        modification_gui().mainloop()
 
     def del_entry(self):
         self.destroy()
@@ -129,7 +126,7 @@ class creation_gui(tk.Frame):
         sci_label = tk.Label(main_frame, text="SCI")
         loyer_label = tk.Label(main_frame, text="loyer")
         charges_label = tk.Label(main_frame, text="charges")
-        # Catégorieselecteur à faire
+
 
         nom_entry = tk.Entry(main_frame, textvariable=self.nomVar)
         prenom_entry = tk.Entry(main_frame, textvariable=self.prenomVar)
@@ -187,7 +184,6 @@ class creation_gui(tk.Frame):
         print(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(), self.villeVar.get(), self.telVar.get(),
               self.mailVar.get(), self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get())
 
-
     def quit(self):
         self.destroy()
         main_gui().mainloop()
@@ -195,35 +191,50 @@ class creation_gui(tk.Frame):
 class modification_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
-        self.master.title("Quittances")
+        self.master.title("modification de locataire")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.createWidgets()
+        self.database = sql_database()
 
     def createWidgets(self):
-        pass
+        # varaible creation
+        self.champs_var = tk.StringVar()
+        self.champs_var.set("Entrez les champs à modifier")
+        self.newval_var =tk.StringVar()
+        self.newval_var.set("Entrez la nouvelle valeur")
+        # widgets' creation
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
+        main_frame.columnconfigure(0, weight=0)
+        main_frame.columnconfigure(1, weight=1)
+        modification_label = tk.Label(main_frame, text="champs à modifier")
+        champs_entry = tk.Entry(main_frame, textvariable=self.champs_var)
+        newval_entry = tk.Entry(main_frame, textvariable=self.champs_var)
+        valeur_label = tk.Label(main_frame, text="Nouvelle valeur")
+        button_val = tk.Button(main_frame, text="Modifier et revenir", command=self.mod_entry)
+        button_back = tk.Button(main_frame, text="Quitter et revenir", command=self.quit)
 
-class config_gui(tk.Frame):
-    def __init__(self):
-        tk.Frame.__init__(self)
-        self.master.title("Quittances")
-        self.master.columnconfigure(0, weight=1)
-        self.master.rowconfigure(0, weight=1)
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-        self.grid(sticky="NSEW")
-        self.createWidgets()
+        # widgets' position
+        modification_label.grid(column=0,row=0, sticky="NSEW")
+        champs_entry.grid(column=1, row=0, sticky="NSEW")
+        valeur_label.grid(column=0, row=1, sticky="NSEW")
+        newval_entry.grid(column=1, row=1, sticky='NSEW')
+        button_val.grid(column=1, row=2, sticky="NSEW")
+        button_back.grid(column=0, row=2, sticky="NSEW")
 
-    def createWidgets(self):
+    def quit(self):
+        self.destroy()
+        main_gui().mainloop()
+    def mod_entry(self):
         pass
 
 class delete_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
-        self.master.title("Quittances")
+        self.master.title("Supression de locataire")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -252,10 +263,9 @@ class delete_gui(tk.Frame):
         button_back.grid(column=1, row=1, sticky="NSEW")
 
     def del_entry(self):
-        print(self.nom_var)
         if self.nom_var.get() != "Attention action definitive":
-            self.database.delete_entry("tenant", self.nom_var)
-            self.database.delete_entry("locataire", self.nom_var)
+            self.database.delete_entry("tenant", self.nom_var.get())
+            self.database.delete_entry("location", self.nom_var.get())
             print("Action effectuée")
             self.destroy()
             main_gui().mainloop()
@@ -265,6 +275,25 @@ class delete_gui(tk.Frame):
     def quit(self):
         self.destroy()
         main_gui().mainloop()
+
+    class config_gui(tk.Frame):
+        def __init__(self):
+            tk.Frame.__init__(self)
+            self.master.title("Quittances")
+            self.master.columnconfigure(0, weight=1)
+            self.master.rowconfigure(0, weight=1)
+            self.columnconfigure(0, weight=1)
+            self.rowconfigure(0, weight=1)
+            self.grid(sticky="NSEW")
+            self.createWidgets()
+
+        def createWidgets(self):
+            pass
+
+        def quit(self):
+            self.destroy()
+            main_gui().mainloop()
+
 
 if __name__ == "__main__":
     #creation_gui().mainloop()
