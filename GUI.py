@@ -101,6 +101,7 @@ class creation_gui(tk.Frame):
 
     def quit(self):
         self.destroy()
+        main_gui().mainloop()
 
 class main_gui(tk.Frame):
     def __init__(self):
@@ -170,6 +171,7 @@ class main_gui(tk.Frame):
 
 
     def new_entry(self):
+        self.destroy()
         creation_gui().mainloop()
 
 

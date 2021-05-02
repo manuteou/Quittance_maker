@@ -1,4 +1,4 @@
-from tinydb import TinyDB, where, Query
+import sqlite3
 
 class locataire:
     def __init__(self, nom, prenom, adresse, ville, tel, mail, sci, loyer, charges, cat='a'):
@@ -8,50 +8,56 @@ class locataire:
         self.mail = mail
         self.sci = sci
         self.adresse = adresse
-        self.ville = ville
+        self.cp_ville = ville
         self.loyer = loyer
         self.charge = charges
         self.cat = cat
 
-    def get_sci(self, sci):
-        return print(f" {sci}\n xx rue lllala tralala\n 98150 les moutons bleus\n telephone\n mail")
+class sql_database():
+    def __init__(self):
+        self.database()
+        conn = sqlite3.connect("tenatdb.db")
+        self.c = conn.cursor()
+        self.create_table_sql(self.c)
 
-    def get_locataire(self):
-        return print(f" {self.nom} {self.prenom} \n {self.adresse} \n {self.ville}")
+    def create_table_sql(self):
+        sql_create_tenant_table = """ CREATE TABLE IF NOT EXISTS tenant(
+            id integer PRIMARY KEY,
+            name text NOT NULL,
+            prenom text NOT NULL,
+            adresse text NOT NULL,
+            CP_ville text NOT NULL,
+            tel text NOT NULL,
+            mail text NOT NULL,
+            SCI text NOT NULL
+            ); """
 
-    def get_contact(self):
-        return print(f" telephone : {self.tel} \n mail : {self.mail}")
+        sql_create_location_table = """ CREATE TABLE IF NOT EXISTS location(
+            id integer PRIMARY KEY,
+            name text NOT NULL,
+            type text NOT NULL,
+            loyer integer NOT NULL,
+            charges integer NOT NULL
+        );"""
 
-    def save_contact(self):
-        db = TinyDB('db.json')
-        locataire_db = db.table('locataire')
-        user = Query()
-        check = locataire_db.search(user.nom == self.nom)
-        if check == []:
-            locataire_db.insert({"nom": self.nom, "prenom": self.prenom, "adresse": self.adresse,
-                "ville": self.ville, "tel": self.tel, "mail": self.mail,
-                "sci": self.sci, "loyer": self.loyer, "charges": self.charge, "cat": self.cat})
-        else:
-            print(f'Utilisateur {self.nom} déjà dans la base')
+        self.c.execute(sql_create_tenant_table)
+        self.c.execute(sql_create_location_table)
 
-    def del_contact(self):
-        db = TinyDB('db.json')
-        locataire_db = db.table('locataire')
-        user = Query()
-        locataire_db.remove(user.nom == self.nom)
+    def create_tenant(self, tenant_insert: dict):
+        field_name = ""
+        field_value = ""
+        for k, v in tenant_insert:
+            field_name += k + ", "
+            field_value += v + ", "
+        field_name = field_name[:-2]
+        field_value = field_value[:-2]
 
+        sql_insert_tenant = f""" INSERT INTO tenant({field_name}) 
+            VALUES({field_value})"""
+        # self.c.execute(sql_insert_tenant)
+        print(sql_insert_tenant)
 
 if __name__ == "__main__":
-    mail = 'frogenmanu@hotmail.com'
-    client1 = locataire('Bubu', 'prenom', 'adresse', 'ville', 'tel', mail, 'sci', 1200, 100)
-    client2 = locataire('baba', 'prenom', 'adresse', 'ville', 'tel', mail, 'sci', 1200, 100, 'c')
-    client3 = locataire('zaza', 'prenom', 'adresse', 'ville', 'tel', mail, 'sci', 1200, 100, 'c')
-    client4 = locataire('lala', 'prenom', 'adresse', 'ville', 'tel', mail, 'sci', 1200, 100)
-
-    client1.save_contact()
-    client2.save_contact()
-    client3.save_contact()
-    client4.save_contact()
-    #client1.del_contact()
+    client1 = locataire('Bubu', 'prenom', 'adresse', 'ville', 'tel', 'mail', 'sci_1', 1200, 100)
 
 
