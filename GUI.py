@@ -1,6 +1,6 @@
 import tkinter as tk
 from datetime import date
-from locataire import locataire
+from locataire import locataire, sql_database
 
 class creation_gui(tk.Frame):
     def __init__(self):
@@ -12,6 +12,7 @@ class creation_gui(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.createWidgets()
+        self.database = sql_database()
 
     def createWidgets(self):
         # varaibles' creation
@@ -41,7 +42,7 @@ class creation_gui(tk.Frame):
         nom_label = tk.Label(main_frame, text="Nom")
         prenom_label = tk.Label(main_frame, text="Prenom")
         adresse_label = tk.Label(main_frame, text="Adresse")
-        ville_label = tk.Label(main_frame, text="ville")
+        ville_label = tk.Label(main_frame, text="CP_ville")
         tel_label = tk.Label(main_frame, text="Telephone")
         mail_label = tk.Label(main_frame, text="mail")
         sci_label = tk.Label(main_frame, text="SCI")
@@ -89,11 +90,18 @@ class creation_gui(tk.Frame):
         button2.grid(column=0, columnspan=1, row=10, sticky='NSEW')
 
     def validation_tenant(self):
-        client1 = locataire(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(),
+        client = locataire(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(),
                              self.villeVar.get(), self.telVar.get(), self.mailVar.get(),
-                             self.sciVar.get(), self.loyerVar.get(),self.chargesVar.get())
+                             self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get())
 
-        client1.save_contact()
+        insert_tenant = {'nom': client.nom,  'prenom': client.prenom, 'adresse': client.adresse, 'CP_ville': client.cp_ville,
+                  'tel': client.tel, 'mail': client.mail}
+
+        insert_location = {'SCI': client.sci, 'nom': client.nom, 'type': client.cat, 'loyer': client.loyer,
+                           'charges': client.charges}
+
+        self.database.create_entry("tenant", insert_tenant)
+        self.database.create_entry("location", insert_location)
 
         print(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(), self.villeVar.get(), self.telVar.get(),
               self.mailVar.get(), self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get())

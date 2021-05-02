@@ -25,7 +25,7 @@ class send_mail:
         msgText = MIMEText('<b>%s</b>' % (self.body), 'html')
         msg.attach(msgText)
 
-        filename = "example.txt"
+        filename = "message.txt"
         msg.attach(MIMEText(open(filename).read()))
 
         pdf = MIMEApplication(open(self.path, 'rb').read())
