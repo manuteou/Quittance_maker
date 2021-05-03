@@ -2,7 +2,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
-from tinydb import TinyDB, where, Query
+from locataire import locataire, sql_database
 import json
 import os
 
@@ -44,18 +44,16 @@ class send_mail:
 
 if __name__ == "__main__":
 
-    db = TinyDB('db.json')
-    locataire_db = db.table('locataire')
+    database = sql_database()
 
     directory = os.path.dirname(__file__)
     years = "2021"
     month = "02"
     with open('config.json','r') as json_files:
-        config = json.load(json_files
-                           )
-    for i in range(len(locataire_db)):
-        el = locataire_db.all()[i]
-        path = os.path.join(directory, el['sci'] + "\\" + years + "\\" + month + "\\") + el["nom"] + ".pdf"
-        mail = send_mail("Quittance", config["master_mail"], config["password"], el["mail"], path)
+        config = json.load(json_files)
+    for elt in database.pdf_table():
+        nom, prenom, adresse, ville, sci, loyer, charges = elt
+        path = os.path.join(directory, 'sci' + "\\" + years + "\\" + month + "\\") + "nom" + ".pdf"
+        mail = send_mail("Quittance", config["master_mail"], config["password"], "mail", path)
         mail.send()
 

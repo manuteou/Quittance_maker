@@ -3,6 +3,7 @@ from tkinter import ttk
 from datetime import date
 from locataire import locataire, sql_database
 from pdf_generator import pdf_generator, make_directories
+from mail_sender import send_mail
 import os
 from reportlab.pdfgen import canvas
 import json
@@ -10,7 +11,7 @@ import json
 class main_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
-        self.master.geometry("600x300")
+        self.master.geometry("800x300")
         self.master.minsize(300, 150)
         self.master.title("Quittances")
         self.master.columnconfigure(0, weight=1)
@@ -21,6 +22,10 @@ class main_gui(tk.Frame):
         self.database = sql_database()
         self.createWidgets()
 
+    def loadconfig(self):
+        with open("config.json", "r") as json_file:
+            config = json.load(json_file)
+        return config
 
     def createWidgets(self):
         # variable's creation
@@ -73,14 +78,19 @@ class main_gui(tk.Frame):
     def validation_button_all(self):
         day, month, year = self.date_s.get().split("/")
         make_directories(year, month)
-        directories = os.path.dirname(__file__)
+        directory = os.path.dirname(__file__)
+        with open("config.json", "r") as json_file:
+            config = json.load(json_file)
 
         for elt in self.database.pdf_table():
-            nom, prenom, adresse, ville, sci, loyer, charges = elt
-            name_pdf = directories + "\\" + sci + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
-            pdf = canvas.Canvas(name_pdf)
+            nom, prenom, adresse, ville, sci, loyer, charges, mail = elt
+            path = directory + "\\" + sci + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
+            pdf = canvas.Canvas(path)
             pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer, charges, day, month, year, cat="c")# Cat valeur temporaire car pas encore interger GUI
             pdf_gen.generator()
+            mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"], config["port"], path)
+            mail.send()
+
 
     def validation_button_s(self):
         pass
@@ -123,7 +133,7 @@ class creation_gui(tk.Frame):
         self.telVar = tk.StringVar()
         self.telVar.set("090807060")
         self.mailVar = tk.StringVar()
-        self.mailVar.set("azerty@ytreza.fr")
+        self.mailVar.set("frogenmanu@hotmail.com")
         self.sciVar = tk.StringVar()
         self.loyerVar = tk.StringVar()
         self.loyerVar.set("1500")

@@ -1,5 +1,5 @@
 from reportlab.pdfgen import canvas
-from locataire import locataire, sql_database
+from locataire import sql_database
 import os
 
 
