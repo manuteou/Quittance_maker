@@ -1,6 +1,11 @@
 import tkinter as tk
+from tkinter import ttk
 from datetime import date
 from locataire import locataire, sql_database
+from pdf_generator import pdf_generator, make_directories
+import os
+from reportlab.pdfgen import canvas
+import json
 
 class main_gui(tk.Frame):
     def __init__(self):
@@ -37,13 +42,13 @@ class main_gui(tk.Frame):
             tenant_list.insert(i, row)
 
         # widgets under left
-        date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1, relief=tk.GROOVE)
+        date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1)
         date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE)
 
-        button_all = tk.Button(frame2, text="Créer  PDF et envoyer pour tous", borderwidth=2, relief=tk.GROOVE,
-                               command=self.validation_button)
-        button_selection = tk.Button(frame2, text="Créer PDF et envoyer pour selection", borderwidth=2, relief=tk.GROOVE
-                                     , command=self.validation_button)
+        button_all = tk.Button(frame2, text="Créer Quittance et Envoyer pour TOUS", borderwidth=2, relief=tk.GROOVE,
+                               command=self.validation_button_all)
+        button_selection = tk.Button(frame2, text="Créer Quittance et Envoyer pour selection", borderwidth=2, relief=tk.GROOVE
+                                     , command=self.validation_button_s)
         # widgets on right
         button_new = tk.Button(frame3, text='Nouvelle Entrée', borderwidth=2, relief=tk.GROOVE, command=self.new_entry)
         button_modify = tk.Button(frame3, text="Modifier un locataire", borderwidth=2, relief=tk.GROOVE, command=self.modify_entry)
@@ -65,7 +70,19 @@ class main_gui(tk.Frame):
         button_modify.grid(column=0, row=1, sticky='NSEW')
         button_del.grid(column=0, row=2, sticky='NSEW')
 
-    def validation_button(self):
+    def validation_button_all(self):
+        day, month, year = self.date_s.get().split("/")
+        make_directories(year, month)
+        directories = os.path.dirname(__file__)
+
+        for elt in self.database.pdf_table():
+            nom, prenom, adresse, ville, sci, loyer, charges = elt
+            name_pdf = directories + "\\" + sci + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
+            pdf = canvas.Canvas(name_pdf)
+            pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer, charges, day, month, year, cat="c")# Cat valeur temporaire car pas encore interger GUI
+            pdf_gen.generator()
+
+    def validation_button_s(self):
         pass
 
     def new_entry(self):
@@ -73,8 +90,9 @@ class main_gui(tk.Frame):
         creation_gui().mainloop()
 
     def modify_entry(self):
-        self.destroy()
-        modification_gui().mainloop()
+        pass
+        #self.destroy()
+        #modification_gui().mainloop()
 
     def del_entry(self):
         self.destroy()
@@ -107,11 +125,12 @@ class creation_gui(tk.Frame):
         self.mailVar = tk.StringVar()
         self.mailVar.set("azerty@ytreza.fr")
         self.sciVar = tk.StringVar()
-        self.sciVar.set("LOL")
         self.loyerVar = tk.StringVar()
         self.loyerVar.set("1500")
         self.chargesVar = tk.StringVar()
         self.chargesVar.set("200")
+        self.selectorVar = tk.IntVar()
+        self.selectorVar.set(1)
 
         # widgets' creation
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
@@ -123,9 +142,12 @@ class creation_gui(tk.Frame):
         ville_label = tk.Label(main_frame, text="CP_ville")
         tel_label = tk.Label(main_frame, text="Telephone")
         mail_label = tk.Label(main_frame, text="mail")
+
         sci_label = tk.Label(main_frame, text="SCI")
+
         loyer_label = tk.Label(main_frame, text="loyer")
         charges_label = tk.Label(main_frame, text="charges")
+
 
 
         nom_entry = tk.Entry(main_frame, textvariable=self.nomVar)
@@ -134,46 +156,55 @@ class creation_gui(tk.Frame):
         ville_entry = tk.Entry(main_frame, textvariable=self.villeVar)
         tel_entry = tk.Entry(main_frame, textvariable=self.telVar)
         mail_entry = tk.Entry(main_frame, textvariable=self.mailVar)
-        sci_entry = tk.Entry(main_frame, textvariable=self.sciVar)
+
+        sci_choise = ttk.Combobox(main_frame, textvariable=self.sciVar)
+        with open('config.json', 'r') as json_files:
+            config = json.load(json_files)
+        sci_choise['values'] = config['sci']
         loyer_entry = tk.Entry(main_frame, textvariable=self.loyerVar)
         charges_entry = tk.Entry(main_frame, textvariable=self.chargesVar)
+        selector1 = tk.Radiobutton(main_frame, text="Particulier", variable=self.selectorVar, value=1, bd=2, relief=tk.GROOVE)
+        selector2 = tk.Radiobutton(main_frame, text="Professionel", variable=self.selectorVar, value=2, bd=3, relief=tk.GROOVE)
 
         button = tk.Button(main_frame, text="Valider la saisie", command=self.validation_tenant) # faire un bouton system etes vous sur de vouloir ajoueter le client
         button2 = tk.Button(main_frame, text="Quitter et revenir", command=self.quit)
 
         # widgets' position
         main_frame.grid(column=0, row=0, sticky="NSEW")
-        nom_label.grid(column=0, row=0, sticky="EW")
-        nom_entry.grid(column=1, row=0, sticky="EW")
-        prenom_label.grid(column=0, row=1, sticky="EW")
-        prenom_entry.grid(column=1, row=1, sticky="EW")
-        adresse_label.grid(column=0, row=2, sticky="EW")
-        adresse_entry.grid(column=1, row=2, sticky="EW")
-        ville_label.grid(column=0, row=3, sticky="EW")
-        ville_entry.grid(column=1, row=3, sticky="EW")
-        tel_label.grid(column=0, row=4, sticky="EW")
-        tel_entry.grid(column=1, row=4, sticky="EW")
-        mail_label.grid(column=0, row=5, sticky="EW")
-        mail_entry.grid(column=1, row=5, sticky="EW")
+        nom_label.grid(column=0, row=1, sticky="EW")
+        nom_entry.grid(column=1, row=1, sticky="EW")
+        prenom_label.grid(column=0, row=2, sticky="EW")
+        prenom_entry.grid(column=1, row=2, sticky="EW")
+        adresse_label.grid(column=0, row=3, sticky="EW")
+        adresse_entry.grid(column=1, row=3, sticky="EW")
+        ville_label.grid(column=0, row=4, sticky="EW")
+        ville_entry.grid(column=1, row=4, sticky="EW")
+        tel_label.grid(column=0, row=5, sticky="EW")
+        tel_entry.grid(column=1, row=5, sticky="EW")
         mail_label.grid(column=0, row=6, sticky="EW")
         mail_entry.grid(column=1, row=6, sticky="EW")
-        sci_label.grid(column=0, row=7, sticky="EW")
-        sci_entry.grid(column=1, row=7, sticky="EW")
-        loyer_label.grid(column=0, row=8, sticky="EW")
-        loyer_entry.grid(column=1, row=8, sticky="EW")
-        charges_label.grid(column=0, row=9, sticky="EW")
-        charges_entry.grid(column=1, row=9, sticky="EW")
+        mail_label.grid(column=0, row=7, sticky="EW")
+        mail_entry.grid(column=1, row=7, sticky="EW")
 
-        button.grid(column=1, columnspan=1, row=10, sticky='NSEW')
-        button2.grid(column=0, columnspan=1, row=10, sticky='NSEW')
+        sci_label.grid(column=0, row=8, sticky="EW")
+        sci_choise.grid(column=1, row=8, sticky="EW")
+
+        loyer_label.grid(column=0, row=9, sticky="EW")
+        loyer_entry.grid(column=1, row=9, sticky="EW")
+        charges_label.grid(column=0, row=10, sticky="EW")
+        charges_entry.grid(column=1, row=10, sticky="EW")
+        selector1.grid(column=0, row=0, sticky="EW")
+        selector2.grid(column=1, row=0, sticky="EN")
+        button.grid(column=1, columnspan=1, row=11, sticky='NSEW')
+        button2.grid(column=0, columnspan=1, row=11, sticky='NSEW')
 
     def validation_tenant(self):
         client = locataire(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(),
                              self.villeVar.get(), self.telVar.get(), self.mailVar.get(),
-                             self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get())
+                             self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get(), self.selectorVar.get())
 
         insert_tenant = {'nom': client.nom,  'prenom': client.prenom, 'adresse': client.adresse, 'CP_ville': client.cp_ville,
-                  'tel': client.tel, 'mail': client.mail}
+                  'tel': client.tel, 'mail': client.mail, 'cat': client.cat}
 
         insert_location = {'SCI': client.sci, 'nom': client.nom, 'type': client.cat, 'loyer': client.loyer,
                            'charges': client.charges}
@@ -259,8 +290,8 @@ class delete_gui(tk.Frame):
         main_frame.grid(column=0, row=0, sticky="NSEW")
         nom_label.grid(column=0, row=0, sticky="EW")
         nom_entry.grid(column=1, row=0, sticky="EW")
-        button_val.grid(column=0, row=1, sticky="NSEW")
-        button_back.grid(column=1, row=1, sticky="NSEW")
+        button_val.grid(column=1, row=1, sticky="NSEW")
+        button_back.grid(column=0, row=1, sticky="NSEW")
 
     def del_entry(self):
         if self.nom_var.get() != "Attention action definitive":
