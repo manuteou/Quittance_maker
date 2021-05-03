@@ -92,6 +92,30 @@ class sql_database():
         pdf_table = self.c.fetchall()
         return pdf_table
 
+    def pdf_table_single(self, nom):
+        sql_pdf_table_single = f"""SELECT t.nom, prenom, adresse, CP_ville, SCI, loyer, charges, mail , cat
+                            FROM tenant as t
+                            INNER JOIN location as l
+                            ON t.nom = l.nom
+                            WHERE t.nom = {nom};"""
+        self.c.execute(sql_pdf_table_single)
+        pdf_table = self.c.fetchall()
+        return pdf_table
+
+    def modif_table(self, nom, champs, valeur):
+        for table in ["tenant", "location"]:
+            sql_table_modif = f"""UPDATE {table}
+                                SET {champs} = {valeur}
+                                WHERE nom = '{nom}';"""
+            print(sql_table_modif)
+            try:
+                self.c.execute(sql_table_modif)
+
+            except:
+                self.conn.commit()
+
+        self.conn.commit()
+
 if __name__ == "__main__":
     client = locataire('Bubu', 'prenom', 'adresse treze', 'ville', 'tel', 'mail', 'sci_1', 1200, 100, 1)
     db = sql_database()
