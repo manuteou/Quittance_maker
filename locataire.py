@@ -103,17 +103,21 @@ class sql_database():
         return pdf_table
 
     def modif_table(self, nom, champs, valeur):
-        for table in ["tenant", "location"]:
+        if (champs == 'loyer') or (champs == 'charges'):
+            table = "location"
             sql_table_modif = f"""UPDATE {table}
                                 SET {champs} = {valeur}
                                 WHERE nom = '{nom}';"""
             print(sql_table_modif)
-            try:
-                self.c.execute(sql_table_modif)
-
-            except:
-                self.conn.commit()
-
+        else:
+            for table in ["tenant", "location"]:
+                sql_table_modif = f"""UPDATE {table}
+                                    SET {champs} = '{valeur}'
+                                     WHERE nom = '{nom}';"""
+                try:
+                    self.c.execute(sql_table_modif)
+                except:
+                    pass
         self.conn.commit()
 
 if __name__ == "__main__":

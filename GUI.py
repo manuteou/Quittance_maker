@@ -54,8 +54,11 @@ class main_gui(tk.Frame):
         button_selection = tk.Button(frame2, text="Créer Quittance et Envoyer pour selection", borderwidth=2, relief=tk.GROOVE
                                      , command=self.validation_button_s)
         # widgets on right
+        button_config = tk.Button(frame3, text='Config', borderwidth=2, relief=tk.GROOVE, command=self.config)
+        button_blk0 = tk.Button(frame3, state='disabled', bd=0)
+        button_blk1 = tk.Button(frame3, state='disabled', bd=0)
         button_info = tk.Button(frame3, text='Info Locataire', borderwidth=2, relief=tk.GROOVE, command=self.info_entry)
-        button_blk = tk.Button(frame3, state='disabled', bd=0)
+        button_blk2 = tk.Button(frame3, state='disabled', bd=0)
         button_new = tk.Button(frame3, text='Nouvelle Entrée', borderwidth=2, relief=tk.GROOVE, command=self.new_entry)
         button_modify = tk.Button(frame3, text="Modifier un locataire", borderwidth=2, relief=tk.GROOVE, command=self.modify_entry)
         button_del = tk.Button(frame3, text="Supprimer un locataire", borderwidth=2, relief=tk.GROOVE, command=self.del_entry)
@@ -72,11 +75,14 @@ class main_gui(tk.Frame):
         button_all.grid(column=0, row=10, sticky='NSEW')
         button_selection.grid(column=0, row=9, sticky='NSEW')
         ##position widgets3
-        button_info.grid(column=0, row=0, sticky='NSEW')
-        button_blk.grid(column=0, row=1, sticky='NSEW')
-        button_new.grid(column=0, row=2, sticky='NSEW')
-        button_modify.grid(column=0, row=3, sticky='NSEW')
-        button_del.grid(column=0, row=4, sticky='NSEW')
+        button_config.grid(column=0, row=0, sticky='NSEW')
+        button_blk0.grid(column=0, row=1, sticky='NSEW')
+        button_blk1.grid(column=0, row=2, sticky='NSEW')
+        button_info.grid(column=0, row=3, sticky='NSEW')
+        button_blk2.grid(column=0, row=4, sticky='NSEW')
+        button_new.grid(column=0, row=5, sticky='NSEW')
+        button_modify.grid(column=0, row=6, sticky='NSEW')
+        button_del.grid(column=0, row=7, sticky='NSEW')
 
     def validation_button_all(self):
         day, month, year = self.date_s.get().split("/")
@@ -89,7 +95,7 @@ class main_gui(tk.Frame):
             nom, prenom, adresse, ville, sci, loyer, charges, mail, cat = elt
             path = directory + "\\" + sci + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
             pdf = canvas.Canvas(path)
-            pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer, charges, day, month, year, cat)# Cat valeur temporaire car pas encore interger GUI
+            pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer, charges, day, month, year, cat)
             pdf_gen.generator()
             mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"], config["port"], path)
             mail.send()
@@ -105,11 +111,9 @@ class main_gui(tk.Frame):
         nom, prenom, adresse, ville, sci, loyer, charges, mail, cat = self.database.pdf_table_single(f'"{value[1]}"')[0]
         path = directory + "\\" + sci + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
         pdf = canvas.Canvas(path)
-        pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer, charges, day, month, year,
-                                cat)  # Cat valeur temporaire car pas encore interger GUI
+        pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer, charges, day, month, year, cat)
         pdf_gen.generator()
-        mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"], config["port"],
-                         path)
+        mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"], config["port"], path)
         mail.send()
 
 
@@ -129,6 +133,11 @@ class main_gui(tk.Frame):
         value = (self.tenant_list.get(tk.ACTIVE))[1]
         print(value)
         #info_gui()
+
+    def config(self):
+        self.destroy()
+        config_gui().mainloop()
+
 class creation_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
@@ -225,7 +234,7 @@ class creation_gui(tk.Frame):
         charges_label.grid(column=0, row=10, sticky="EW")
         charges_entry.grid(column=1, row=10, sticky="EW")
         selector1.grid(column=0, row=0, sticky="EW")
-        selector2.grid(column=1, row=0, sticky="EN")
+        selector2.grid(column=1, row=0, sticky="W")
         button.grid(column=1, columnspan=1, row=11, sticky='NSEW')
         button2.grid(column=0, columnspan=1, row=11, sticky='NSEW')
 
@@ -278,7 +287,7 @@ class modification_gui(tk.Frame):
         tenant_entry = tk.Entry(main_frame, textvariable=self.tenant_var)
         nom_label = tk.Label(main_frame, text="champs à modifier")
         nom_entry = tk.Entry(main_frame, textvariable=self.champs_var)
-        mod_label = tk.Label(main_frame, text="champs à modifier")
+        mod_label = tk.Label(main_frame, text="modification")
         mod_entry = tk.Entry(main_frame, textvariable=self.newval_var)
 
         button_val = tk.Button(main_frame, text="Appliquer la modification", command=self.mod_entry)
@@ -299,6 +308,7 @@ class modification_gui(tk.Frame):
         main_gui().mainloop()
 
     def mod_entry(self):
+        print(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
         self.database.modif_table(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
 
 class delete_gui(tk.Frame):
@@ -383,7 +393,8 @@ class config_gui(tk.Frame):
         smtp_entry = tk.Entry(main_frame, textvariable=self.smtp_var)
         port_label = tk.Label(main_frame, text="port")
         port_entry = tk.Entry(main_frame, textvariable=self.port_var)
-        #boutton valider/quitter
+        button_validation = tk.Button(main_frame, text="Modifier et quitter", command=self.mod_entry)
+        button_exit = tk.Button(main_frame, text="Annuler et quitter", command=self.quit)
         #button  Quitter sans valider
 
         #position
@@ -396,14 +407,18 @@ class config_gui(tk.Frame):
         smtp_entry.grid(column=2, row=1, sticky="NSEW")
         port_label.grid(column=3, row=0, sticky="NSEW")
         port_entry.grid(column=3, row=1, sticky="NSEW")
+        button_validation.grid(column=0, row=3, sticky="NSEW")
+        button_exit.grid(column=3, row=3, sticky="NSEW")
 
     def quit(self):
         self.destroy()
         main_gui().mainloop()
 
+    def mod_entry(self):
+        pass
 
 if __name__ == "__main__":
     #creation_gui().mainloop()
     #modification_gui().mainloop()
-    #main_gui().mainloop()
-    config_gui().mainloop()
+    main_gui().mainloop()
+    #config_gui().mainloop()
