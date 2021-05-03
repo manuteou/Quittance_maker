@@ -346,26 +346,64 @@ class delete_gui(tk.Frame):
         self.destroy()
         main_gui().mainloop()
 
-    class config_gui(tk.Frame):
-        def __init__(self):
-            tk.Frame.__init__(self)
-            self.master.title("Quittances")
-            self.master.columnconfigure(0, weight=1)
-            self.master.rowconfigure(0, weight=1)
-            self.columnconfigure(0, weight=1)
-            self.rowconfigure(0, weight=1)
-            self.grid(sticky="NSEW")
-            self.createWidgets()
+class config_gui(tk.Frame):
+    def __init__(self):
+        tk.Frame.__init__(self)
+        self.master.title("Configuration")
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.grid(sticky="NSEW")
+        self.createWidgets()
 
-        def createWidgets(self):
-            pass
 
-        def quit(self):
-            self.destroy()
-            main_gui().mainloop()
+    def createWidgets(self):
+        with open('config.json', 'r') as json_files:
+            config = json.load(json_files)
+        # variables
+        self.master_mail_var = tk.StringVar()
+        self.master_mail_var.set(config["master_mail"])
+        self.password_var = tk.StringVar()
+        self.password_var.set(config["password"])
+        self.smtp_var = tk.StringVar()
+        self.smtp_var.set(config['SMTP'])
+        self.port_var = tk.StringVar()
+        self.port_var.set(config["port"])
+
+        # Widget
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
+        main_frame.columnconfigure(0, weight=0)
+        main_frame.columnconfigure(1, weight=1)
+        master_mail_label = tk.Label(main_frame, text="email du compte")
+        master_mail_entry = tk.Entry(main_frame, textvariable=self.master_mail_var)
+        password_label = tk.Label(main_frame, text="password du compte")
+        password_entry = tk.Entry(main_frame, textvariable=self.password_var)
+        smtp_label = tk.Label(main_frame, text="SMTP")
+        smtp_entry = tk.Entry(main_frame, textvariable=self.smtp_var)
+        port_label = tk.Label(main_frame, text="port")
+        port_entry = tk.Entry(main_frame, textvariable=self.port_var)
+        #boutton valider/quitter
+        #button  Quitter sans valider
+
+        #position
+        main_frame.grid(column=0, row=0, sticky="NSEW")
+        master_mail_label.grid(column=0, row=0, sticky="NSEW")
+        master_mail_entry.grid(column=0, row=1, sticky="NSEW")
+        password_label.grid(column=1, row=0, sticky="NSEW")
+        password_entry.grid(column=1, row=1, sticky="NSEW")
+        smtp_label.grid(column=2, row=0, sticky="NSEW")
+        smtp_entry.grid(column=2, row=1, sticky="NSEW")
+        port_label.grid(column=3, row=0, sticky="NSEW")
+        port_entry.grid(column=3, row=1, sticky="NSEW")
+
+    def quit(self):
+        self.destroy()
+        main_gui().mainloop()
 
 
 if __name__ == "__main__":
     #creation_gui().mainloop()
     #modification_gui().mainloop()
-    main_gui().mainloop()
+    #main_gui().mainloop()
+    config_gui().mainloop()
