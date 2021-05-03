@@ -83,10 +83,10 @@ class main_gui(tk.Frame):
             config = json.load(json_file)
 
         for elt in self.database.pdf_table():
-            nom, prenom, adresse, ville, sci, loyer, charges, mail = elt
+            nom, prenom, adresse, ville, sci, loyer, charges, mail, cat = elt
             path = directory + "\\" + sci + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
             pdf = canvas.Canvas(path)
-            pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer, charges, day, month, year, cat="c")# Cat valeur temporaire car pas encore interger GUI
+            pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer, charges, day, month, year, cat)# Cat valeur temporaire car pas encore interger GUI
             pdf_gen.generator()
             mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"], config["port"], path)
             mail.send()

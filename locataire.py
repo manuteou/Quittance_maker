@@ -84,7 +84,7 @@ class sql_database():
         return elt
 
     def pdf_table(self):
-        sql_pdf_table = """SELECT t.nom, prenom, adresse, CP_ville, SCI, loyer, charges, mail  
+        sql_pdf_table = """SELECT t.nom, prenom, adresse, CP_ville, SCI, loyer, charges, mail , cat
                             FROM tenant as t
                             INNER JOIN location as l
                             ON t.nom = l.nom;"""
