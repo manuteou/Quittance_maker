@@ -72,7 +72,8 @@ class main_gui(tk.Frame):
                                   command=self.modify_entry)
         button_del = tk.Button(frame3, text="Supprimer un locataire", borderwidth=2, relief=tk.GROOVE,
                                command=self.del_entry)
-
+        button_rent_maj = tk.Button(frame3, text='MAJ LOYER', borderwidth=2, relief=tk.GROOVE,
+                                    command=self.maj_rent)
         #widgets' position
         frame1.grid(column=0, row=0, sticky='NSEW')
         frame2.grid(column=0, row=1, sticky='NSEW')
@@ -86,13 +87,15 @@ class main_gui(tk.Frame):
         button_selection.grid(column=0, row=9, sticky='NSEW')
         ##position widgets3
         button_config.grid(column=0, row=0, sticky='NSEW')
+        button_rent_maj.grid(column=0, row=2, sticky='NSEW')
         button_blk0.grid(column=0, row=1, sticky='NSEW')
-        button_blk1.grid(column=0, row=2, sticky='NSEW')
-        button_info.grid(column=0, row=3, sticky='NSEW')
-        button_blk2.grid(column=0, row=4, sticky='NSEW')
-        button_new.grid(column=0, row=5, sticky='NSEW')
-        button_modify.grid(column=0, row=6, sticky='NSEW')
-        button_del.grid(column=0, row=7, sticky='NSEW')
+        button_blk1.grid(column=0, row=3, sticky='NSEW')
+        button_info.grid(column=0, row=4, sticky='NSEW')
+        button_blk2.grid(column=0, row=5, sticky='NSEW')
+        button_new.grid(column=0, row=6, sticky='NSEW')
+        button_modify.grid(column=0, row=7, sticky='NSEW')
+        button_del.grid(column=0, row=8, sticky='NSEW')
+
 
     def validation_button_all(self):
         day, month, year = self.date_s.get().split("/")
@@ -143,12 +146,15 @@ class main_gui(tk.Frame):
 
     def info_entry(self):
         value = (self.tenant_list.get(tk.ACTIVE).split(" ")[0])
-        #print(value)
         info_gui(value)
 
     def config(self):
         self.destroy()
         config_gui().mainloop()
+
+    def maj_rent(self):
+        value = (self.tenant_list.get(tk.ACTIVE).split(" ")[0])
+        maj_rent_gui(value)
 
     def maj_tenant(self, nom):
         self.month = date.today().month
@@ -195,6 +201,8 @@ class creation_gui(tk.Frame):
         self.selectorVar.set(1)
         self.date_entreeVar = tk.StringVar()
         self.date_entreeVar.set('JJ/MM/YYYY')
+        self.indice_base = tk.IntVar()
+        self.indice_base.set(100)
         # widgets' creation
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
         main_frame.columnconfigure(0, weight=0)
@@ -209,8 +217,7 @@ class creation_gui(tk.Frame):
         date_label = tk.Label(main_frame, text="Date d'entrée")
         loyer_label = tk.Label(main_frame, text="Loyer")
         charges_label = tk.Label(main_frame, text="Charges")
-
-
+        indice_label = tk.Label(main_frame, text="Indice de base")
 
         nom_entry = tk.Entry(main_frame, textvariable=self.nomVar)
         prenom_entry = tk.Entry(main_frame, textvariable=self.prenomVar)
@@ -226,6 +233,7 @@ class creation_gui(tk.Frame):
         loyer_entry = tk.Entry(main_frame, textvariable=self.loyerVar)
         charges_entry = tk.Entry(main_frame, textvariable=self.chargesVar)
         date_entry = tk.Entry(main_frame, textvariable=self.date_entreeVar)
+        indice_entry = tk.Entry(main_frame, textvariable=self.indice_base)
         selector1 = tk.Radiobutton(main_frame, text="Particulier", variable=self.selectorVar, value=1, bd=2,
                                    relief=tk.GROOVE)
         selector2 = tk.Radiobutton(main_frame, text="Professionel", variable=self.selectorVar, value=2, bd=3,
@@ -259,22 +267,25 @@ class creation_gui(tk.Frame):
         loyer_entry.grid(column=1, row=10, sticky="EW")
         charges_label.grid(column=0, row=11, sticky="EW")
         charges_entry.grid(column=1, row=11, sticky="EW")
+        indice_label.grid(column=1, row=12, sticky="EW")
+        indice_entry.grid(column=1, row=12, sticky="EW")
         selector1.grid(column=0, row=0, sticky="EW")
         selector2.grid(column=1, row=0, sticky="W")
-        button.grid(column=1, columnspan=1, row=12, sticky='NSEW')
-        button2.grid(column=0, columnspan=1, row=12, sticky='NSEW')
+        button.grid(column=1, columnspan=1, row=13, sticky='NSEW')
+        button2.grid(column=0, columnspan=1, row=13, sticky='NSEW')
 
     def validation_tenant(self):
         client = locataire(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(),
                              self.villeVar.get(), self.telVar.get(), self.mailVar.get(),
                              self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get(),
-                           self.selectorVar.get(),self.date_entreeVar.get())
+                           self.selectorVar.get(),self.date_entreeVar.get(), self.indice_base.get())
 
         insert_tenant = {'nom': client.nom,  'prenom': client.prenom, 'adresse': client.adresse,
                          'CP_ville': client.cp_ville, 'tel': client.tel, 'mail': client.mail, 'cat': client.cat}
 
         insert_location = {'SCI': client.sci, 'nom': client.nom, 'type': client.cat, 'loyer': client.loyer,
-                           'charges': client.charges, 'date_entree': client.date_entree}
+                           'charges': client.charges, 'date_entree': client.date_entree,
+                           'indice_base': client.base_indice}
 
         self.database.create_entry("tenant", insert_tenant)
         self.database.create_entry("location", insert_location)
@@ -417,6 +428,53 @@ class info_gui(tk.Frame):
     def quit(self):
         self.destroy()
 
+class maj_rent_gui(tk.Frame):
+    def __init__(self, value):
+        tk.Frame.__init__(self)
+        self.master.title("Configuration")
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.grid(sticky="NSEW")
+        self.nom = value
+        self.database = sql_database()
+        self.createWidgets()
+
+
+    def createWidgets(self):
+        #variables
+        _, _, _, _, rent, _, _, base_indice = self.database.elt_table_one("nom",  "location", self.nom)[0]
+        self.new_indice = tk.IntVar()
+        # widget label
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
+        rent_label = tk.Label(main_frame, text="Loyer")
+        rent = tk.Label(main_frame, text=rent)
+        base_indice_lable = tk.Label(main_frame, text='Indice de base')
+        base_indice = tk.Label(main_frame, text=base_indice)
+        new_indice_label = tk.Label(main_frame, text="Nouvel indice")
+        new_indice_entry = tk.Entry(main_frame)
+        button_blk0 = tk.Button(main_frame, state='disabled', bd=0)
+        button_val = tk.Button(main_frame, text="Appliquer", command=self.validation)
+        button_back = tk.Button(main_frame, text="Quitter et revenir", command=self.quit)
+        # widget position
+        main_frame.grid(column=0, row=0, sticky="NSEW")
+        rent_label.grid(column=0, row=0, sticky="NSEW")
+        base_indice_lable.grid(column=1, row=0, sticky="NSEW")
+        new_indice_label.grid(column=2, row=0, sticky="NSEW")
+
+        rent.grid(column=0, row=1, sticky="NSEW")
+        base_indice.grid(column=1, row=1, sticky="NSEW")
+        new_indice_entry.grid(column=2, row=1, sticky="NSEW")
+
+        button_blk0.grid(column=4, row=1, sticky="NSEW")
+        button_val.grid(column=3, row=1, sticky="NSEW")
+        button_back.grid(column=5, row=1, sticky="NSEW")
+
+    def quit(self):
+        self.destroy()
+    def validation(self):
+        pass
 
 class config_gui(tk.Frame):
     def __init__(self):

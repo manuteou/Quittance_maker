@@ -41,7 +41,7 @@ class sql_database():
             loyer INTEGER NOT NULL,
             charges INTEGER NOT NULL,
             date_entree DATE NOT NULL,
-            indice_base INTEGER NOT NULL,
+            indice_base INTEGER NOT NULL
         );"""
 
         self.c.execute(sql_create_tenant_table)
