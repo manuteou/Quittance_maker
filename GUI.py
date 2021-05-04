@@ -42,7 +42,7 @@ class main_gui(tk.Frame):
         frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE)
         frame3 = tk.Frame(self, main_frame)
         # widgets on the left side
-        self.tenant_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Helvetica", 15), width=600)
+        self.tenant_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Helvetica", 15), width=600, bg="#5472AE", fg='white')
         self.tenant_list.insert(0, f"NOM   PRENOM   LOYER   CHARGES   DATE D'ENTREE")
         for i, nom in enumerate(self.database.elt_table("nom", "tenant")):
             aff_nom = self.database.affichage_table(nom[0])[0][0]
@@ -51,7 +51,8 @@ class main_gui(tk.Frame):
             aff_charges = self.database.affichage_table(nom[0])[0][3]
             aff_date = self.database.affichage_table(nom[0])[0][4]
             self.tenant_list.insert(i+1, f"{aff_nom}    {aff_prenom}        "
-                                         f"{aff_loyer}           {aff_charges}            {aff_date}")
+                                         f"{aff_loyer}           {aff_charges}     "
+                                         f"       {aff_date}   {self.maj_tenant(nom)}")
         # widgets under left
         date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1)
         date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE)
@@ -148,6 +149,16 @@ class main_gui(tk.Frame):
     def config(self):
         self.destroy()
         config_gui().mainloop()
+
+    def maj_tenant(self, nom):
+        self.month = date.today().month
+        month_tenant = int(self.database.affichage_table(nom[0])[0][4].split("/")[1])
+        print(self.month)
+        print(month_tenant)
+        if (self.month - month_tenant) == 0:
+            return "MAJ Loyer"
+        else:
+            return ""
 
 class creation_gui(tk.Frame):
     def __init__(self):
@@ -421,16 +432,16 @@ class config_gui(tk.Frame):
 
     def createWidgets(self):
         with open('config.json', 'r') as json_files:
-            config = json.load(json_files)
+            self.config = json.load(json_files)
         # variables
         self.master_mail_var = tk.StringVar()
-        self.master_mail_var.set(config["master_mail"])
+        self.master_mail_var.set(self.config["master_mail"])
         self.password_var = tk.StringVar()
-        self.password_var.set(config["password"])
+        self.password_var.set(self.config["password"])
         self.smtp_var = tk.StringVar()
-        self.smtp_var.set(config['SMTP'])
+        self.smtp_var.set(self.config['SMTP'])
         self.port_var = tk.StringVar()
-        self.port_var.set(config["port"])
+        self.port_var.set(self.config["port"])
 
         # Widget
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
@@ -466,10 +477,15 @@ class config_gui(tk.Frame):
         main_gui().mainloop()
 
     def mod_entry(self):
-        pass
+        self.config["master_mail"] = self.master_mail_var.get()
+        self.config["password"] = self.password_var.get()
+        self.config['SMTP'] = self.smtp_var.get()
+        self.config["port"] = self.port_var.get()
+        with open ('config.json', 'w') as json_files:
+            json.dump(self.config, json_files)
+        self.destroy()
+        main_gui().mainloop()
 
 if __name__ == "__main__":
-    #creation_gui().mainloop()
-    #modification_gui().mainloop()
+
     main_gui().mainloop()
-    #config_gui().mainloop()

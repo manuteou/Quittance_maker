@@ -1,7 +1,7 @@
 import sqlite3
 
 class locataire:
-    def __init__(self, nom, prenom, adresse, ville, tel, mail, sci, loyer, charges, cat, date):
+    def __init__(self, nom, prenom, adresse, ville, tel, mail, sci, loyer, charges, cat, date, indice):
         self.nom = nom
         self.prenom = prenom
         self.tel = tel
@@ -13,6 +13,7 @@ class locataire:
         self.charges = charges
         self.cat = cat
         self.date_entree = date
+        self.base_indice = indice
 
 class sql_database():
     def __init__(self):
@@ -39,7 +40,8 @@ class sql_database():
             type TEXT NOT NULL,
             loyer INTEGER NOT NULL,
             charges INTEGER NOT NULL,
-            date_entree DATE NOT NULL
+            date_entree DATE NOT NULL,
+            indice_base INTEGER NOT NULL,
         );"""
 
         self.c.execute(sql_create_tenant_table)
