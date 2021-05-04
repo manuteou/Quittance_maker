@@ -43,16 +43,23 @@ class main_gui(tk.Frame):
         frame3 = tk.Frame(self, main_frame)
         # widgets on the left side
         self.tenant_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Helvetica", 15), width=600)
-        for i, row in enumerate(self.database.list_table("tenant")):
-            self.tenant_list.insert(i, row)
+        self.tenant_list.insert(0, f"NOM   PRENOM   LOYER   CHARGES   DATE D'ENTREE")
+        for i, nom in enumerate(self.database.elt_table("nom", "tenant")):
+            aff_nom = self.database.affichage_table(nom[0])[0][0]
+            aff_prenom = self.database.affichage_table(nom[0])[0][1]
+            aff_loyer = self.database.affichage_table(nom[0])[0][2]
+            aff_charges = self.database.affichage_table(nom[0])[0][3]
+            aff_date = self.database.affichage_table(nom[0])[0][4]
+            self.tenant_list.insert(i+1, f"{aff_nom}    {aff_prenom}        "
+                                         f"{aff_loyer}           {aff_charges}            {aff_date}")
         # widgets under left
         date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1)
         date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE)
 
         button_all = tk.Button(frame2, text="Créer Quittance et Envoyer pour TOUS", borderwidth=2, relief=tk.GROOVE,
                                command=self.validation_button_all)
-        button_selection = tk.Button(frame2, text="Créer Quittance et Envoyer pour selection", borderwidth=2, relief=tk.GROOVE
-                                     , command=self.validation_button_s)
+        button_selection = tk.Button(frame2, text="Créer Quittance et Envoyer pour selection", borderwidth=2,
+                                     relief=tk.GROOVE, command=self.validation_button_s)
         # widgets on right
         button_config = tk.Button(frame3, text='Config', borderwidth=2, relief=tk.GROOVE, command=self.config)
         button_blk0 = tk.Button(frame3, state='disabled', bd=0)
@@ -60,8 +67,10 @@ class main_gui(tk.Frame):
         button_info = tk.Button(frame3, text='Info Locataire', borderwidth=2, relief=tk.GROOVE, command=self.info_entry)
         button_blk2 = tk.Button(frame3, state='disabled', bd=0)
         button_new = tk.Button(frame3, text='Nouvelle Entrée', borderwidth=2, relief=tk.GROOVE, command=self.new_entry)
-        button_modify = tk.Button(frame3, text="Modifier un locataire", borderwidth=2, relief=tk.GROOVE, command=self.modify_entry)
-        button_del = tk.Button(frame3, text="Supprimer un locataire", borderwidth=2, relief=tk.GROOVE, command=self.del_entry)
+        button_modify = tk.Button(frame3, text="Modifier un locataire", borderwidth=2, relief=tk.GROOVE,
+                                  command=self.modify_entry)
+        button_del = tk.Button(frame3, text="Supprimer un locataire", borderwidth=2, relief=tk.GROOVE,
+                               command=self.del_entry)
 
         #widgets' position
         frame1.grid(column=0, row=0, sticky='NSEW')
@@ -97,7 +106,8 @@ class main_gui(tk.Frame):
             pdf = canvas.Canvas(path)
             pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer, charges, day, month, year, cat)
             pdf_gen.generator()
-            mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"], config["port"], path)
+            mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"],
+                             config["port"], path)
             mail.send()
 
 
@@ -113,7 +123,8 @@ class main_gui(tk.Frame):
         pdf = canvas.Canvas(path)
         pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer, charges, day, month, year, cat)
         pdf_gen.generator()
-        mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"], config["port"], path)
+        mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"],
+                         config["port"], path)
         mail.send()
 
 
@@ -130,9 +141,9 @@ class main_gui(tk.Frame):
         delete_gui().mainloop()
 
     def info_entry(self):
-        value = (self.tenant_list.get(tk.ACTIVE))[1]
-        print(value)
-        #info_gui()
+        value = (self.tenant_list.get(tk.ACTIVE).split(" ")[0])
+        #print(value)
+        info_gui(value)
 
     def config(self):
         self.destroy()
@@ -171,7 +182,8 @@ class creation_gui(tk.Frame):
         self.chargesVar.set("200")
         self.selectorVar = tk.IntVar()
         self.selectorVar.set(1)
-
+        self.date_entreeVar = tk.StringVar()
+        self.date_entreeVar.set('JJ/MM/YYYY')
         # widgets' creation
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
         main_frame.columnconfigure(0, weight=0)
@@ -181,12 +193,11 @@ class creation_gui(tk.Frame):
         adresse_label = tk.Label(main_frame, text="Adresse")
         ville_label = tk.Label(main_frame, text="CP_ville")
         tel_label = tk.Label(main_frame, text="Telephone")
-        mail_label = tk.Label(main_frame, text="mail")
-
+        mail_label = tk.Label(main_frame, text="Email")
         sci_label = tk.Label(main_frame, text="SCI")
-
-        loyer_label = tk.Label(main_frame, text="loyer")
-        charges_label = tk.Label(main_frame, text="charges")
+        date_label = tk.Label(main_frame, text="Date d'entrée")
+        loyer_label = tk.Label(main_frame, text="Loyer")
+        charges_label = tk.Label(main_frame, text="Charges")
 
 
 
@@ -203,10 +214,13 @@ class creation_gui(tk.Frame):
         sci_choise['values'] = config['sci']
         loyer_entry = tk.Entry(main_frame, textvariable=self.loyerVar)
         charges_entry = tk.Entry(main_frame, textvariable=self.chargesVar)
-        selector1 = tk.Radiobutton(main_frame, text="Particulier", variable=self.selectorVar, value=1, bd=2, relief=tk.GROOVE)
-        selector2 = tk.Radiobutton(main_frame, text="Professionel", variable=self.selectorVar, value=2, bd=3, relief=tk.GROOVE)
+        date_entry = tk.Entry(main_frame, textvariable=self.date_entreeVar)
+        selector1 = tk.Radiobutton(main_frame, text="Particulier", variable=self.selectorVar, value=1, bd=2,
+                                   relief=tk.GROOVE)
+        selector2 = tk.Radiobutton(main_frame, text="Professionel", variable=self.selectorVar, value=2, bd=3,
+                                   relief=tk.GROOVE)
 
-        button = tk.Button(main_frame, text="Valider la saisie", command=self.validation_tenant) # faire un bouton system etes vous sur de vouloir ajoueter le client
+        button = tk.Button(main_frame, text="Valider la saisie", command=self.validation_tenant)
         button2 = tk.Button(main_frame, text="Quitter et revenir", command=self.quit)
 
         # widgets' position
@@ -228,26 +242,28 @@ class creation_gui(tk.Frame):
 
         sci_label.grid(column=0, row=8, sticky="EW")
         sci_choise.grid(column=1, row=8, sticky="EW")
-
-        loyer_label.grid(column=0, row=9, sticky="EW")
-        loyer_entry.grid(column=1, row=9, sticky="EW")
-        charges_label.grid(column=0, row=10, sticky="EW")
-        charges_entry.grid(column=1, row=10, sticky="EW")
+        date_label.grid(column=0, row=9, sticky="EW")
+        date_entry.grid(column=1, row=9, sticky="EW")
+        loyer_label.grid(column=0, row=10, sticky="EW")
+        loyer_entry.grid(column=1, row=10, sticky="EW")
+        charges_label.grid(column=0, row=11, sticky="EW")
+        charges_entry.grid(column=1, row=11, sticky="EW")
         selector1.grid(column=0, row=0, sticky="EW")
         selector2.grid(column=1, row=0, sticky="W")
-        button.grid(column=1, columnspan=1, row=11, sticky='NSEW')
-        button2.grid(column=0, columnspan=1, row=11, sticky='NSEW')
+        button.grid(column=1, columnspan=1, row=12, sticky='NSEW')
+        button2.grid(column=0, columnspan=1, row=12, sticky='NSEW')
 
     def validation_tenant(self):
         client = locataire(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(),
                              self.villeVar.get(), self.telVar.get(), self.mailVar.get(),
-                             self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get(), self.selectorVar.get())
+                             self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get(),
+                           self.selectorVar.get(),self.date_entreeVar.get())
 
-        insert_tenant = {'nom': client.nom,  'prenom': client.prenom, 'adresse': client.adresse, 'CP_ville': client.cp_ville,
-                  'tel': client.tel, 'mail': client.mail, 'cat': client.cat}
+        insert_tenant = {'nom': client.nom,  'prenom': client.prenom, 'adresse': client.adresse,
+                         'CP_ville': client.cp_ville, 'tel': client.tel, 'mail': client.mail, 'cat': client.cat}
 
         insert_location = {'SCI': client.sci, 'nom': client.nom, 'type': client.cat, 'loyer': client.loyer,
-                           'charges': client.charges}
+                           'charges': client.charges, 'date_entree': client.date_entree}
 
         self.database.create_entry("tenant", insert_tenant)
         self.database.create_entry("location", insert_location)
@@ -355,6 +371,41 @@ class delete_gui(tk.Frame):
     def quit(self):
         self.destroy()
         main_gui().mainloop()
+
+class info_gui(tk.Frame):
+    def __init__(self, value):
+        tk.Frame.__init__(self)
+        self.master.title("Configuration")
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.grid(sticky="NSEW")
+        self.nom = value
+        self.database = sql_database()
+        self.createWidgets()
+
+
+    def createWidgets(self):
+        _, _, _, adresse, ville, tel, mail, _ = self.database.elt_table_one("nom",  "tenant", self.nom)[0]
+        # widget label
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
+        label_adresse = tk.Label(main_frame, text=adresse)
+        label_ville = tk.Label(main_frame, text=ville)
+        label_tel = tk.Label(main_frame, text=tel)
+        label_mail = tk.Label(main_frame, text=mail)
+        button_back = tk.Button(main_frame, text="Quitter et revenir", command=self.quit)
+        # widget position
+        main_frame.grid(column=0, row=0, sticky="NSEW")
+        label_adresse.grid(column=0, row=0, sticky="NSEW")
+        label_ville.grid(column=0, row=1, sticky="NSEW")
+        label_tel.grid(column=0, row=2, sticky="NSEW")
+        label_mail.grid(column=0, row=3, sticky="NSEW")
+        button_back.grid(column=0, row=4, sticky="NSEW")
+
+    def quit(self):
+        self.destroy()
+
 
 class config_gui(tk.Frame):
     def __init__(self):

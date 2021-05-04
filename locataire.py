@@ -1,7 +1,7 @@
 import sqlite3
 
 class locataire:
-    def __init__(self, nom, prenom, adresse, ville, tel, mail, sci, loyer, charges, cat):
+    def __init__(self, nom, prenom, adresse, ville, tel, mail, sci, loyer, charges, cat, date):
         self.nom = nom
         self.prenom = prenom
         self.tel = tel
@@ -12,6 +12,7 @@ class locataire:
         self.loyer = loyer
         self.charges = charges
         self.cat = cat
+        self.date_entree = date
 
 class sql_database():
     def __init__(self):
@@ -21,23 +22,24 @@ class sql_database():
 
     def create_table_sql(self):
         sql_create_tenant_table = """ CREATE TABLE IF NOT EXISTS tenant(
-            id integer PRIMARY KEY,
-            nom text NOT NULL,
-            prenom text NOT NULL,
-            adresse text NOT NULL,
-            CP_ville text NOT NULL,
-            tel text NOT NULL,
-            mail text NOT NULL,
-            cat integer NOT NULL
+            id INTEGER PRIMARY KEY,
+            nom TEXT NOT NULL,
+            prenom TEXT NOT NULL,
+            adresse TEXT NOT NULL,
+            CP_ville TEXT NOT NULL,
+            tel TEXT NOT NULL,
+            mail TEXT NOT NULL,
+            cat INTEGER NOT NULL
             );"""
 
         sql_create_location_table = """ CREATE TABLE IF NOT EXISTS location(
-            id integer PRIMARY KEY,
-            SCI text NOT NULL,
-            nom text NOT NULL,
-            type text NOT NULL,
-            loyer integer NOT NULL,
-            charges integer NOT NULL
+            id INTEGER PRIMARY KEY,
+            SCI TEXT NOT NULL,
+            nom TEXT NOT NULL,
+            type TEXT NOT NULL,
+            loyer INTEGER NOT NULL,
+            charges INTEGER NOT NULL,
+            date_entree DATE NOT NULL
         );"""
 
         self.c.execute(sql_create_tenant_table)
@@ -83,6 +85,13 @@ class sql_database():
         elt = self.c.fetchall()
         return elt
 
+    def elt_table_one(self, elt, table, champs):
+        sql_elt_table = f"""SELECT * FROM {table} 
+                            WHERE {elt}= "{champs}";"""
+        self.c.execute(sql_elt_table)
+        elt = self.c.fetchall()
+        return elt
+
     def pdf_table(self):
         sql_pdf_table = """SELECT t.nom, prenom, adresse, CP_ville, SCI, loyer, charges, mail , cat
                             FROM tenant as t
@@ -101,6 +110,16 @@ class sql_database():
         self.c.execute(sql_pdf_table_single)
         pdf_table = self.c.fetchall()
         return pdf_table
+
+    def affichage_table(self, nom):
+        sql_affichage_table = f"""SELECT t.nom, prenom, loyer, charges, date_entree 
+                                FROM tenant as t
+                                INNER JOIN location as l
+                                ON t.nom = l.nom
+                                WHERE t.nom = "{nom}";"""
+        self.c.execute(sql_affichage_table)
+        affichage_table = self.c.fetchall()
+        return affichage_table
 
     def modif_table(self, nom, champs, valeur):
         if (champs == 'loyer') or (champs == 'charges'):
@@ -121,14 +140,7 @@ class sql_database():
         self.conn.commit()
 
 if __name__ == "__main__":
-    client = locataire('Bubu', 'prenom', 'adresse treze', 'ville', 'tel', 'mail', 'sci_1', 1200, 100, 1)
-    db = sql_database()
-    insert_tenant = {'nom': client.nom, 'prenom': client.prenom, 'adresse': client.adresse, 'CP_ville': client.cp_ville,
-                  'tel': client.tel, 'mail': client.mail, 'cat': client.cat}
-    insert_location = ({'SCI': client.sci, 'nom': client.nom, 'type': client.cat, 'loyer': client.loyer,
-                    'charges': client.charges})
 
-    db.create_entry("tenant", insert_tenant)
-    db.create_entry("location", insert_location)
-    for row in db.pdf_table():
-        print (row)
+    db = sql_database()
+    print(db.elt_table_one("nom","tenant", "Mini")[0])
+
