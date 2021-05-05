@@ -72,9 +72,6 @@ class sql_database():
         self.c.execute(sql_delete_entry)
         self.conn.commit()
 
-    def update_entry(self):
-        pass
-
     def list_table(self, table):
         sql_list_table = f"""SELECT * FROM {table}"""
         self.c.execute(sql_list_table)
@@ -130,6 +127,7 @@ class sql_database():
                                 SET {champs} = {valeur}
                                 WHERE nom = '{nom}';"""
             print(sql_table_modif)
+
         else:
             for table in ["tenant", "location"]:
                 sql_table_modif = f"""UPDATE {table}
@@ -139,6 +137,7 @@ class sql_database():
                     self.c.execute(sql_table_modif)
                 except:
                     pass
+        self.c.execute(sql_table_modif)
         self.conn.commit()
 
 if __name__ == "__main__":

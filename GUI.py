@@ -13,7 +13,7 @@ class main_gui(tk.Frame):
         tk.Frame.__init__(self)
         self.master.geometry("800x300")
         self.master.minsize(300, 150)
-        self.master.title("Quittances")
+        self.master.title("Quittances Maker V1.0")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -47,7 +47,7 @@ class main_gui(tk.Frame):
         for i, nom in enumerate(self.database.elt_table("nom", "tenant")):
             aff_nom = self.database.affichage_table(nom[0])[0][0]
             aff_prenom = self.database.affichage_table(nom[0])[0][1]
-            aff_loyer = self.database.affichage_table(nom[0])[0][2]
+            aff_loyer = int(self.database.affichage_table(nom[0])[0][2])
             aff_charges = self.database.affichage_table(nom[0])[0][3]
             aff_date = self.database.affichage_table(nom[0])[0][4]
             self.tenant_list.insert(i+1, f"{aff_nom}    {aff_prenom}        "
@@ -154,13 +154,12 @@ class main_gui(tk.Frame):
 
     def maj_rent(self):
         value = (self.tenant_list.get(tk.ACTIVE).split(" ")[0])
-        maj_rent_gui(value)
+        self.destroy()
+        maj_rent_gui(value).mainloop()
 
     def maj_tenant(self, nom):
         self.month = date.today().month
         month_tenant = int(self.database.affichage_table(nom[0])[0][4].split("/")[1])
-        print(self.month)
-        print(month_tenant)
         if (self.month - month_tenant) == 0:
             return "MAJ Loyer"
         else:
@@ -346,7 +345,6 @@ class modification_gui(tk.Frame):
         main_gui().mainloop()
 
     def mod_entry(self):
-        print(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
         self.database.modif_table(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
 
 class delete_gui(tk.Frame):
@@ -444,16 +442,17 @@ class maj_rent_gui(tk.Frame):
 
     def createWidgets(self):
         #variables
-        _, _, _, _, rent, _, _, base_indice = self.database.elt_table_one("nom",  "location", self.nom)[0]
+        _, _, _, _, self.rent, _, _, self.base_indice = self.database.elt_table_one("nom",  "location", self.nom)[0]
         self.new_indice = tk.IntVar()
+        self.new_indice.set(self.base_indice)
         # widget label
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
         rent_label = tk.Label(main_frame, text="Loyer")
-        rent = tk.Label(main_frame, text=rent)
+        rent_aff = tk.Label(main_frame, text=int(self.rent))
         base_indice_lable = tk.Label(main_frame, text='Indice de base')
-        base_indice = tk.Label(main_frame, text=base_indice)
+        base_indice_aff = tk.Label(main_frame, text=self.base_indice)
         new_indice_label = tk.Label(main_frame, text="Nouvel indice")
-        new_indice_entry = tk.Entry(main_frame)
+        new_indice_entry = tk.Entry(main_frame, textvariable=self.new_indice)
         button_blk0 = tk.Button(main_frame, state='disabled', bd=0)
         button_val = tk.Button(main_frame, text="Appliquer", command=self.validation)
         button_back = tk.Button(main_frame, text="Quitter et revenir", command=self.quit)
@@ -463,8 +462,8 @@ class maj_rent_gui(tk.Frame):
         base_indice_lable.grid(column=1, row=0, sticky="NSEW")
         new_indice_label.grid(column=2, row=0, sticky="NSEW")
 
-        rent.grid(column=0, row=1, sticky="NSEW")
-        base_indice.grid(column=1, row=1, sticky="NSEW")
+        rent_aff.grid(column=0, row=1, sticky="NSEW")
+        base_indice_aff.grid(column=1, row=1, sticky="NSEW")
         new_indice_entry.grid(column=2, row=1, sticky="NSEW")
 
         button_blk0.grid(column=4, row=1, sticky="NSEW")
@@ -473,8 +472,11 @@ class maj_rent_gui(tk.Frame):
 
     def quit(self):
         self.destroy()
+        main_gui().mainloop()
+
     def validation(self):
-        pass
+        new_rent = int(self.rent) * (int(self.new_indice.get())/int(self.base_indice))
+        self.database.modif_table(self.nom, "loyer", new_rent)
 
 class config_gui(tk.Frame):
     def __init__(self):
