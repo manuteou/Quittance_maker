@@ -266,7 +266,7 @@ class creation_gui(tk.Frame):
         loyer_entry.grid(column=1, row=10, sticky="EW")
         charges_label.grid(column=0, row=11, sticky="EW")
         charges_entry.grid(column=1, row=11, sticky="EW")
-        indice_label.grid(column=1, row=12, sticky="EW")
+        indice_label.grid(column=0, row=12, sticky="EW")
         indice_entry.grid(column=1, row=12, sticky="EW")
         selector1.grid(column=0, row=0, sticky="EW")
         selector2.grid(column=1, row=0, sticky="W")
