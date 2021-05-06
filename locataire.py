@@ -15,7 +15,7 @@ class locataire:
         self.date_entree = date
         self.base_indice = indice
 
-class sql_database():
+class sql_database_init():
     def __init__(self):
         self.conn = sqlite3.connect("tenatdb.db")
         self.c = self.conn.cursor()
@@ -23,30 +23,44 @@ class sql_database():
 
     def create_table_sql(self):
         sql_create_tenant_table = """ CREATE TABLE IF NOT EXISTS tenant(
-            id INTEGER PRIMARY KEY,
-            nom TEXT NOT NULL,
-            prenom TEXT NOT NULL,
-            adresse TEXT NOT NULL,
-            CP_ville TEXT NOT NULL,
-            tel TEXT NOT NULL,
-            mail TEXT NOT NULL,
-            cat INTEGER NOT NULL
-            );"""
+               id INTEGER PRIMARY KEY,
+               nom TEXT NOT NULL,
+               prenom TEXT NOT NULL,
+               adresse TEXT NOT NULL,
+               CP_ville TEXT NOT NULL,
+               tel TEXT NOT NULL,
+               mail TEXT NOT NULL,
+               cat INTEGER NOT NULL
+               );"""
 
         sql_create_location_table = """ CREATE TABLE IF NOT EXISTS location(
-            id INTEGER PRIMARY KEY,
-            SCI TEXT NOT NULL,
-            nom TEXT NOT NULL,
-            type TEXT NOT NULL,
-            loyer INTEGER NOT NULL,
-            charges INTEGER NOT NULL,
-            date_entree DATE NOT NULL,
-            indice_base INTEGER NOT NULL
-        );"""
+               id INTEGER PRIMARY KEY,
+               SCI TEXT NOT NULL,
+               nom TEXT NOT NULL,
+               type TEXT NOT NULL,
+               loyer INTEGER NOT NULL,
+               charges INTEGER NOT NULL,
+               date_entree DATE NOT NULL,
+               indice_base INTEGER NOT NULL
+           );"""
+
+        sql_create_sci_table = """CREATE TABLE IF NOT EXISTS sci(
+               id INTEGER PRIMARY KEY,
+               nom TEXT NOT NULL,
+               adresse TEXT NOT NULL,
+               CP_ville TEXT NOT NULL,
+               tel TEXT NOT NULL,
+               mail TEXT NOT NULL,
+               SIRET TEXT NOT NULL);"""
 
         self.c.execute(sql_create_tenant_table)
         self.c.execute(sql_create_location_table)
+        self.c.execute(sql_create_sci_table)
 
+class sql_database():
+    def __init__(self):
+        self.conn = sqlite3.connect("tenatdb.db")
+        self.c = self.conn.cursor()
 
     def create_entry(self, table, insert: dict):
         field_name = ""
