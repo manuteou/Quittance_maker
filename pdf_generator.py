@@ -6,7 +6,8 @@ import os
 # pdf function generator
 class pdf_generator():
 
-    def __init__(self, pdf, nom, prenom, adresse, ville, sci, loyer, charge, day, month, years, cat):
+    def __init__(self, pdf, nom, prenom, adresse, ville, loyer, charge, day, month, years, cat,
+                 sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret):
         self.month_list = {1: "Janvier", 2: "Fevrier", 3: "Mars",
                            4: "Avril", 5: "Mai", 6: "Juin",
                            7: "Juillet", 8: "Aout", 9: "Septembre",
@@ -17,19 +18,24 @@ class pdf_generator():
         self.prenom = prenom
         self.adresse = adresse
         self.ville = ville
-        self.sci = sci
         self.loyer = loyer
         self.charge = charge
         self.day = day
         self.month = month
         self.year = years
         self.cat = cat
+        self.sci_nom = sci_nom
+        self.sci_adresse = sci_adresse
+        self.sci_cp_ville = sci_cp_ville
+        self.sci_tel = sci_tel
+        self.sci_mail = sci_mail
+        self.sci_siret = sci_siret
         self.database = sql_database()
 
     def generator(self):
         if self.cat == 1:  # habitation case
             # Coordonnées de la SCI
-            self.pdf.drawString(20, 800, f"{self.sci}")  # colon, row ( 0 down / 800 up) ( 0 left / 600 right)
+            self.pdf.drawString(20, 800, f"{self.sci_nom}")  # colon, row ( 0 down / 800 up) ( 0 left / 600 right)
             self.pdf.drawString(20, 785, "xx rue lllala tralala")
             self.pdf.drawString(20, 770, "98150 les moutons bleus")
             self.pdf.drawString(20, 755, "telephone")
@@ -55,7 +61,7 @@ class pdf_generator():
 
         else:  # shop case
             # Coordonnées de la SCI
-            self.pdf.drawString(20, 800, f"{self.sci}")  # colon, row ( 0 down / 800 up) ( 0 left / 600 right)
+            self.pdf.drawString(20, 800, f"{self.sci_nom}")  # colon, row ( 0 down / 800 up) ( 0 left / 600 right)
             self.pdf.drawString(20, 785, "xx rue lllala tralala")
             self.pdf.drawString(20, 770, "98150 les moutons bleus")
             self.pdf.drawString(20, 755, "telephone")
@@ -108,18 +114,4 @@ class make_directories():
 
 
 if __name__ == "__main__":
-    database = sql_database()
-    make_directories("2020", "01")
-
-    day, month, year = "2", "8", "2020"
-    # make_directories(year, month)
-    directories = os.path.dirname(__file__)
-
-    for elt in database.pdf_table():
-        nom, prenom, adresse, ville, sci, loyer, charges = elt
-        print(nom, prenom, adresse, ville, sci, loyer, charges)
-        name_pdf = directories + "\\" + sci + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
-        pdf = canvas.Canvas(name_pdf)
-        pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer,
-                                charges, day, month, year, cat="c")
-        pdf_gen.generator()
+    print("Hello world")

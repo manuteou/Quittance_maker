@@ -15,6 +15,15 @@ class locataire:
         self.date_entree = date
         self.base_indice = indice
 
+class sci:
+    def __init__(self, nom, adresse, cp_ville, tel, mail, siret):
+        self.nom = nom
+        self.adresse = adresse
+        self.cp_ville = cp_ville
+        self.tel = tel
+        self.mail = mail
+        self.siret = siret
+
 class sql_database_init():
     def __init__(self):
         self.conn = sqlite3.connect("tenatdb.db")
@@ -27,7 +36,7 @@ class sql_database_init():
                nom TEXT NOT NULL,
                prenom TEXT NOT NULL,
                adresse TEXT NOT NULL,
-               CP_ville TEXT NOT NULL,
+               cp_ville TEXT NOT NULL,
                tel TEXT NOT NULL,
                mail TEXT NOT NULL,
                cat INTEGER NOT NULL
@@ -35,7 +44,7 @@ class sql_database_init():
 
         sql_create_location_table = """ CREATE TABLE IF NOT EXISTS location(
                id INTEGER PRIMARY KEY,
-               SCI TEXT NOT NULL,
+               sci TEXT NOT NULL,
                nom TEXT NOT NULL,
                type TEXT NOT NULL,
                loyer INTEGER NOT NULL,
@@ -48,10 +57,10 @@ class sql_database_init():
                id INTEGER PRIMARY KEY,
                nom TEXT NOT NULL,
                adresse TEXT NOT NULL,
-               CP_ville TEXT NOT NULL,
+               cp_ville TEXT NOT NULL,
                tel TEXT NOT NULL,
                mail TEXT NOT NULL,
-               SIRET TEXT NOT NULL);"""
+               siret TEXT NOT NULL);"""
 
         self.c.execute(sql_create_tenant_table)
         self.c.execute(sql_create_location_table)
@@ -106,20 +115,27 @@ class sql_database():
         return elt
 
     def pdf_table(self):
-        sql_pdf_table = """SELECT t.nom, prenom, adresse, CP_ville, SCI, loyer, charges, mail , cat
-                            FROM tenant as t
-                            INNER JOIN location as l
-                            ON t.nom = l.nom;"""
+        sql_pdf_table = f"""SELECT t.nom, prenom, t.adresse, t.cp_ville, loyer, charges, t.mail, cat, s.nom, 
+                            s.adresse, s.cp_ville, s.tel, s.mail, s.siret
+                            FROM location as l
+                            INNER JOIN tenant as t
+                            ON l.nom = t.nom
+                            INNER JOIN sci as s
+                            ON l.sci = s.nom;"""
+        print(sql_pdf_table)
         self.c.execute(sql_pdf_table)
         pdf_table = self.c.fetchall()
         return pdf_table
 
     def pdf_table_single(self, nom):
-        sql_pdf_table_single = f"""SELECT t.nom, prenom, adresse, CP_ville, SCI, loyer, charges, mail , cat
-                            FROM tenant as t
-                            INNER JOIN location as l
-                            ON t.nom = l.nom
-                            WHERE t.nom = {nom};"""
+        sql_pdf_table_single = f"""SELECT  t.nom, prenom, t.adresse, t.CP_ville, loyer, charges, t.mail, cat, s.nom, s.adresse, s.cp_ville, s.tel, s.mail, s.siret
+                                FROM location as l
+                                INNER JOIN tenant as t
+                                ON l.nom = t.nom
+                                INNER JOIN sci as s
+                                ON l.sci = s.nom
+                                WHERE t.nom = "{nom}";"""
+        print(sql_pdf_table_single)
         self.c.execute(sql_pdf_table_single)
         pdf_table = self.c.fetchall()
         return pdf_table
@@ -130,6 +146,7 @@ class sql_database():
                                 INNER JOIN location as l
                                 ON t.nom = l.nom
                                 WHERE t.nom = "{nom}";"""
+        #print(sql_affichage_table)
         self.c.execute(sql_affichage_table)
         affichage_table = self.c.fetchall()
         return affichage_table
@@ -143,10 +160,12 @@ class sql_database():
             print(sql_table_modif)
 
         else:
-            for table in ["tenant", "location"]:
+            for table in ["tenant", "location", "sci"]:
+                print(table)
                 sql_table_modif = f"""UPDATE {table}
                                     SET {champs} = '{valeur}'
                                      WHERE nom = '{nom}';"""
+                print(sql_table_modif)
                 try:
                     self.c.execute(sql_table_modif)
                 except:
@@ -157,5 +176,6 @@ class sql_database():
 if __name__ == "__main__":
 
     db = sql_database()
-    print(db.elt_table_one("nom","tenant", "Mini")[0])
+    print(db.elt_table_one("nom", "tenant", "Mini")[0])
+    db.modif_table("Manu", "sci", "ENAV")
 

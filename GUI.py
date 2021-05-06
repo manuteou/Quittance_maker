@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from datetime import date
-from locataire import locataire, sql_database
+from locataire import locataire, sql_database, sci
 from pdf_generator import pdf_generator, make_directories
 from mail_sender import send_mail
 import os
@@ -98,39 +98,51 @@ class main_gui(tk.Frame):
 
 
     def validation_button_all(self):
+        print("debut de l'envoie")
         day, month, year = self.date_s.get().split("/")
         make_directories(year, month)
         directory = os.path.dirname(__file__)
         with open("config.json", "r") as json_file:
             config = json.load(json_file)
-
         for elt in self.database.pdf_table():
-            nom, prenom, adresse, ville, sci, loyer, charges, mail, cat = elt
-            path = directory + "\\" + sci + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
+            print(elt)
+            nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, \
+                sci_cp_ville, sci_tel, sci_mail, sci_siret  = elt
+            path = directory + "\\" + sci_nom + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
             pdf = canvas.Canvas(path)
-            pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer, charges, day, month, year, cat)
+            pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, loyer, charges, day, month, year, cat,
+                                    sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret)
             pdf_gen.generator()
+            print(f"Quittance {nom} ----> crée")
             mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"],
                              config["port"], path)
             mail.send()
-
+            print("mail : mail ----> envoyé")
+        print("fin de l'envoie")
 
     def validation_button_s(self):
+        print("debut de l'envoie")
         value = (self.tenant_list.get(tk.ACTIVE))
+        print((value.split(" ")[0]))
         day, month, year = self.date_s.get().split("/")
         make_directories(year, month)
         directory = os.path.dirname(__file__)
         with open("config.json", "r") as json_file:
             config = json.load(json_file)
-        nom, prenom, adresse, ville, sci, loyer, charges, mail, cat = self.database.pdf_table_single(f'"{value[1]}"')[0]
-        path = directory + "\\" + sci + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
+
+        nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, sci_cp_ville, sci_tel, \
+            sci_mail, sci_siret = self.database.pdf_table_single(f'{value.split(" ")[0]}')[0]
+        path = directory + "\\" + sci_nom + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
+        print(path)
         pdf = canvas.Canvas(path)
-        pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, sci, loyer, charges, day, month, year, cat)
+        pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, loyer, charges, day, month, year, cat,
+                                sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret)
+        print(f"Quittance {nom} ----> crée")
         pdf_gen.generator()
         mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"],
                          config["port"], path)
         mail.send()
-
+        print("mail : mail ----> envoyé")
 
     def new_entry(self):
         self.destroy()
@@ -346,6 +358,8 @@ class modification_gui(tk.Frame):
 
     def mod_entry(self):
         self.database.modif_table(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
+        print(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
+        print("modification effectuée")
 
 class delete_gui(tk.Frame):
     def __init__(self):
@@ -382,11 +396,9 @@ class delete_gui(tk.Frame):
         if self.nom_var.get() != "Attention action definitive":
             self.database.delete_entry("tenant", self.nom_var.get())
             self.database.delete_entry("location", self.nom_var.get())
-            print("Action effectuée")
+            print("suppression effectuée")
             self.destroy()
             main_gui().mainloop()
-        else:
-            print("action impossible")
 
     def quit(self):
         self.destroy()
@@ -545,6 +557,7 @@ class config_gui(tk.Frame):
         self.config["port"] = self.port_var.get()
         with open ('config.json', 'w') as json_files:
             json.dump(self.config, json_files)
+        print("mise à jour du fichier config")
         self.destroy()
         main_gui().mainloop()
 
@@ -569,7 +582,7 @@ class gestion_sci(tk.Frame):
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
         boutton_add = tk.Button(main_frame, text="Ajouter SCI", command=self.add_sci)
         boutton_mod = tk.Button(main_frame, text="Modifier SCI", command=self.mod_sci)
-        boutton_sup = tk.Button(main_frame, text="Suprimer SCI", command=self.del_sci)
+        boutton_sup = tk.Button(main_frame, text="Supprimer SCI", command=self.del_sci)
         boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
         # position
         main_frame.grid(column=0, row=0, sticky="NSEW")
@@ -605,6 +618,13 @@ class new_sci_gui(tk.Frame):
 
 
     def createWidgets(self):
+        # Variables
+        self.name_var = tk.StringVar()
+        self.adresse_var = tk.StringVar()
+        self.city_var = tk.StringVar()
+        self.tel_var = tk.StringVar()
+        self.mail_var = tk.StringVar()
+        self.siret_var = tk.StringVar()
         # Widget
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
         name_label = tk.Label(main_frame, text="SCI")
@@ -613,7 +633,12 @@ class new_sci_gui(tk.Frame):
         tel_label = tk.Label(main_frame, text="Tel")
         mail_label = tk.Label(main_frame, text="Email")
         siret_label = tk.Label(main_frame, text="SIRET")
-
+        name_entry = tk.Entry(main_frame, textvariable=self.name_var)
+        adresse_entry = tk.Entry(main_frame, textvariable=self.adresse_var)
+        city_entry = tk.Entry(main_frame, textvariable=self.city_var)
+        tel_entry = tk.Entry(main_frame, textvariable=self.tel_var)
+        mail_entry = tk.Entry(main_frame, textvariable=self.mail_var)
+        siret_entry = tk.Entry(main_frame, textvariable=self.siret_var)
         boutton_add = tk.Button(main_frame, text="Ajouter", command=self.add_sci)
         boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
 
@@ -626,12 +651,29 @@ class new_sci_gui(tk.Frame):
         tel_label.grid(column=0, row=3, sticky="NSEW")
         mail_label.grid(column=0, row=4, sticky="NSEW")
         siret_label.grid(column=0, row=5, sticky="NSEW")
+        name_entry.grid(column=1, row=0, sticky="NSEW")
+        adresse_entry.grid(column=1, row=1, sticky="NSEW")
+        city_entry.grid(column=1, row=2, sticky="NSEW")
+        tel_entry.grid(column=1, row=3, sticky="NSEW")
+        mail_entry.grid(column=1, row=4, sticky="NSEW")
+        siret_entry.grid(column=1, row=5, sticky="NSEW")
         boutton_add.grid(column=0, row=6, sticky="NSEW")
         boutton_quitter.grid(column=1, row=6, sticky="NSEW")
 
     def add_sci(self):
-        pass
+        new_sci = sci(self.name_var.get(), self.adresse_var.get(), self.city_var.get(),
+                           self.tel_var.get(), self.mail_var.get(), self.siret_var.get())
 
+        insert_sci = {'nom': new_sci.nom, 'adresse': new_sci.adresse, 'cp_ville': new_sci.cp_ville,
+                         'tel':new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret}
+
+        print({'nom': new_sci.nom, 'adresse': new_sci.adresse, 'cp_ville': new_sci.cp_ville,
+                         'tel':new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret})
+
+        self.database.create_entry("sci", insert_sci)
+        ################################
+        ##rajouter au fichier config""
+        ###############################
     def quit(self):
         self.destroy()
         gestion_sci.mainloop(self)
@@ -650,19 +692,42 @@ class mod_sci_gui(tk.Frame):
 
 
     def createWidgets(self):
-        # Widget
+        self.sci_var = tk.StringVar()
+        self.sci_var.set("nom de la sci à modifier")
+        self.champs_var = tk.StringVar()
+        self.champs_var.set("champs à modifier")
+        self.newval_var = tk.StringVar()
+        self.newval_var.set("nouvelle valeur")
+        # widget creation
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
+        main_frame.columnconfigure(0, weight=0)
+        main_frame.columnconfigure(1, weight=1)
+        sci_label = tk.Label(main_frame, text="sci")
+        sci_entry = tk.Entry(main_frame, textvariable=self.sci_var)
+        champs_label = tk.Label(main_frame, text="champs à modifier")
+        champs_entry = tk.Entry(main_frame, textvariable=self.champs_var)
+        mod_label = tk.Label(main_frame, text="modification")
+        mod_entry = tk.Entry(main_frame, textvariable=self.newval_var)
 
         boutton_add = tk.Button(main_frame, text="Ajouter", command=self.mod_sci)
         boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
         # position
         main_frame.grid(column=0, row=0, sticky="NSEW")
+        main_frame.grid(column=0, row=0, sticky="NSEW")
+        sci_label.grid(column=0, row=0, sticky="EW")
+        sci_entry.grid(column=1, row=0, sticky="EW")
+        champs_label.grid(column=0, row=1, sticky="EW")
+        champs_entry.grid(column=1, row=1, sticky="EW")
+        mod_label.grid(column=0, row=2, sticky="EW")
+        mod_entry.grid(column=1, row=2, sticky="EW")
         boutton_add.grid(column=0, row=6, sticky="NSEW")
         boutton_quitter.grid(column=1, row=6, sticky="NSEW")
 
 
     def mod_sci(self):
-        pass
+        self.database.modif_table(self.sci_var.get(), self.champs_var.get(), self.newval_var.get())
+        print(self.sci_var.get(), self.champs_var.get(), self.newval_var.get())
+        print("modifications effectuées")
 
     def quit(self):
         self.destroy()
@@ -671,29 +736,41 @@ class mod_sci_gui(tk.Frame):
 class del_sci_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
-        self.master.title("New sci")
+        self.master.title("Supression de locataire")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
-        self.database = sql_database()
         self.createWidgets()
-
+        self.database = sql_database()
 
     def createWidgets(self):
-        # Widget
+        # variable creation
+        self.nom_var = tk.StringVar()
+        self.nom_var.set("Attention action definitive")
+        # widget creation
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
-
-        boutton_add = tk.Button(main_frame, text="Ajouter", command=self.del_sci)
+        main_frame.columnconfigure(0, weight=0)
+        main_frame.columnconfigure(1, weight=1)
+        nom_label = tk.Label(main_frame, text="Nom de la sci")
+        nom_entry = tk.Entry(main_frame, textvariable=self.nom_var)
+        boutton_add = tk.Button(main_frame, text="Supprimer", command=self.del_entry)
         boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
-        # position
+        # widget position
         main_frame.grid(column=0, row=0, sticky="NSEW")
+        nom_label.grid(column=0, row=0, sticky="EW")
+        nom_entry.grid(column=1, row=0, sticky="EW")
         boutton_add.grid(column=0, row=6, sticky="NSEW")
         boutton_quitter.grid(column=1, row=6, sticky="NSEW")
 
-    def del_sci(self):
-        pass
+    def del_entry(self):
+        if self.nom_var.get() != "Attention action definitive":
+            self.database.delete_entry("sci", self.nom_var.get())
+            print("sci", self.nom_var.get())
+            print("suppression effectuée")
+
+
 
     def quit(self):
         self.destroy()

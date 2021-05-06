@@ -12,11 +12,11 @@ if c.exists() == False:
     config = {"master_mail": "", "password": "", "SMTP": "", "port": "", "sci": []}
     with open('config.json','w') as json_files:
         json.dump(config, json_files)
-    print("création")
+    print("création fichier config")
 
 
 if d.exists() == False:
-    print("création")
+    print("création base de données")
     sql_database_init()
 
 # GUI launch
