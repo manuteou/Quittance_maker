@@ -13,7 +13,7 @@ class main_gui(tk.Frame):
         tk.Frame.__init__(self)
         self.master.geometry("800x300")
         self.master.minsize(300, 150)
-        self.master.title("Quittances Maker V1.0")
+        self.master.title("Quittances Maker V1.1")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -395,7 +395,7 @@ class delete_gui(tk.Frame):
 class info_gui(tk.Frame):
     def __init__(self, value):
         tk.Frame.__init__(self)
-        self.master.title("Configuration")
+        self.master.title("Information")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -429,7 +429,7 @@ class info_gui(tk.Frame):
 class maj_rent_gui(tk.Frame):
     def __init__(self, value):
         tk.Frame.__init__(self)
-        self.master.title("Configuration")
+        self.master.title("MAJ rent")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -515,6 +515,7 @@ class config_gui(tk.Frame):
         smtp_entry = tk.Entry(main_frame, textvariable=self.smtp_var)
         port_label = tk.Label(main_frame, text="port")
         port_entry = tk.Entry(main_frame, textvariable=self.port_var)
+        button_sci = tk.Button(main_frame, text="Gestion sci", command=self.sci)
         button_validation = tk.Button(main_frame, text="Modifier et quitter", command=self.mod_entry)
         button_exit = tk.Button(main_frame, text="Annuler et quitter", command=self.quit)
         #button  Quitter sans valider
@@ -529,8 +530,9 @@ class config_gui(tk.Frame):
         smtp_entry.grid(column=2, row=1, sticky="NSEW")
         port_label.grid(column=3, row=0, sticky="NSEW")
         port_entry.grid(column=3, row=1, sticky="NSEW")
+        button_sci.grid(column=3, row=2, sticky="NSEW")
         button_validation.grid(column=0, row=3, sticky="NSEW")
-        button_exit.grid(column=3, row=3, sticky="NSEW")
+        button_exit.grid(column=0, row=4, sticky="NSEW")
 
     def quit(self):
         self.destroy()
@@ -546,6 +548,156 @@ class config_gui(tk.Frame):
         self.destroy()
         main_gui().mainloop()
 
-if __name__ == "__main__":
+    def sci(self):
+        self.destroy()
+        gestion_sci().mainloop()
 
+class gestion_sci(tk.Frame):
+    def __init__(self):
+        tk.Frame.__init__(self)
+        self.master.title("Configuration sci")
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.grid(sticky="NSEW")
+        self.createWidgets()
+
+
+    def createWidgets(self):
+        # Widget
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
+        boutton_add = tk.Button(main_frame, text="Ajouter SCI", command=self.add_sci)
+        boutton_mod = tk.Button(main_frame, text="Modifier SCI", command=self.mod_sci)
+        boutton_sup = tk.Button(main_frame, text="Suprimer SCI", command=self.del_sci)
+        boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
+        # position
+        main_frame.grid(column=0, row=0, sticky="NSEW")
+        boutton_add.grid(column=0, row=0, sticky="NSEW")
+        boutton_mod.grid(column=1, row=0, sticky="NSEW")
+        boutton_sup.grid(column=2, row=0, sticky="NSEW")
+        boutton_quitter.grid(column=3, row=0, sticky="NSEW")
+
+    def add_sci(self):
+       new_sci_gui().mainloop()
+
+    def mod_sci(self):
+        mod_sci_gui().mainloop()
+
+    def del_sci(self):
+        del_sci_gui().mainloop()
+
+    def quit(self):
+        self.destroy()
+        config_gui().mainloop()
+
+class new_sci_gui(tk.Frame):
+    def __init__(self):
+        tk.Frame.__init__(self)
+        self.master.title("New sci")
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.grid(sticky="NSEW")
+        self.database = sql_database()
+        self.createWidgets()
+
+
+    def createWidgets(self):
+        # Widget
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
+        name_label = tk.Label(main_frame, text="SCI")
+        adresse_label = tk.Label(main_frame, text="Adresse")
+        city_label = tk.Label(main_frame, text= "CP/ville")
+        tel_label = tk.Label(main_frame, text="Tel")
+        mail_label = tk.Label(main_frame, text="Email")
+        siret_label = tk.Label(main_frame, text="SIRET")
+
+        boutton_add = tk.Button(main_frame, text="Ajouter", command=self.add_sci)
+        boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
+
+
+        # position
+        main_frame.grid(column=0, row=0, sticky="NSEW")
+        name_label.grid(column=0, row=0, sticky="NSEW")
+        adresse_label.grid(column=0, row=1, sticky="NSEW")
+        city_label.grid(column=0, row=2, sticky="NSEW")
+        tel_label.grid(column=0, row=3, sticky="NSEW")
+        mail_label.grid(column=0, row=4, sticky="NSEW")
+        siret_label.grid(column=0, row=5, sticky="NSEW")
+        boutton_add.grid(column=0, row=6, sticky="NSEW")
+        boutton_quitter.grid(column=1, row=6, sticky="NSEW")
+
+    def add_sci(self):
+        pass
+
+    def quit(self):
+        self.destroy()
+        gestion_sci.mainloop(self)
+
+class mod_sci_gui(tk.Frame):
+    def __init__(self):
+        tk.Frame.__init__(self)
+        self.master.title("New sci")
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.grid(sticky="NSEW")
+        self.database = sql_database()
+        self.createWidgets()
+
+
+    def createWidgets(self):
+        # Widget
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
+
+        boutton_add = tk.Button(main_frame, text="Ajouter", command=self.mod_sci)
+        boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
+        # position
+        main_frame.grid(column=0, row=0, sticky="NSEW")
+        boutton_add.grid(column=0, row=6, sticky="NSEW")
+        boutton_quitter.grid(column=1, row=6, sticky="NSEW")
+
+
+    def mod_sci(self):
+        pass
+
+    def quit(self):
+        self.destroy()
+        gestion_sci.mainloop(self)
+
+class del_sci_gui(tk.Frame):
+    def __init__(self):
+        tk.Frame.__init__(self)
+        self.master.title("New sci")
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.grid(sticky="NSEW")
+        self.database = sql_database()
+        self.createWidgets()
+
+
+    def createWidgets(self):
+        # Widget
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
+
+        boutton_add = tk.Button(main_frame, text="Ajouter", command=self.del_sci)
+        boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
+        # position
+        main_frame.grid(column=0, row=0, sticky="NSEW")
+        boutton_add.grid(column=0, row=6, sticky="NSEW")
+        boutton_quitter.grid(column=1, row=6, sticky="NSEW")
+
+    def del_sci(self):
+        pass
+
+    def quit(self):
+        self.destroy()
+        gestion_sci.mainloop(self)
+
+if __name__ == "__main__":
     main_gui().mainloop()
