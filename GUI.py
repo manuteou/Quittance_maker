@@ -7,6 +7,8 @@ from mail_sender import send_mail
 import os
 from reportlab.pdfgen import canvas
 import json
+import re
+
 
 class main_gui(tk.Frame):
     def __init__(self):
@@ -291,8 +293,9 @@ class creation_gui(tk.Frame):
                              self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get(),
                            self.selectorVar.get(),self.date_entreeVar.get(), self.indice_base.get())
 
-        insert_tenant = {'nom': client.nom,  'prenom': client.prenom, 'adresse': client.adresse,
-                         'CP_ville': client.cp_ville, 'tel': client.tel, 'mail': client.mail, 'cat': client.cat}
+        insert_tenant = {'nom': client.nom.lower(),  'prenom': client.prenom.lower(), 'adresse': client.adresse.lower(),
+                         'CP_ville': client.cp_ville.lower(), 'tel': client.tel, 'mail': client.mail.lower(),
+                         'cat': client.cat}
 
         insert_location = {'SCI': client.sci, 'nom': client.nom, 'type': client.cat, 'loyer': client.loyer,
                            'charges': client.charges, 'date_entree': client.date_entree,
@@ -308,6 +311,27 @@ class creation_gui(tk.Frame):
         self.destroy()
         main_gui().mainloop()
 
+    def verification_mail(self, value):
+        pattern = re.compile(r"^[a-z\d]+@[a-z\d]+.[a-z]+$")
+        while not re.match(pattern, value):
+            value = input("entrer un mail valide:")
+        else:
+            return value
+    def verification_tel(self, value):
+        num = re.sub(r"\D", "", value)
+        print(num)
+        pattern = re.compile(r"^0\d{9}")
+        while not re.match(pattern, num):
+            num = input("entrer un telephone valide")
+        else:
+            return num
+
+    def verification_date(self, value):
+        pattern = re.compile(r"^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$")
+        while not re.match(pattern, value):
+            value = input("rentrer une date valide")
+        else:
+            return value
 
 class modification_gui(tk.Frame):
     def __init__(self):
@@ -674,6 +698,7 @@ class new_sci_gui(tk.Frame):
         ################################
         ##rajouter au fichier config""
         ###############################
+
     def quit(self):
         self.destroy()
         gestion_sci.mainloop(self)
@@ -770,11 +795,15 @@ class del_sci_gui(tk.Frame):
             print("sci", self.nom_var.get())
             print("suppression effectuée")
 
-
+    ################################
+    ##rajouter au fichier config""
+    ###############################
 
     def quit(self):
         self.destroy()
         gestion_sci.mainloop(self)
 
 if __name__ == "__main__":
-    main_gui().mainloop()
+    #main_gui().mainloop()
+    creation_gui().verification_date("01/15/2050")
+
