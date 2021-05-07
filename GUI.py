@@ -10,6 +10,7 @@ from reportlab.pdfgen import canvas
 import json
 import re
 
+
 class main_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
@@ -44,7 +45,8 @@ class main_gui(tk.Frame):
         frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE)
         frame3 = tk.Frame(self, main_frame)
         # widgets on the left side
-        self.tenant_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Helvetica", 15), width=600, bg="#5472AE", fg='white')
+        self.tenant_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Helvetica", 15), width=600, bg="#5472AE",
+                                      fg='white')
         self.tenant_list.insert(0, f"NOM   PRENOM   LOYER   CHARGES   DATE D'ENTREE")
         for i, nom in enumerate(self.database.elt_table("nom", "tenant")):
             aff_nom = self.database.affichage_table(nom[0])[0][0]
@@ -52,9 +54,9 @@ class main_gui(tk.Frame):
             aff_loyer = int(self.database.affichage_table(nom[0])[0][2])
             aff_charges = self.database.affichage_table(nom[0])[0][3]
             aff_date = self.database.affichage_table(nom[0])[0][4]
-            self.tenant_list.insert(i+1, f"{aff_nom}    {aff_prenom}        "
-                                         f"{aff_loyer}           {aff_charges}     "
-                                         f"       {aff_date}   {self.maj_tenant(nom)}")
+            self.tenant_list.insert(i + 1, f"{aff_nom}    {aff_prenom}        "
+                                           f"{aff_loyer}           {aff_charges}     "
+                                           f"       {aff_date}   {self.maj_tenant(nom)}")
         # widgets under left
         date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1)
         date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE)
@@ -76,7 +78,7 @@ class main_gui(tk.Frame):
                                command=self.del_entry)
         button_rent_maj = tk.Button(frame3, text='MAJ LOYER', borderwidth=2, relief=tk.GROOVE,
                                     command=self.maj_rent)
-        #widgets' position
+        # widgets' position
         frame1.grid(column=0, row=0, sticky='NSEW')
         frame2.grid(column=0, row=1, sticky='NSEW')
         frame3.grid(column=1, row=0)
@@ -98,7 +100,6 @@ class main_gui(tk.Frame):
         button_modify.grid(column=0, row=7, sticky='NSEW')
         button_del.grid(column=0, row=8, sticky='NSEW')
 
-
     def validation_button_all(self):
         print("debut de l'envoie")
         day, month, year = self.date_s.get().split("/")
@@ -109,7 +110,7 @@ class main_gui(tk.Frame):
         for elt in self.database.pdf_table():
             print(elt)
             nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, \
-                sci_cp_ville, sci_tel, sci_mail, sci_siret  = elt
+            sci_cp_ville, sci_tel, sci_mail, sci_siret = elt
             path = directory + "\\" + sci_nom + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
             pdf = canvas.Canvas(path)
             pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, loyer, charges, day, month, year, cat,
@@ -121,7 +122,7 @@ class main_gui(tk.Frame):
             mail.send()
             print("mail : mail ----> envoyé")
         print("fin de l'envoie")
-
+        messagebox.showinfo("Information", "Envoies effectués")
     def validation_button_s(self):
         print("debut de l'envoie")
         value = (self.tenant_list.get(tk.ACTIVE))
@@ -133,7 +134,7 @@ class main_gui(tk.Frame):
             config = json.load(json_file)
 
         nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, sci_cp_ville, sci_tel, \
-            sci_mail, sci_siret = self.database.pdf_table_single(f'{value.split(" ")[0]}')[0]
+        sci_mail, sci_siret = self.database.pdf_table_single(f'{value.split(" ")[0]}')[0]
         path = directory + "\\" + sci_nom + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
         print(path)
         pdf = canvas.Canvas(path)
@@ -145,7 +146,7 @@ class main_gui(tk.Frame):
                          config["port"], path)
         mail.send()
         print("mail : mail ----> envoyé")
-
+        messagebox.showinfo("Information", "Envoie effectue")
     def new_entry(self):
         self.destroy()
         creation_gui().mainloop()
@@ -178,6 +179,7 @@ class main_gui(tk.Frame):
             return "MAJ Loyer"
         else:
             return ""
+
 
 class creation_gui(tk.Frame):
     def __init__(self):
@@ -241,9 +243,12 @@ class creation_gui(tk.Frame):
             config = json.load(json_files)
         sci_choise['values'] = config['sci']
         loyer_entry = tk.Entry(main_frame, textvariable=self.loyerVar, validatecommand=ok_loyer, validate='focusout')
-        charges_entry = tk.Entry(main_frame, textvariable=self.chargesVar,  validatecommand=ok_charge, validate='focusout')
-        date_entry = tk.Entry(main_frame, textvariable=self.date_entreeVar,  validatecommand=ok_date, validate='focusout')
-        indice_entry = tk.Entry(main_frame, textvariable=self.indice_base,  validatecommand=ok_indice, validate='focusout')
+        charges_entry = tk.Entry(main_frame, textvariable=self.chargesVar, validatecommand=ok_charge,
+                                 validate='focusout')
+        date_entry = tk.Entry(main_frame, textvariable=self.date_entreeVar, validatecommand=ok_date,
+                              validate='focusout')
+        indice_entry = tk.Entry(main_frame, textvariable=self.indice_base, validatecommand=ok_indice,
+                                validate='focusout')
         selector1 = tk.Radiobutton(main_frame, text="Particulier", variable=self.selectorVar, value=1, bd=2,
                                    relief=tk.GROOVE)
         selector2 = tk.Radiobutton(main_frame, text="Professionel", variable=self.selectorVar, value=2, bd=3,
@@ -285,24 +290,32 @@ class creation_gui(tk.Frame):
         button2.grid(column=0, columnspan=1, row=13, sticky='NSEW')
 
     def validation_tenant(self):
-        client = locataire(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(),
-                             self.villeVar.get(), self.telVar.get(), self.mailVar.get(),
-                             self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get(),
-                           self.selectorVar.get(),self.date_entreeVar.get(), self.indice_base.get())
+        if self.nomVar.get() == "" or self.prenomVar.get() == "" or self.adresseVar.get() == ""\
+            or self.villeVar.get() == "" or self.telVar.get() == ""or self.mailVar.get() == ""\
+            or self.sciVar.get() == "" or self.loyerVar.get() == ""or self.chargesVar.get() == ""\
+                or self.indice_base.get() == "":
+            print("champs vide")
+            messagebox.showinfo("Attention", "un ou plusieurs champs vides")
+        else:
+            client = locataire(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(),
+                               self.villeVar.get(), self.telVar.get(), self.mailVar.get(),
+                               self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get(),
+                               self.selectorVar.get(), self.date_entreeVar.get(), self.indice_base.get())
 
-        insert_tenant = {'nom': client.nom.lower(),  'prenom': client.prenom.lower(), 'adresse': client.adresse.lower(),
-                         'CP_ville': client.cp_ville.lower(), 'tel': client.tel, 'mail': client.mail.lower(),
-                         'cat': client.cat}
+            insert_tenant = {'nom': client.nom.lower(), 'prenom': client.prenom.lower(), 'adresse': client.adresse.lower(),
+                             'CP_ville': client.cp_ville.lower(), 'tel': client.tel, 'mail': client.mail.lower(),
+                             'cat': client.cat}
 
-        insert_location = {'SCI': client.sci.lower(), 'nom': client.nom.lower(), 'type': client.cat, 'loyer': client.loyer,
-                           'charges': client.charges, 'date_entree': client.date_entree,
-                           'indice_base': client.base_indice}
+            insert_location = {'SCI': client.sci.lower(), 'nom': client.nom.lower(), 'type': client.cat,
+                               'loyer': client.loyer,
+                               'charges': client.charges, 'date_entree': client.date_entree,
+                               'indice_base': client.base_indice}
 
-        self.database.create_entry("tenant", insert_tenant)
-        self.database.create_entry("location", insert_location)
+            self.database.create_entry("tenant", insert_tenant)
+            self.database.create_entry("location", insert_location)
 
-        print(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(), self.villeVar.get(), self.telVar.get(),
-              self.mailVar.get(), self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get())
+            print(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(), self.villeVar.get(), self.telVar.get(),
+                  self.mailVar.get(), self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get())
 
     def quit(self):
         self.destroy()
@@ -311,12 +324,12 @@ class creation_gui(tk.Frame):
     def verification_mail(self):
 
         pattern = re.compile(r"^[a-z\d]+@[a-z\d]+.[a-z]+$")
-        if re.match(pattern, self.mailVar.get()) :
+        if re.match(pattern, self.mailVar.get()):
             print("Format du mail  correct")
             return True
         else:
             print("Format de saisie incorrect")
-            messagebox.showinfo("Attention", "Format de saisie incorrect")
+            messagebox.showinfo("Attention", "Saisie incorrect")
             return False
 
     def verification_tel(self):
@@ -328,41 +341,47 @@ class creation_gui(tk.Frame):
             return True
         else:
             print("Format de saisie  telephone incorrect")
+            messagebox.showinfo("Attention", "Saisie incorrect")
             return False
 
-
     def verification_date(self):
-        pattern = re.compile(r"^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$")
+        pattern = re.compile(
+            r"^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$")
         if re.match(pattern, self.date_entreeVar.get()):
             print(" format date compatible")
             return True
         else:
             print("Format de saisie incorrect")
+            messagebox.showinfo("Attention", "Saisie incorrect")
             return False
 
     def verification_loyer(self):
         if isinstance(self.loyerVar.get(), str):
             print("valeur incorrect")
+            messagebox.showinfo("Attention", "Saisie incorrect")
             return False
         else:
-            print("foramt saisie loyer correct")
+            print("(loyer) format saisie correct")
             return True
 
     def verification_charges(self):
         if isinstance(self.chargesVar.get(), str):
             print("valeur incorrect")
+            messagebox.showinfo("Attention", "Saisie incorrect")
             return False
         else:
-            print("format saisie charges correct")
+            print("(saisie) format saisie correct")
             return True
 
     def verification_indice(self):
         if isinstance(self.indice_base.get(), str):
             print("valeur incorrect")
+            messagebox.showinfo("Attention", "Saisie incorrect")
             return False
         else:
-            print("foramt saisie indice correct")
+            print("(indice) format saisie correct")
             return True
+
 
 class modification_gui(tk.Frame):
     def __init__(self):
@@ -416,6 +435,7 @@ class modification_gui(tk.Frame):
         print(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
         print("modification effectuée")
 
+
 class delete_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
@@ -459,6 +479,7 @@ class delete_gui(tk.Frame):
         self.destroy()
         main_gui().mainloop()
 
+
 class info_gui(tk.Frame):
     def __init__(self, value):
         tk.Frame.__init__(self)
@@ -472,9 +493,8 @@ class info_gui(tk.Frame):
         self.database = sql_database()
         self.createWidgets()
 
-
     def createWidgets(self):
-        _, _, _, adresse, ville, tel, mail, _ = self.database.elt_table_one("nom",  "tenant", self.nom)[0]
+        _, _, _, adresse, ville, tel, mail, _ = self.database.elt_table_one("nom", "tenant", self.nom)[0]
         # widget label
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
         label_adresse = tk.Label(main_frame, text=adresse)
@@ -493,6 +513,7 @@ class info_gui(tk.Frame):
     def quit(self):
         self.destroy()
 
+
 class maj_rent_gui(tk.Frame):
     def __init__(self, value):
         tk.Frame.__init__(self)
@@ -506,10 +527,9 @@ class maj_rent_gui(tk.Frame):
         self.database = sql_database()
         self.createWidgets()
 
-
     def createWidgets(self):
-        #variables
-        _, _, _, _, self.rent, _, _, self.base_indice = self.database.elt_table_one("nom",  "location", self.nom)[0]
+        # variables
+        _, _, _, _, self.rent, _, _, self.base_indice = self.database.elt_table_one("nom", "location", self.nom)[0]
         self.new_indice = tk.IntVar()
         self.new_indice.set(self.base_indice)
         # widget label
@@ -542,8 +562,9 @@ class maj_rent_gui(tk.Frame):
         main_gui().mainloop()
 
     def validation(self):
-        new_rent = int(self.rent) * (int(self.new_indice.get())/int(self.base_indice))
+        new_rent = int(self.rent) * (int(self.new_indice.get()) / int(self.base_indice))
         self.database.modif_table(self.nom, "loyer", new_rent)
+
 
 class config_gui(tk.Frame):
     def __init__(self):
@@ -555,7 +576,6 @@ class config_gui(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.createWidgets()
-
 
     def createWidgets(self):
         with open('config.json', 'r') as json_files:
@@ -585,9 +605,9 @@ class config_gui(tk.Frame):
         button_sci = tk.Button(main_frame, text="Gestion sci", command=self.sci)
         button_validation = tk.Button(main_frame, text="Modifier et quitter", command=self.mod_entry)
         button_exit = tk.Button(main_frame, text="Annuler et quitter", command=self.quit)
-        #button  Quitter sans valider
+        # button  Quitter sans valider
 
-        #position
+        # position
         main_frame.grid(column=0, row=0, sticky="NSEW")
         master_mail_label.grid(column=0, row=0, sticky="NSEW")
         master_mail_entry.grid(column=0, row=1, sticky="NSEW")
@@ -610,7 +630,7 @@ class config_gui(tk.Frame):
         self.config["password"] = self.password_var.get()
         self.config['SMTP'] = self.smtp_var.get()
         self.config["port"] = self.port_var.get()
-        with open ('config.json', 'w') as json_files:
+        with open('config.json', 'w') as json_files:
             json.dump(self.config, json_files)
         print("mise à jour du fichier config")
         self.destroy()
@@ -619,6 +639,7 @@ class config_gui(tk.Frame):
     def sci(self):
         self.destroy()
         gestion_sci().mainloop()
+
 
 class gestion_sci(tk.Frame):
     def __init__(self):
@@ -630,7 +651,6 @@ class gestion_sci(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.createWidgets()
-
 
     def createWidgets(self):
         # Widget
@@ -647,7 +667,7 @@ class gestion_sci(tk.Frame):
         boutton_quitter.grid(column=3, row=0, sticky="NSEW")
 
     def add_sci(self):
-       new_sci_gui().mainloop()
+        new_sci_gui().mainloop()
 
     def mod_sci(self):
         mod_sci_gui().mainloop()
@@ -658,6 +678,7 @@ class gestion_sci(tk.Frame):
     def quit(self):
         self.destroy()
         config_gui().mainloop()
+
 
 class new_sci_gui(tk.Frame):
     def __init__(self):
@@ -671,7 +692,6 @@ class new_sci_gui(tk.Frame):
         self.database = sql_database()
         self.createWidgets()
 
-
     def createWidgets(self):
         # Variables
         self.name_var = tk.StringVar()
@@ -684,7 +704,7 @@ class new_sci_gui(tk.Frame):
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
         name_label = tk.Label(main_frame, text="SCI")
         adresse_label = tk.Label(main_frame, text="Adresse")
-        city_label = tk.Label(main_frame, text= "CP/ville")
+        city_label = tk.Label(main_frame, text="CP/ville")
         tel_label = tk.Label(main_frame, text="Tel")
         mail_label = tk.Label(main_frame, text="Email")
         siret_label = tk.Label(main_frame, text="SIRET")
@@ -696,7 +716,6 @@ class new_sci_gui(tk.Frame):
         siret_entry = tk.Entry(main_frame, textvariable=self.siret_var)
         boutton_add = tk.Button(main_frame, text="Ajouter", command=self.add_sci)
         boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
-
 
         # position
         main_frame.grid(column=0, row=0, sticky="NSEW")
@@ -717,13 +736,13 @@ class new_sci_gui(tk.Frame):
 
     def add_sci(self):
         new_sci = sci(self.name_var.get(), self.adresse_var.get(), self.city_var.get(),
-                           self.tel_var.get(), self.mail_var.get(), self.siret_var.get())
+                      self.tel_var.get(), self.mail_var.get(), self.siret_var.get())
 
         insert_sci = {'nom': new_sci.nom, 'adresse': new_sci.adresse, 'cp_ville': new_sci.cp_ville,
-                         'tel':new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret}
+                      'tel': new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret}
 
         print({'nom': new_sci.nom, 'adresse': new_sci.adresse, 'cp_ville': new_sci.cp_ville,
-                         'tel':new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret})
+               'tel': new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret})
 
         self.database.create_entry("sci", insert_sci)
         ################################
@@ -733,6 +752,7 @@ class new_sci_gui(tk.Frame):
     def quit(self):
         self.destroy()
         gestion_sci.mainloop(self)
+
 
 class mod_sci_gui(tk.Frame):
     def __init__(self):
@@ -745,7 +765,6 @@ class mod_sci_gui(tk.Frame):
         self.grid(sticky="NSEW")
         self.database = sql_database()
         self.createWidgets()
-
 
     def createWidgets(self):
         self.sci_var = tk.StringVar()
@@ -779,7 +798,6 @@ class mod_sci_gui(tk.Frame):
         boutton_add.grid(column=0, row=6, sticky="NSEW")
         boutton_quitter.grid(column=1, row=6, sticky="NSEW")
 
-
     def mod_sci(self):
         self.database.modif_table(self.sci_var.get(), self.champs_var.get(), self.newval_var.get())
         print(self.sci_var.get(), self.champs_var.get(), self.newval_var.get())
@@ -788,6 +806,7 @@ class mod_sci_gui(tk.Frame):
     def quit(self):
         self.destroy()
         gestion_sci.mainloop(self)
+
 
 class del_sci_gui(tk.Frame):
     def __init__(self):
@@ -834,10 +853,16 @@ class del_sci_gui(tk.Frame):
         self.destroy()
         gestion_sci.mainloop(self)
 
-if __name__ == "__main__":
-    db = sql_database()
-    sql = """SELECT * FROM tenant"""
-    db.c.execute((sql))
-    print (db.c.fetchall())
-    print(db.affichage_table("seban"))
 
+if __name__ == "__main__":
+
+    def verification_indice(value):
+        if isinstance(value, str):
+            print("valeur incorrect")
+            # messagebox.showinfo("Attention", "Saisie incorrect")
+        else:
+            print("(indice) format saisie correct")
+
+
+
+    verification_indice(15)
