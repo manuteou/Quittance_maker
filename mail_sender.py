@@ -18,7 +18,7 @@ class send_mail:
 
     def send(self):
         msg = MIMEMultipart()
-        msg['Subject'] = '[Email Test]'
+        msg['Subject'] = '[Quittance de loyer]'
         msg['From'] = self.sender_email
         msg['To'] = self.receiver_email
 

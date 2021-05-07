@@ -1,4 +1,4 @@
-from reportlab.pdfgen import canvas
+
 from locataire import sql_database
 import os
 
@@ -36,10 +36,11 @@ class pdf_generator():
         if self.cat == 1:  # habitation case
             # Coordonnées de la SCI
             self.pdf.drawString(20, 800, f"{self.sci_nom}")  # colon, row ( 0 down / 800 up) ( 0 left / 600 right)
-            self.pdf.drawString(20, 785, "xx rue lllala tralala")
-            self.pdf.drawString(20, 770, "98150 les moutons bleus")
-            self.pdf.drawString(20, 755, "telephone")
-            self.pdf.drawString(20, 740, "mail")
+            self.pdf.drawString(20, 785, f"{self.sci_adresse}")
+            self.pdf.drawString(20, 770, f"{self.sci_cp_ville}")
+            self.pdf.drawString(20, 755, f"{self.sci_tel}")
+            self.pdf.drawString(20, 740, f"{self.sci_tel}")
+            self.pdf.drawString(20, 725, f"SIRET : {self.sci_siret}")
             # Coordonnées du locataire
             self.pdf.drawString(350, 700, f"{self.nom} {self.prenom}")
             self.pdf.drawString(350, 685, f"{self.adresse}")
@@ -62,10 +63,11 @@ class pdf_generator():
         else:  # shop case
             # Coordonnées de la SCI
             self.pdf.drawString(20, 800, f"{self.sci_nom}")  # colon, row ( 0 down / 800 up) ( 0 left / 600 right)
-            self.pdf.drawString(20, 785, "xx rue lllala tralala")
-            self.pdf.drawString(20, 770, "98150 les moutons bleus")
-            self.pdf.drawString(20, 755, "telephone")
-            self.pdf.drawString(20, 740, "mail")
+            self.pdf.drawString(20, 785, f"{self.sci_adresse}")
+            self.pdf.drawString(20, 770, f"{self.sci_cp_ville}")
+            self.pdf.drawString(20, 755, f"{self.sci_tel}")
+            self.pdf.drawString(20, 740, f"{self.sci_tel}")
+            self.pdf.drawString(20, 725, f"{self.sci_siret}")
             # Coordonnées du locataire
             self.pdf.drawString(350, 700, f"{self.nom} {self.prenom}")
             self.pdf.drawString(350, 685, f"{self.adresse}")
@@ -114,4 +116,15 @@ class make_directories():
 
 
 if __name__ == "__main__":
-    print("Hello world")
+    from datetime import date
+    from reportlab.pdfgen import canvas
+    date = date.today()
+    day = date.day
+    month = date.month
+    year = date.year
+    path = os.path.dirname(__file__)
+    pdf = canvas.Canvas(path)
+    pdf_gen = pdf_generator(pdf, "nom", "prenom", "adresse", "ville", 2500, 100, day, month, year, 1,
+                            "sci_nom", "sci_adresse", "sci_cp_ville", "sci_tel", "sci_mail", "sci_siret")
+    pdf_gen.generator()
+
