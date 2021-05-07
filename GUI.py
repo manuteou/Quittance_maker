@@ -4,11 +4,11 @@ from datetime import date
 from locataire import locataire, sql_database, sci
 from pdf_generator import pdf_generator, make_directories
 from mail_sender import send_mail
+from tkinter import messagebox
 import os
 from reportlab.pdfgen import canvas
 import json
 import re
-
 
 class main_gui(tk.Frame):
     def __init__(self):
@@ -194,28 +194,25 @@ class creation_gui(tk.Frame):
     def createWidgets(self):
         # varaibles' creation
         self.nomVar = tk.StringVar()
-        self.nomVar.set("Mini")
         self.prenomVar = tk.StringVar()
-        self.prenomVar.set("Cooper")
         self.adresseVar = tk.StringVar()
-        self.adresseVar.set("15 rue des anges")
         self.villeVar = tk.StringVar()
-        self.villeVar.set("75000 Paris")
         self.telVar = tk.StringVar()
-        self.telVar.set("090807060")
         self.mailVar = tk.StringVar()
-        self.mailVar.set("frogenmanu@hotmail.com")
         self.sciVar = tk.StringVar()
-        self.loyerVar = tk.StringVar()
-        self.loyerVar.set("1500")
-        self.chargesVar = tk.StringVar()
-        self.chargesVar.set("200")
+        self.loyerVar = tk.IntVar()
+        self.chargesVar = tk.IntVar()
         self.selectorVar = tk.IntVar()
         self.selectorVar.set(1)
         self.date_entreeVar = tk.StringVar()
-        self.date_entreeVar.set('JJ/MM/YYYY')
         self.indice_base = tk.IntVar()
-        self.indice_base.set(100)
+        # Validation pack
+        ok_tel = self.register(self.verification_tel)
+        ok_mail = self.register(self.verification_mail)
+        ok_date = self.register(self.verification_date)
+        ok_loyer = self.register(self.verification_loyer)
+        ok_charge = self.register(self.verification_charges)
+        ok_indice = self.register(self.verification_indice)
         # widgets' creation
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
         main_frame.columnconfigure(0, weight=0)
@@ -236,17 +233,17 @@ class creation_gui(tk.Frame):
         prenom_entry = tk.Entry(main_frame, textvariable=self.prenomVar)
         adresse_entry = tk.Entry(main_frame, textvariable=self.adresseVar)
         ville_entry = tk.Entry(main_frame, textvariable=self.villeVar)
-        tel_entry = tk.Entry(main_frame, textvariable=self.telVar)
-        mail_entry = tk.Entry(main_frame, textvariable=self.mailVar)
+        tel_entry = tk.Entry(main_frame, textvariable=self.telVar, validatecommand=ok_tel, validate='focusout')
+        mail_entry = tk.Entry(main_frame, textvariable=self.mailVar, validatecommand=ok_mail, validate='focusout')
 
         sci_choise = ttk.Combobox(main_frame, textvariable=self.sciVar)
         with open('config.json', 'r') as json_files:
             config = json.load(json_files)
         sci_choise['values'] = config['sci']
-        loyer_entry = tk.Entry(main_frame, textvariable=self.loyerVar)
-        charges_entry = tk.Entry(main_frame, textvariable=self.chargesVar)
-        date_entry = tk.Entry(main_frame, textvariable=self.date_entreeVar)
-        indice_entry = tk.Entry(main_frame, textvariable=self.indice_base)
+        loyer_entry = tk.Entry(main_frame, textvariable=self.loyerVar, validatecommand=ok_loyer, validate='focusout')
+        charges_entry = tk.Entry(main_frame, textvariable=self.chargesVar,  validatecommand=ok_charge, validate='focusout')
+        date_entry = tk.Entry(main_frame, textvariable=self.date_entreeVar,  validatecommand=ok_date, validate='focusout')
+        indice_entry = tk.Entry(main_frame, textvariable=self.indice_base,  validatecommand=ok_indice, validate='focusout')
         selector1 = tk.Radiobutton(main_frame, text="Particulier", variable=self.selectorVar, value=1, bd=2,
                                    relief=tk.GROOVE)
         selector2 = tk.Radiobutton(main_frame, text="Professionel", variable=self.selectorVar, value=2, bd=3,
@@ -297,7 +294,7 @@ class creation_gui(tk.Frame):
                          'CP_ville': client.cp_ville.lower(), 'tel': client.tel, 'mail': client.mail.lower(),
                          'cat': client.cat}
 
-        insert_location = {'SCI': client.sci, 'nom': client.nom, 'type': client.cat, 'loyer': client.loyer,
+        insert_location = {'SCI': client.sci.lower(), 'nom': client.nom.lower(), 'type': client.cat, 'loyer': client.loyer,
                            'charges': client.charges, 'date_entree': client.date_entree,
                            'indice_base': client.base_indice}
 
@@ -311,27 +308,61 @@ class creation_gui(tk.Frame):
         self.destroy()
         main_gui().mainloop()
 
-    def verification_mail(self, value):
-        pattern = re.compile(r"^[a-z\d]+@[a-z\d]+.[a-z]+$")
-        while not re.match(pattern, value):
-            value = input("entrer un mail valide:")
-        else:
-            return value
-    def verification_tel(self, value):
-        num = re.sub(r"\D", "", value)
-        print(num)
-        pattern = re.compile(r"^0\d{9}")
-        while not re.match(pattern, num):
-            num = input("entrer un telephone valide")
-        else:
-            return num
+    def verification_mail(self):
 
-    def verification_date(self, value):
-        pattern = re.compile(r"^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$")
-        while not re.match(pattern, value):
-            value = input("rentrer une date valide")
+        pattern = re.compile(r"^[a-z\d]+@[a-z\d]+.[a-z]+$")
+        if re.match(pattern, self.mailVar.get()) :
+            print("Format du mail  correct")
+            return True
         else:
-            return value
+            print("Format de saisie incorrect")
+            messagebox.showinfo("Attention", "Format de saisie incorrect")
+            return False
+
+    def verification_tel(self):
+        num = re.sub(r"\D", "", self.telVar.get())
+        pattern = re.compile(r"^0\d{9}")
+        print(pattern)
+        if re.match(pattern, num):
+            print("Format telephone valide")
+            return True
+        else:
+            print("Format de saisie  telephone incorrect")
+            return False
+
+
+    def verification_date(self):
+        pattern = re.compile(r"^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$")
+        if re.match(pattern, self.date_entreeVar.get()):
+            print(" format date compatible")
+            return True
+        else:
+            print("Format de saisie incorrect")
+            return False
+
+    def verification_loyer(self):
+        if isinstance(self.loyerVar.get(), str):
+            print("valeur incorrect")
+            return False
+        else:
+            print("foramt saisie loyer correct")
+            return True
+
+    def verification_charges(self):
+        if isinstance(self.chargesVar.get(), str):
+            print("valeur incorrect")
+            return False
+        else:
+            print("format saisie charges correct")
+            return True
+
+    def verification_indice(self):
+        if isinstance(self.indice_base.get(), str):
+            print("valeur incorrect")
+            return False
+        else:
+            print("foramt saisie indice correct")
+            return True
 
 class modification_gui(tk.Frame):
     def __init__(self):
@@ -804,6 +835,9 @@ class del_sci_gui(tk.Frame):
         gestion_sci.mainloop(self)
 
 if __name__ == "__main__":
-    #main_gui().mainloop()
-    creation_gui().verification_date("01/15/2050")
+    db = sql_database()
+    sql = """SELECT * FROM tenant"""
+    db.c.execute((sql))
+    print (db.c.fetchall())
+    print(db.affichage_table("seban"))
 
