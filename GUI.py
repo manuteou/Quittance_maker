@@ -47,16 +47,15 @@ class main_gui(tk.Frame):
         # widgets on the left side
         self.tenant_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Helvetica", 15), width=600, bg="#5472AE",
                                       fg='white')
-        self.tenant_list.insert(0, f"NOM   PRENOM   LOYER   CHARGES   DATE D'ENTREE")
+        self.tenant_list.insert(0, f"NOM    PRENOM  LOYER   CHARGES     DATE D'ENTREE")
         for i, nom in enumerate(self.database.elt_table("nom", "tenant")):
             aff_nom = self.database.affichage_table(nom[0])[0][0]
             aff_prenom = self.database.affichage_table(nom[0])[0][1]
             aff_loyer = int(self.database.affichage_table(nom[0])[0][2])
             aff_charges = self.database.affichage_table(nom[0])[0][3]
             aff_date = self.database.affichage_table(nom[0])[0][4]
-            self.tenant_list.insert(i + 1, f"{aff_nom}    {aff_prenom}        "
-                                           f"{aff_loyer}           {aff_charges}     "
-                                           f"       {aff_date}   {self.maj_tenant(nom)}")
+            self.tenant_list.insert(i + 1, f"{aff_nom}  {aff_prenom}    {aff_loyer}        {aff_charges}"
+                                           f"               {aff_date}          {self.maj_tenant(nom)}")
         # widgets under left
         date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1)
         date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE)
@@ -101,14 +100,14 @@ class main_gui(tk.Frame):
         button_del.grid(column=0, row=8, sticky='NSEW')
 
     def validation_button_all(self):
-        print("debut de l'envoie")
+        print("debut de l'envoie pour tous")
         day, month, year = self.date_s.get().split("/")
         make_directories(year, month)
         directory = os.path.dirname(__file__)
         with open("config.json", "r") as json_file:
             config = json.load(json_file)
         for elt in self.database.pdf_table():
-            print(elt)
+            #print(elt)
             nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, \
             sci_cp_ville, sci_tel, sci_mail, sci_siret = elt
             path = directory + "\\" + sci_nom + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
@@ -117,16 +116,19 @@ class main_gui(tk.Frame):
                                     sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret)
             pdf_gen.generator()
             print(f"Quittance {nom} ----> crée")
+            print(f"""SMTP{config["SMTP"]}""")
             mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"],
                              config["port"], path)
             mail.send()
             print("mail : mail ----> envoyé")
+
         print("fin de l'envoie")
         messagebox.showinfo("Information", "Envoies effectués")
+
+
     def validation_button_s(self):
-        print("debut de l'envoie")
         value = (self.tenant_list.get(tk.ACTIVE))
-        print((value.split(" ")[0]))
+        print(f"""debut de l"envoie pour {(value.split(" ")[0])}""")
         day, month, year = self.date_s.get().split("/")
         make_directories(year, month)
         directory = os.path.dirname(__file__)
@@ -147,6 +149,7 @@ class main_gui(tk.Frame):
         mail.send()
         print("mail : mail ----> envoyé")
         messagebox.showinfo("Information", "Envoie effectue")
+
     def new_entry(self):
         self.destroy()
         creation_gui().mainloop()
@@ -313,7 +316,7 @@ class creation_gui(tk.Frame):
 
             self.database.create_entry("tenant", insert_tenant)
             self.database.create_entry("location", insert_location)
-
+            messagebox.showinfo("Nouvelle Entrée", "Locataire enregistré")
             print(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(), self.villeVar.get(), self.telVar.get(),
                   self.mailVar.get(), self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get())
 
@@ -397,11 +400,10 @@ class modification_gui(tk.Frame):
 
     def createWidgets(self):
         self.tenant_var = tk.StringVar()
-        self.tenant_var.set("nom du locataire")
         self.champs_var = tk.StringVar()
-        self.champs_var.set("champs à modifier")
         self.newval_var = tk.StringVar()
-        self.newval_var.set("nouvelle valeur")
+        # check box
+        ok_format = self.register(self.check_format)
         # widget creation
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
         main_frame.columnconfigure(0, weight=0)
@@ -411,7 +413,7 @@ class modification_gui(tk.Frame):
         nom_label = tk.Label(main_frame, text="champs à modifier")
         nom_entry = tk.Entry(main_frame, textvariable=self.champs_var)
         mod_label = tk.Label(main_frame, text="modification")
-        mod_entry = tk.Entry(main_frame, textvariable=self.newval_var)
+        mod_entry = tk.Entry(main_frame, textvariable=self.newval_var, validatecommand=ok_format, validate='focusout')
 
         button_val = tk.Button(main_frame, text="Appliquer la modification", command=self.mod_entry)
         button_back = tk.Button(main_frame, text="Quitter et revenir", command=self.quit)
@@ -431,11 +433,47 @@ class modification_gui(tk.Frame):
         main_gui().mainloop()
 
     def mod_entry(self):
-        self.database.modif_table(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
+        self.database.modif_table(self.tenant_var.get().lower(), self.champs_var.get().lower(),
+                                  self.newval_var.get().lower())
         print(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
         print("modification effectuée")
 
+    def check_format(self):
+        if self.champs_var.get() == "tel":
+            num = re.sub(r"\D", "", self.newval_var.get())
+            pattern = re.compile(r"^0\d{9}")
+            print(pattern)
+            if re.match(pattern, num):
+                print("Format telephone valide")
+                return True
+            else:
+                print("Format de saisie  telephone incorrect")
+                messagebox.showinfo("Attention", "Saisie incorrect")
+                return False
 
+        elif self.champs_var.get() == "mail":
+            pattern = re.compile(r"^[a-z\d]+@[a-z\d]+.[a-z]+$")
+            if re.match(pattern, self.newval_var.get()):
+                print("Format du mail  correct")
+                return True
+            else:
+                print("Format de saisie incorrect")
+                messagebox.showinfo("Attention", "Saisie incorrect")
+                return False
+
+        elif self.champs_var.get() == "date":
+            pattern = re.compile(
+                r"^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$")
+            if re.match(pattern, self.newval_var.get()):
+                print(" format date compatible")
+                return True
+            else:
+                print("Format de saisie incorrect")
+                messagebox.showinfo("Attention", "Saisie incorrect")
+                return False
+
+        else:
+            return True
 class delete_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
@@ -605,7 +643,7 @@ class config_gui(tk.Frame):
         button_sci = tk.Button(main_frame, text="Gestion sci", command=self.sci)
         button_validation = tk.Button(main_frame, text="Modifier et quitter", command=self.mod_entry)
         button_exit = tk.Button(main_frame, text="Annuler et quitter", command=self.quit)
-        # button  Quitter sans valider
+
 
         # position
         main_frame.grid(column=0, row=0, sticky="NSEW")
@@ -745,9 +783,13 @@ class new_sci_gui(tk.Frame):
                'tel': new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret})
 
         self.database.create_entry("sci", insert_sci)
-        ################################
-        ##rajouter au fichier config""
-        ###############################
+        with open('config.json', 'r') as json_files:
+            config = json.load(json_files)
+        config["sci"].append(self.name_var.get())
+        with open('config.json', 'w') as json_files:
+            json.dump(config, json_files)
+        print("sci rajouter au json")
+        messagebox.showinfo("Attention", "SCI Ajoutée")
 
     def quit(self):
         self.destroy()
@@ -801,7 +843,15 @@ class mod_sci_gui(tk.Frame):
     def mod_sci(self):
         self.database.modif_table(self.sci_var.get(), self.champs_var.get(), self.newval_var.get())
         print(self.sci_var.get(), self.champs_var.get(), self.newval_var.get())
+        with open('config.json', 'r') as json_files:
+            config = json.load(json_files)
+            config['sci'].remove("self.sci_var.get()")
+            config['sci'].append("self.newval_var.get()")
+        with open('config.json', 'w') as json_files:
+            json.dump(config, json_files)
+
         print("modifications effectuées")
+        messagebox.showinfo("Attention", "SCI Ajoutée")
 
     def quit(self):
         self.destroy()
@@ -844,10 +894,13 @@ class del_sci_gui(tk.Frame):
             self.database.delete_entry("sci", self.nom_var.get())
             print("sci", self.nom_var.get())
             print("suppression effectuée")
-
-    ################################
-    ##rajouter au fichier config""
-    ###############################
+        with open('config.json', 'r') as json_files:
+            config = json.load(json_files)
+        config["sci"].remove(self.nom_var.get())
+        with open('config.json', 'w') as json_files:
+            json.dump(config, json_files)
+        print("suppression effectuée")
+        messagebox.showinfo("Attention", "SCI suprimée")
 
     def quit(self):
         self.destroy()
