@@ -10,7 +10,7 @@ d = p / 'tenant_db.db'
 
 if c.exists() == False:
     config = {"master_mail": "", "password": "", "SMTP": "", "port": "", "sci": []}
-    with open('config.json','w') as json_files:
+    with open('config.json', 'w') as json_files:
         json.dump(config, json_files)
     print("création fichier config")
 

@@ -9,12 +9,12 @@ import os
 from reportlab.pdfgen import canvas
 import json
 import re
-
+from tkinter import font as tkFont
 
 class main_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
-        self.master.geometry("800x300")
+        self.master.geometry("850x300")
         self.master.minsize(300, 150)
         self.master.title("Quittances Maker V1.11")
         self.master.columnconfigure(0, weight=1)
@@ -47,15 +47,24 @@ class main_gui(tk.Frame):
         # widgets on the left side
         self.tenant_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Helvetica", 15), width=600, bg="#5472AE",
                                       fg='white')
-        self.tenant_list.insert(0, f"NOM    PRENOM  LOYER   CHARGES     DATE D'ENTREE")
+        self.tenant_list.insert(0, "NOM" + 10 * " " + "PRENOM" + 10 * " " + "LOYER" + 5 * " " + "CHARGES" + 5 * " " +"DATE D'ENTREE")
         for i, nom in enumerate(self.database.elt_table("nom", "tenant")):
             aff_nom = self.database.affichage_table(nom[0])[0][0]
             aff_prenom = self.database.affichage_table(nom[0])[0][1]
             aff_loyer = int(self.database.affichage_table(nom[0])[0][2])
             aff_charges = self.database.affichage_table(nom[0])[0][3]
             aff_date = self.database.affichage_table(nom[0])[0][4]
-            self.tenant_list.insert(i + 1, f"{aff_nom}  {aff_prenom}    {aff_loyer}        {aff_charges}"
-                                           f"               {aff_date}           {self.maj_tenant(nom)}")
+            listFont = tkFont.Font(font=self.tenant_list.cget("font"))
+            spaceLength = listFont.measure(" ")
+
+            align_nom_prenom = int(round(90 / (len(aff_nom) + len(aff_prenom))))
+            align_prenom_loyer = int(round(160 / (len(aff_prenom) + len(str(aff_loyer)))))
+            align_loyer_charges = int(round(35 / len(str(aff_loyer)) + len(str(aff_charges))))
+            align_charges_date = int(round(10 / len(str(aff_charges)) + len(aff_date)))
+            print(align_charges_date)
+            self.tenant_list.insert(i + 1,  aff_nom + align_nom_prenom * " " + aff_prenom + align_prenom_loyer * " " +
+                                    str(aff_loyer) + align_loyer_charges * " " + str(aff_charges) +
+                                    align_charges_date * " " + aff_date + " " + self.maj_tenant(nom))
         # widgets under left
         date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1)
         date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE)
