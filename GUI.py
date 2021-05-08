@@ -16,7 +16,7 @@ class main_gui(tk.Frame):
         tk.Frame.__init__(self)
         self.master.geometry("800x300")
         self.master.minsize(300, 150)
-        self.master.title("Quittances Maker V1.1")
+        self.master.title("Quittances Maker V1.11")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -55,7 +55,7 @@ class main_gui(tk.Frame):
             aff_charges = self.database.affichage_table(nom[0])[0][3]
             aff_date = self.database.affichage_table(nom[0])[0][4]
             self.tenant_list.insert(i + 1, f"{aff_nom}  {aff_prenom}    {aff_loyer}        {aff_charges}"
-                                           f"               {aff_date}          {self.maj_tenant(nom)}")
+                                           f"               {aff_date}           {self.maj_tenant(nom)}")
         # widgets under left
         date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1)
         date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE)
@@ -241,15 +241,16 @@ class creation_gui(tk.Frame):
         tel_entry = tk.Entry(main_frame, textvariable=self.telVar, validatecommand=ok_tel, validate='focusout')
         mail_entry = tk.Entry(main_frame, textvariable=self.mailVar, validatecommand=ok_mail, validate='focusout')
 
-        sci_choise = ttk.Combobox(main_frame, textvariable=self.sciVar)
+        sci_choise = ttk.Combobox(main_frame, textvariable=self.sciVar, state='readonly')
         with open('config.json', 'r') as json_files:
             config = json.load(json_files)
         sci_choise['values'] = config['sci']
+        date_entry = tk.Entry(main_frame, textvariable=self.date_entreeVar, validatecommand=ok_date,
+                              validate='focusout')
         loyer_entry = tk.Entry(main_frame, textvariable=self.loyerVar, validatecommand=ok_loyer, validate='focusout')
         charges_entry = tk.Entry(main_frame, textvariable=self.chargesVar, validatecommand=ok_charge,
                                  validate='focusout')
-        date_entry = tk.Entry(main_frame, textvariable=self.date_entreeVar, validatecommand=ok_date,
-                              validate='focusout')
+
         indice_entry = tk.Entry(main_frame, textvariable=self.indice_base, validatecommand=ok_indice,
                                 validate='focusout')
         selector1 = tk.Radiobutton(main_frame, text="Particulier", variable=self.selectorVar, value=1, bd=2,
@@ -299,6 +300,7 @@ class creation_gui(tk.Frame):
                 or self.indice_base.get() == "":
             print("champs vide")
             messagebox.showinfo("Attention", "un ou plusieurs champs vides")
+
         else:
             client = locataire(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(),
                                self.villeVar.get(), self.telVar.get(), self.mailVar.get(),
@@ -324,9 +326,10 @@ class creation_gui(tk.Frame):
         self.destroy()
         main_gui().mainloop()
 
+
     def verification_mail(self):
 
-        pattern = re.compile(r"^[a-z\d]+@[a-z\d]+.[a-z]+$")
+        pattern = re.compile(r"^[a-z\d].+[a-z]@[a-z\d]+.[a-z]+$")
         if re.match(pattern, self.mailVar.get()):
             print("Format du mail  correct")
             return True
@@ -336,8 +339,8 @@ class creation_gui(tk.Frame):
             return False
 
     def verification_tel(self):
-        num = re.sub(r"\D", "", self.telVar.get())
-        pattern = re.compile(r"^0\d{9}")
+        num = re.sub(r"[^\\+|\d]", "", self.telVar.get())
+        pattern = re.compile(r"^[\\+0][\d]{9,11}")
         print(pattern)
         if re.match(pattern, num):
             print("Format telephone valide")

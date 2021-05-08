@@ -26,7 +26,7 @@ class sci:
 
 class sql_database_init():
     def __init__(self):
-        self.conn = sqlite3.connect("tenatdb.db")
+        self.conn = sqlite3.connect("tenant_db.db")
         self.c = self.conn.cursor()
         self.create_table_sql()
 

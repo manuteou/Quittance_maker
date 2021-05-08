@@ -6,7 +6,7 @@ import json
 # initialisation
 p = Path()
 c = p / 'config.json'
-d = p / 'tenatdb.db'
+d = p / 'tenant_db.db'
 
 if c.exists() == False:
     config = {"master_mail": "", "password": "", "SMTP": "", "port": "", "sci": []}
