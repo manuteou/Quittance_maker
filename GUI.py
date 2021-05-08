@@ -9,7 +9,6 @@ import os
 from reportlab.pdfgen import canvas
 import json
 import re
-from tkinter import font as tkFont
 
 class main_gui(tk.Frame):
     def __init__(self):
@@ -45,23 +44,21 @@ class main_gui(tk.Frame):
         frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE)
         frame3 = tk.Frame(self, main_frame)
         # widgets on the left side
+        self.head_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Helvetica", 15), width=600, height=1, bg="#333366",
+                                      fg='white')
         self.tenant_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Helvetica", 15), width=600, bg="#5472AE",
                                       fg='white')
-        self.tenant_list.insert(0, "NOM" + 10 * " " + "PRENOM" + 10 * " " + "LOYER" + 5 * " " + "CHARGES" + 5 * " " +"DATE D'ENTREE")
+        self.head_list.insert(0, "NOM" + 10 * " " + "PRENOM" + 10 * " " + "LOYER" + 5 * " " + "CHARGES" + 5 * " " +"DATE D'ENTREE")
         for i, nom in enumerate(self.database.elt_table("nom", "tenant")):
             aff_nom = self.database.affichage_table(nom[0])[0][0]
             aff_prenom = self.database.affichage_table(nom[0])[0][1]
             aff_loyer = int(self.database.affichage_table(nom[0])[0][2])
             aff_charges = self.database.affichage_table(nom[0])[0][3]
             aff_date = self.database.affichage_table(nom[0])[0][4]
-            listFont = tkFont.Font(font=self.tenant_list.cget("font"))
-            spaceLength = listFont.measure(" ")
-
             align_nom_prenom = int(round(90 / (len(aff_nom) + len(aff_prenom))))
             align_prenom_loyer = int(round(160 / (len(aff_prenom) + len(str(aff_loyer)))))
             align_loyer_charges = int(round(35 / len(str(aff_loyer)) + len(str(aff_charges))))
             align_charges_date = int(round(10 / len(str(aff_charges)) + len(aff_date)))
-            print(align_charges_date)
             self.tenant_list.insert(i + 1,  aff_nom + align_nom_prenom * " " + aff_prenom + align_prenom_loyer * " " +
                                     str(aff_loyer) + align_loyer_charges * " " + str(aff_charges) +
                                     align_charges_date * " " + aff_date + " " + self.maj_tenant(nom))
@@ -91,7 +88,8 @@ class main_gui(tk.Frame):
         frame2.grid(column=0, row=1, sticky='NSEW')
         frame3.grid(column=1, row=0)
         ##position widgets 1
-        self.tenant_list.grid(column=0, row=0, rowspan=10)
+        self.head_list.grid(column=0, row=0)
+        self.tenant_list.grid(column=0, row=1, rowspan=10)
         ##position widget 2
         date_s_label.grid(column=0, row=0, sticky='NW')
         date_s_entry.grid(column=0, row=0, sticky='NE')
@@ -407,8 +405,9 @@ class modification_gui(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
-        self.createWidgets()
         self.database = sql_database()
+        self.createWidgets()
+
 
     def createWidgets(self):
         self.tenant_var = tk.StringVar()
@@ -421,7 +420,9 @@ class modification_gui(tk.Frame):
         main_frame.columnconfigure(0, weight=0)
         main_frame.columnconfigure(1, weight=1)
         tenant_label = tk.Label(main_frame, text="nom du locataire")
-        tenant_entry = tk.Entry(main_frame, textvariable=self.tenant_var)
+        selec_entry = ttk.Combobox(main_frame, textvariable=self.tenant_var, state='readonly')
+        tenant_list = self.database.elt_table("nom", "tenant")
+        selec_entry['values'] = tenant_list
         nom_label = tk.Label(main_frame, text="champs à modifier")
         nom_entry = tk.Entry(main_frame, textvariable=self.champs_var)
         mod_label = tk.Label(main_frame, text="modification")
@@ -432,7 +433,7 @@ class modification_gui(tk.Frame):
         # widget position
         main_frame.grid(column=0, row=0, sticky="NSEW")
         tenant_label.grid(column=0, row=0, sticky="EW")
-        tenant_entry.grid(column=1, row=0, sticky="EW")
+        selec_entry.grid(column=1, row=0, sticky="EW")
         nom_label.grid(column=0, row=1, sticky="EW")
         nom_entry.grid(column=1, row=1, sticky="EW")
         mod_label.grid(column=0, row=2, sticky="EW")
@@ -495,8 +496,9 @@ class delete_gui(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
-        self.createWidgets()
         self.database = sql_database()
+        self.createWidgets()
+
 
     def createWidgets(self):
         # variable creation
@@ -507,13 +509,15 @@ class delete_gui(tk.Frame):
         main_frame.columnconfigure(0, weight=0)
         main_frame.columnconfigure(1, weight=1)
         nom_label = tk.Label(main_frame, text="Nom du loctaire")
-        nom_entry = tk.Entry(main_frame, textvariable=self.nom_var)
+        selec_entry = ttk.Combobox(main_frame, textvariable=self.nom_var, state='readonly')
+        list_tenant = self.database.elt_table("nom", "tenant")
+        selec_entry['values'] = list_tenant
         button_val = tk.Button(main_frame, text="Supprimer et revenir", command=self.del_entry)
         button_back = tk.Button(main_frame, text="Quitter et revenir", command=self.quit)
         # widget position
         main_frame.grid(column=0, row=0, sticky="NSEW")
         nom_label.grid(column=0, row=0, sticky="EW")
-        nom_entry.grid(column=1, row=0, sticky="EW")
+        selec_entry.grid(column=1, row=0, sticky="EW")
         button_val.grid(column=1, row=1, sticky="NSEW")
         button_back.grid(column=0, row=1, sticky="NSEW")
 
@@ -522,6 +526,7 @@ class delete_gui(tk.Frame):
             self.database.delete_entry("tenant", self.nom_var.get())
             self.database.delete_entry("location", self.nom_var.get())
             print("suppression effectuée")
+            messagebox.showinfo("Attention", "Supression effectuée")
             self.destroy()
             main_gui().mainloop()
 
@@ -820,6 +825,8 @@ class mod_sci_gui(tk.Frame):
         self.database = sql_database()
         self.createWidgets()
 
+
+
     def createWidgets(self):
         self.sci_var = tk.StringVar()
         self.sci_var.set("nom de la sci à modifier")
@@ -832,7 +839,9 @@ class mod_sci_gui(tk.Frame):
         main_frame.columnconfigure(0, weight=0)
         main_frame.columnconfigure(1, weight=1)
         sci_label = tk.Label(main_frame, text="sci")
-        sci_entry = tk.Entry(main_frame, textvariable=self.sci_var)
+        selec_entry = ttk.Combobox(main_frame, textvariable=self.sci_var, state='readonly')
+        sci_list = self.database.elt_table("nom", "sci")
+        selec_entry['values'] = sci_list
         champs_label = tk.Label(main_frame, text="champs à modifier")
         champs_entry = tk.Entry(main_frame, textvariable=self.champs_var)
         mod_label = tk.Label(main_frame, text="modification")
@@ -844,7 +853,7 @@ class mod_sci_gui(tk.Frame):
         main_frame.grid(column=0, row=0, sticky="NSEW")
         main_frame.grid(column=0, row=0, sticky="NSEW")
         sci_label.grid(column=0, row=0, sticky="EW")
-        sci_entry.grid(column=1, row=0, sticky="EW")
+        selec_entry.grid(column=1, row=0, sticky="EW")
         champs_label.grid(column=0, row=1, sticky="EW")
         champs_entry.grid(column=1, row=1, sticky="EW")
         mod_label.grid(column=0, row=2, sticky="EW")
@@ -873,14 +882,15 @@ class mod_sci_gui(tk.Frame):
 class del_sci_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
-        self.master.title("Supression de locataire")
+        self.master.title("Supression SCI")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
-        self.createWidgets()
         self.database = sql_database()
+        self.createWidgets()
+
 
     def createWidgets(self):
         # variable creation
@@ -891,13 +901,15 @@ class del_sci_gui(tk.Frame):
         main_frame.columnconfigure(0, weight=0)
         main_frame.columnconfigure(1, weight=1)
         nom_label = tk.Label(main_frame, text="Nom de la sci")
-        nom_entry = tk.Entry(main_frame, textvariable=self.nom_var)
+        selec_entry = ttk.Combobox(main_frame, textvariable=self.nom_var, state='readonly')
+        sci_list = self.database.elt_table("nom", "sci")
+        selec_entry['values'] = sci_list
         boutton_add = tk.Button(main_frame, text="Supprimer", command=self.del_entry)
         boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
         # widget position
         main_frame.grid(column=0, row=0, sticky="NSEW")
         nom_label.grid(column=0, row=0, sticky="EW")
-        nom_entry.grid(column=1, row=0, sticky="EW")
+        selec_entry.grid(column=1, row=0, sticky="EW")
         boutton_add.grid(column=0, row=6, sticky="NSEW")
         boutton_quitter.grid(column=1, row=6, sticky="NSEW")
 
