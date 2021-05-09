@@ -367,19 +367,19 @@ class creation_gui(tk.Frame):
             return True
         else:
             print("Format de saisie incorrect")
-            messagebox.showinfo("Attention", "Saisie incorrect")
+            messagebox.showinfo("Mail", "Saisie incorrect")
             return False
 
     def verification_tel(self):
         num = re.sub(r"[^\\+|\d]", "", self.telVar.get())
-        pattern = re.compile(r"^[\\+0][\d]{9,11}")
+        pattern = re.compile(r"(\+33|^0)\d{9}$")
         print(pattern)
         if re.match(pattern, num):
             print("Format telephone valide")
             return True
         else:
             print("Format de saisie  telephone incorrect")
-            messagebox.showinfo("Attention", "Saisie incorrect")
+            messagebox.showinfo("Telephone", "Saisie incorrect")
             return False
 
     def verification_date(self):
@@ -390,13 +390,13 @@ class creation_gui(tk.Frame):
             return True
         else:
             print("Format de saisie incorrect")
-            messagebox.showinfo("Attention", "Saisie incorrect")
+            messagebox.showinfo("Date", "Saisie incorrect")
             return False
 
     def verification_loyer(self):
         if isinstance(self.loyerVar.get(), str):
             print("valeur incorrect")
-            messagebox.showinfo("Attention", "Saisie incorrect")
+            messagebox.showinfo("Loyer", "Saisie incorrect")
             return False
         else:
             print("(loyer) format saisie correct")
@@ -405,7 +405,7 @@ class creation_gui(tk.Frame):
     def verification_charges(self):
         if isinstance(self.chargesVar.get(), str):
             print("valeur incorrect")
-            messagebox.showinfo("Attention", "Saisie incorrect")
+            messagebox.showinfo("Charges", "Saisie incorrect")
             return False
         else:
             print("(saisie) format saisie correct")
@@ -414,7 +414,7 @@ class creation_gui(tk.Frame):
     def verification_indice(self):
         if isinstance(self.indice_base.get(), str):
             print("valeur incorrect")
-            messagebox.showinfo("Attention", "Saisie incorrect")
+            messagebox.showinfo("Indice", "Saisie incorrect")
             return False
         else:
             print("(indice) format saisie correct")
@@ -484,14 +484,14 @@ class modification_gui(tk.Frame):
     def check_format(self):
         if self.champs_var.get() == "tel":
             num = re.sub(r"\D", "", self.newval_var.get())
-            pattern = re.compile(r"^0\d{9}")
+            pattern = re.compile(r"(\+33|^0)\d{9}$")
             print(pattern)
             if re.match(pattern, num):
                 print("Format telephone valide")
                 return True
             else:
                 print("Format de saisie  telephone incorrect")
-                messagebox.showinfo("Attention", "Saisie incorrect")
+                messagebox.showinfo("Telephone", "Saisie incorrect")
                 return False
 
         elif self.champs_var.get() == "mail":
@@ -501,7 +501,7 @@ class modification_gui(tk.Frame):
                 return True
             else:
                 print("Format de saisie incorrect")
-                messagebox.showinfo("Attention", "Saisie incorrect")
+                messagebox.showinfo("mail", "Saisie incorrect")
                 return False
 
         elif self.champs_var.get() == "date":
@@ -512,7 +512,7 @@ class modification_gui(tk.Frame):
                 return True
             else:
                 print("Format de saisie incorrect")
-                messagebox.showinfo("Attention", "Saisie incorrect")
+                messagebox.showinfo("date", "Saisie incorrect")
                 return False
 
         else:
