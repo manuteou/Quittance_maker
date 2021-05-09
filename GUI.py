@@ -14,9 +14,9 @@ from pathlib import Path
 class main_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
-        self.master.geometry("850x300")
+        self.master.geometry("850x350")
         self.master.minsize(300, 150)
-        self.master.title("Quittances Maker V1.2")
+        self.master.title("Quittances Maker V1.4")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -84,6 +84,8 @@ class main_gui(tk.Frame):
                                command=self.del_entry)
         button_rent_maj = tk.Button(frame3, text='MAJ LOYER', borderwidth=2, relief=tk.GROOVE,
                                     command=self.maj_rent)
+        button_sci = tk.Button(frame3, text="Gestion SCI", borderwidth=2, relief=tk.GROOVE,
+                               command=self.config_sci)
         # widgets' position
         frame1.grid(column=0, row=0, sticky='NSEW')
         frame2.grid(column=0, row=1, sticky='NSEW')
@@ -98,14 +100,15 @@ class main_gui(tk.Frame):
         button_selection.grid(column=0, row=9, sticky='NSEW')
         ##position widgets3
         button_config.grid(column=0, row=0, sticky='NSEW')
-        button_rent_maj.grid(column=0, row=2, sticky='NSEW')
+        button_rent_maj.grid(column=0, row=3, sticky='NSEW')
         button_blk0.grid(column=0, row=1, sticky='NSEW')
-        button_blk1.grid(column=0, row=3, sticky='NSEW')
-        button_info.grid(column=0, row=4, sticky='NSEW')
-        button_blk2.grid(column=0, row=5, sticky='NSEW')
-        button_new.grid(column=0, row=6, sticky='NSEW')
-        button_modify.grid(column=0, row=7, sticky='NSEW')
-        button_del.grid(column=0, row=8, sticky='NSEW')
+        button_blk1.grid(column=0, row=4, sticky='NSEW')
+        button_info.grid(column=0, row=5, sticky='NSEW')
+        button_blk2.grid(column=0, row=6, sticky='NSEW')
+        button_new.grid(column=0, row=7, sticky='NSEW')
+        button_modify.grid(column=0, row=8, sticky='NSEW')
+        button_del.grid(column=0, row=9, sticky='NSEW')
+        button_sci.grid(column=0, row=1, sticky='NSEW')
 
     def validation_button_all(self):
         print("debut de l'envoie pour tous")
@@ -207,6 +210,10 @@ class main_gui(tk.Frame):
             return "MAJ Loyer"
         else:
             return ""
+
+    def config_sci(self):
+        self.destroy()
+        gestion_sci().mainloop()
 
 
 class creation_gui(tk.Frame):
@@ -681,9 +688,8 @@ class config_gui(tk.Frame):
         smtp_entry = tk.Entry(main_frame, textvariable=self.smtp_var)
         port_label = tk.Label(main_frame, text="port")
         port_entry = tk.Entry(main_frame, textvariable=self.port_var)
-        button_sci = tk.Button(main_frame, text="Gestion sci", command=self.sci)
-        button_validation = tk.Button(main_frame, text="Modifier et quitter", command=self.mod_entry)
-        button_exit = tk.Button(main_frame, text="Annuler et quitter", command=self.quit)
+        button_validation = tk.Button(main_frame, text="Appliquer les modification", command=self.mod_entry)
+        button_exit = tk.Button(main_frame, text="Quitter", command=self.quit)
 
 
         # position
@@ -696,7 +702,6 @@ class config_gui(tk.Frame):
         smtp_entry.grid(column=2, row=1, sticky="NSEW")
         port_label.grid(column=3, row=0, sticky="NSEW")
         port_entry.grid(column=3, row=1, sticky="NSEW")
-        button_sci.grid(column=3, row=2, sticky="NSEW")
         button_validation.grid(column=0, row=3, sticky="NSEW")
         button_exit.grid(column=0, row=4, sticky="NSEW")
 
@@ -712,13 +717,7 @@ class config_gui(tk.Frame):
         with open('config.json', 'w') as json_files:
             json.dump(self.config, json_files)
         print("mise à jour du fichier config")
-        self.destroy()
-        main_gui().mainloop()
-
-    def sci(self):
-        self.destroy()
-        gestion_sci().mainloop()
-
+        messagebox.showinfo("Information", "Modification(s) effectuée(s)")
 
 class gestion_sci(tk.Frame):
     def __init__(self):
@@ -756,7 +755,7 @@ class gestion_sci(tk.Frame):
 
     def quit(self):
         self.destroy()
-        config_gui().mainloop()
+        main_gui().mainloop()
 
 
 class new_sci_gui(tk.Frame):
