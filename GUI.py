@@ -15,7 +15,7 @@ class main_gui(tk.Frame):
         tk.Frame.__init__(self)
         self.master.geometry("850x300")
         self.master.minsize(300, 150)
-        self.master.title("Quittances Maker V1.11")
+        self.master.title("Quittances Maker V1.12")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -424,7 +424,12 @@ class modification_gui(tk.Frame):
         tenant_list = self.database.elt_table("nom", "tenant")
         selec_entry['values'] = tenant_list
         nom_label = tk.Label(main_frame, text="champs à modifier")
-        nom_entry = tk.Entry(main_frame, textvariable=self.champs_var)
+
+        champs_entry = ttk.Combobox(main_frame, textvariable=self.champs_var, state='readonly')
+        champs_list = ["nom", "prenom", "adresse", "cp_ville", "tel", "mail", "cat", "sci", "loyer",
+                       "charges", "indice de base"]
+        champs_entry['values'] = champs_list
+
         mod_label = tk.Label(main_frame, text="modification")
         mod_entry = tk.Entry(main_frame, textvariable=self.newval_var, validatecommand=ok_format, validate='focusout')
 
@@ -435,11 +440,11 @@ class modification_gui(tk.Frame):
         tenant_label.grid(column=0, row=0, sticky="EW")
         selec_entry.grid(column=1, row=0, sticky="EW")
         nom_label.grid(column=0, row=1, sticky="EW")
-        nom_entry.grid(column=1, row=1, sticky="EW")
-        mod_label.grid(column=0, row=2, sticky="EW")
-        mod_entry.grid(column=1, row=2, sticky="EW")
-        button_val.grid(column=1, row=3, sticky="NSEW")
-        button_back.grid(column=0, row=3, sticky="NSEW")
+        champs_entry.grid(column=1, row=1, sticky="EW")
+        mod_label.grid(column=0, row=3, sticky="EW")
+        mod_entry.grid(column=1, row=3, sticky="EW")
+        button_val.grid(column=1, row=4, sticky="NSEW")
+        button_back.grid(column=0, row=4, sticky="NSEW")
 
     def quit(self):
         self.destroy()
@@ -487,6 +492,7 @@ class modification_gui(tk.Frame):
 
         else:
             return True
+
 class delete_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
@@ -572,7 +578,7 @@ class info_gui(tk.Frame):
 class maj_rent_gui(tk.Frame):
     def __init__(self, value):
         tk.Frame.__init__(self)
-        self.master.title("MAJ rent")
+        self.master.title("MAJ Loyer")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -738,7 +744,7 @@ class gestion_sci(tk.Frame):
 class new_sci_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
-        self.master.title("New sci")
+        self.master.title("Nouvelle sci")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -816,7 +822,7 @@ class new_sci_gui(tk.Frame):
 class mod_sci_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
-        self.master.title("New sci")
+        self.master.title("Modification sci")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -843,7 +849,10 @@ class mod_sci_gui(tk.Frame):
         sci_list = self.database.elt_table("nom", "sci")
         selec_entry['values'] = sci_list
         champs_label = tk.Label(main_frame, text="champs à modifier")
-        champs_entry = tk.Entry(main_frame, textvariable=self.champs_var)
+        champs_entry = ttk.Combobox(main_frame, textvariable=self.champs_var, state='readonly')
+        champs_list = ['nom', 'adresse', 'cp_ville', 'tel', 'mail', 'siret']
+        champs_entry['values'] = champs_list
+        selec_entry['values'] = sci_list
         mod_label = tk.Label(main_frame, text="modification")
         mod_entry = tk.Entry(main_frame, textvariable=self.newval_var)
 

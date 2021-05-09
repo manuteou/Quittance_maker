@@ -68,7 +68,7 @@ class sql_database_init():
 
 class sql_database():
     def __init__(self):
-        self.conn = sqlite3.connect("tenatdb.db")
+        self.conn = sqlite3.connect("tenant_db.db")
         self.c = self.conn.cursor()
 
     def create_entry(self, table, insert: dict):
