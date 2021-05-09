@@ -7,6 +7,7 @@ import json
 p = Path()
 c = p / 'config.json'
 d = p / 'tenant_db.db'
+m = p / 'message.txt'
 
 if c.exists() == False:
     config = {"master_mail": "", "password": "", "SMTP": "", "port": "", "sci": []}
@@ -18,6 +19,11 @@ if c.exists() == False:
 if d.exists() == False:
     print("création base de données")
     sql_database_init()
+
+if m.exists() == False:
+    text = 'Bonjour ci-joint la quittance de loyer'
+    with open('message.txt', 'w') as text_file:
+        text_file.write(text)
 
 # GUI launch
 main_gui().mainloop()

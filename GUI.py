@@ -5,17 +5,18 @@ from locataire import locataire, sql_database, sci
 from pdf_generator import pdf_generator, make_directories
 from mail_sender import send_mail
 from tkinter import messagebox
-import os
+import sys
 from reportlab.pdfgen import canvas
 import json
 import re
+from pathlib import Path
 
 class main_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.geometry("850x300")
         self.master.minsize(300, 150)
-        self.master.title("Quittances Maker V1.12")
+        self.master.title("Quittances Maker V1.2")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -110,15 +111,24 @@ class main_gui(tk.Frame):
         print("debut de l'envoie pour tous")
         day, month, year = self.date_s.get().split("/")
         make_directories(year, month)
-        directory = os.path.dirname(__file__)
+        if getattr(sys, 'frozen', False):
+            directory = Path(sys.executable).parent
+        else:
+            directory = Path(__file__).parent
+        print(directory)
+        #directory = os.path.dirname(__file__)
         with open("config.json", "r") as json_file:
             config = json.load(json_file)
         for elt in self.database.pdf_table():
             #print(elt)
             nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, \
             sci_cp_ville, sci_tel, sci_mail, sci_siret = elt
-            path = directory + "\\" + sci_nom + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
-            pdf = canvas.Canvas(path)
+            path_dir = directory.joinpath(sci_nom, year, month)
+            print(path_dir)
+            path_dir.mkdir(parents=True, exist_ok=True)
+            path = path_dir.joinpath(nom + ".pdf")
+            print(path)
+            pdf = canvas.Canvas(str(path))
             pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, loyer, charges, day, month, year, cat,
                                     sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret)
             pdf_gen.generator()
@@ -138,15 +148,23 @@ class main_gui(tk.Frame):
         print(f"""debut de l"envoie pour {(value.split(" ")[0])}""")
         day, month, year = self.date_s.get().split("/")
         make_directories(year, month)
-        directory = os.path.dirname(__file__)
+        if getattr(sys, 'frozen', False):
+            directory = Path(sys.executable).parent
+        else:
+            directory = Path(__file__).parent
+        print(directory)
         with open("config.json", "r") as json_file:
             config = json.load(json_file)
-
+        print(self.database.pdf_table_single(f'{value.split(" ")[0]}'))
         nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, sci_cp_ville, sci_tel, \
         sci_mail, sci_siret = self.database.pdf_table_single(f'{value.split(" ")[0]}')[0]
-        path = directory + "\\" + sci_nom + "\\" + year + "\\" + month + "\\" + nom + ".pdf"
+        path_dir = directory.joinpath(sci_nom, year, month)
+        print(path_dir)
+        path_dir.mkdir(parents=True, exist_ok=True)
+        path = path_dir.joinpath(nom + ".pdf")
+
         print(path)
-        pdf = canvas.Canvas(path)
+        pdf = canvas.Canvas(str(path))
         pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, loyer, charges, day, month, year, cat,
                                 sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret)
         print(f"Quittance {nom} ----> crée")
@@ -315,10 +333,10 @@ class creation_gui(tk.Frame):
                                self.selectorVar.get(), self.date_entreeVar.get(), self.indice_base.get())
 
             insert_tenant = {'nom': client.nom.lower(), 'prenom': client.prenom.lower(), 'adresse': client.adresse.lower(),
-                             'CP_ville': client.cp_ville.lower(), 'tel': client.tel, 'mail': client.mail.lower(),
+                             'CP_ville': client.cp_ville.upper(), 'tel': client.tel, 'mail': client.mail.lower(),
                              'cat': client.cat}
 
-            insert_location = {'SCI': client.sci.lower(), 'nom': client.nom.lower(), 'type': client.cat,
+            insert_location = {'SCI': client.sci.upper(), 'nom': client.nom.lower(), 'type': client.cat,
                                'loyer': client.loyer,
                                'charges': client.charges, 'date_entree': client.date_entree,
                                'indice_base': client.base_indice}
@@ -796,7 +814,7 @@ class new_sci_gui(tk.Frame):
         boutton_quitter.grid(column=1, row=6, sticky="NSEW")
 
     def add_sci(self):
-        new_sci = sci(self.name_var.get(), self.adresse_var.get(), self.city_var.get(),
+        new_sci = sci(self.name_var.get().upper(), self.adresse_var.get(), self.city_var.get(),
                       self.tel_var.get(), self.mail_var.get(), self.siret_var.get())
 
         insert_sci = {'nom': new_sci.nom, 'adresse': new_sci.adresse, 'cp_ville': new_sci.cp_ville,
