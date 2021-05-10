@@ -47,7 +47,7 @@ class main_gui(tk.Frame):
                                       fg='white')
         self.tenant_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Helvetica", 15), width=600, bg="#5472AE",
                                       fg='white')
-        self.head_list.insert(0, "NOM" + 10 * " " + "PRENOM" + 10 * " " + "LOYER" + 5 * " " + "CHARGES" + 5 * " " +"DATE D'ENTREE")
+        self.head_list.insert(0, 5 * " " + "NOM" + 10 * " " + "PRENOM" + 10 * " " + "LOYER" + 5 * " " + "CHARGES" + 5 * " " +"DATE D'ENTREE")
         for i, nom in enumerate(self.database.elt_table("nom", "tenant")):
             aff_nom = self.database.affichage_table(nom[0])[0][0]
             aff_prenom = self.database.affichage_table(nom[0])[0][1]
@@ -55,8 +55,8 @@ class main_gui(tk.Frame):
             aff_charges = self.database.affichage_table(nom[0])[0][3]
             aff_date = self.database.affichage_table(nom[0])[0][4]
             align_nom_prenom = int(round(150 / (len(aff_nom) + len(aff_prenom))))
-            align_prenom_loyer = int(round(160 / (len(aff_prenom) + len(str(aff_loyer)))))
-            align_loyer_charges = int(round(35 / len(str(aff_loyer)) + len(str(aff_charges))))
+            align_prenom_loyer = int(round(130 / (len(aff_prenom) + len(str(aff_loyer)))))
+            align_loyer_charges = int(round(30 / len(str(aff_loyer)) + len(str(aff_charges))))
             align_charges_date = int(round(10 / len(str(aff_charges)) + len(aff_date)))
             self.tenant_list.insert(i + 1,  aff_nom + align_nom_prenom * " " + aff_prenom + align_prenom_loyer * " " +
                                     str(aff_loyer) + align_loyer_charges * " " + str(aff_charges) +
@@ -177,8 +177,14 @@ class main_gui(tk.Frame):
         messagebox.showinfo("Information", "Envoie effectue")
 
     def new_entry(self):
-        self.destroy()
-        creation_gui().mainloop()
+        with open('config.json', 'r') as json_files:
+            config = json.load(json_files)
+        if config['sci'] == []:
+            messagebox.showinfo("Attention", "Renseigner un SCI, avant de pouvoir acceder à ce menu")
+            pass
+        else:
+            self.destroy()
+            creation_gui().mainloop()
 
     def modify_entry(self):
         self.destroy()
@@ -329,7 +335,8 @@ class creation_gui(tk.Frame):
             or self.sciVar.get() == "" or self.loyerVar.get() == ""or self.chargesVar.get() == ""\
                 or self.indice_base.get() == "":
             print("champs vide")
-            messagebox.showinfo("Attention", "un ou plusieurs champs vides")
+            messagebox.showinfo("Attention", "un ou plusieurs champs vides, validation impossible")
+            pass
 
         else:
             client = locataire(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(),
@@ -337,11 +344,11 @@ class creation_gui(tk.Frame):
                                self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get(),
                                self.selectorVar.get(), self.date_entreeVar.get(), self.indice_base.get())
 
-            insert_tenant = {'nom': client.nom.lower(), 'prenom': client.prenom.lower(), 'adresse': client.adresse.lower(),
-                             'CP_ville': client.cp_ville.upper(), 'tel': client.tel, 'mail': client.mail.lower(),
+            insert_tenant = {'nom': client.nom, 'prenom': client.prenom, 'adresse': client.adresse,
+                             'CP_ville': client.cp_ville, 'tel': client.tel, 'mail': client.mail.lower(),
                              'cat': client.cat}
 
-            insert_location = {'SCI': client.sci.upper(), 'nom': client.nom.lower(), 'type': client.cat,
+            insert_location = {'SCI': client.sci.upper(), 'nom': client.nom, 'type': client.cat,
                                'loyer': client.loyer,
                                'charges': client.charges, 'date_entree': client.date_entree,
                                'indice_base': client.base_indice}
@@ -474,8 +481,8 @@ class modification_gui(tk.Frame):
         main_gui().mainloop()
 
     def mod_entry(self):
-        self.database.modif_table(self.tenant_var.get().lower(), self.champs_var.get().lower(),
-                                  self.newval_var.get().lower())
+        self.database.modif_table(self.tenant_var.get(), self.champs_var.get(),
+                                  self.newval_var.get())
         print(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
         print("modification effectuée")
 
