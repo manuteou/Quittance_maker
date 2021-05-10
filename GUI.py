@@ -443,6 +443,10 @@ class modification_gui(tk.Frame):
         self.tenant_var = tk.StringVar()
         self.champs_var = tk.StringVar()
         self.newval_var = tk.StringVar()
+        self.old_var = tk.StringVar()
+        self.old_var.set("En Attente de la selection")
+        #tracing
+        self.champs_var.trace("w", self.observer)
         # check box
         ok_format = self.register(self.check_format)
         # widget creation
@@ -459,7 +463,8 @@ class modification_gui(tk.Frame):
         champs_list = ["nom", "prenom", "adresse", "cp_ville", "tel", "mail", "cat", "sci", "loyer",
                        "charges", "indice de base"]
         champs_entry['values'] = champs_list
-
+        old_label = tk.Label(main_frame, text="Valeur actuelle")
+        old_data = tk.Label(main_frame, textvariable=self.old_var)
         mod_label = tk.Label(main_frame, text="modification")
         mod_entry = tk.Entry(main_frame, textvariable=self.newval_var, validatecommand=ok_format, validate='focusout')
 
@@ -473,8 +478,21 @@ class modification_gui(tk.Frame):
         champs_entry.grid(column=1, row=1, sticky="EW")
         mod_label.grid(column=0, row=3, sticky="EW")
         mod_entry.grid(column=1, row=3, sticky="EW")
-        button_val.grid(column=1, row=4, sticky="NSEW")
-        button_back.grid(column=0, row=4, sticky="NSEW")
+        old_label.grid(column=0, row=4, sticky="EW")
+        old_data.grid(column=1, row=4, sticky="EW")
+        button_val.grid(column=1, row=5, sticky="NSEW")
+        button_back.grid(column=0, row=5, sticky="NSEW")
+
+    def observer(self, *args):
+        watch = self.champs_var.get()
+        nom, prenom, adresse, cp_ville, loyer, charges, mail, cat, sci, _, _, _, _, _ = self.database.pdf_table_single(self.tenant_var.get())[0]
+        tel = self.database.one_elt("tel", "tenant", self.tenant_var.get())
+        mail = self.database.one_elt("mail", "tenant", self.tenant_var.get())
+        value = {"nom": nom, "prenom": prenom, "adresse": adresse, "cp_ville": cp_ville, "tel": tel, "mail": mail,
+                 "cat": cat, "sci": sci, "loyer": loyer, "charges": charges, "indice de base": "test"}
+        self.old_var.set(value[watch])
+
+
 
     def quit(self):
         self.destroy()

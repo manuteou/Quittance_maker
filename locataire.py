@@ -114,6 +114,13 @@ class sql_database():
         elt = self.c.fetchall()
         return elt
 
+    def one_elt(self, elt, table, champs):
+        sql_elt_table = f"""SELECT {elt} FROM {table} 
+                            WHERE nom = "{champs}";"""
+        self.c.execute(sql_elt_table)
+        elt = self.c.fetchall()
+        return elt
+
     def pdf_table(self):
         sql_pdf_table = f"""SELECT t.nom, prenom, t.adresse, t.cp_ville, loyer, charges, t.mail, cat, s.nom, 
                             s.adresse, s.cp_ville, s.tel, s.mail, s.siret
@@ -151,6 +158,7 @@ class sql_database():
         affichage_table = self.c.fetchall()
         return affichage_table
 
+
     def modif_table(self, nom, champs, valeur):
         if (champs == 'loyer') or (champs == 'charges'):
             table = "location"
@@ -172,6 +180,7 @@ class sql_database():
                     pass
         self.c.execute(sql_table_modif)
         self.conn.commit()
+
 
 if __name__ == "__main__":
 
