@@ -5,10 +5,8 @@ from locataire import locataire, sql_database, sci
 from pdf_generator import pdf_generator, make_directories
 from mail_sender import send_mail
 from tkinter import messagebox
-import sys
+import sys, json, re
 from reportlab.pdfgen import canvas
-import json
-import re
 from pathlib import Path
 
 class main_gui(tk.Frame):
@@ -56,7 +54,7 @@ class main_gui(tk.Frame):
             aff_loyer = int(self.database.affichage_table(nom[0])[0][2])
             aff_charges = self.database.affichage_table(nom[0])[0][3]
             aff_date = self.database.affichage_table(nom[0])[0][4]
-            align_nom_prenom = int(round(90 / (len(aff_nom) + len(aff_prenom))))
+            align_nom_prenom = int(round(150 / (len(aff_nom) + len(aff_prenom))))
             align_prenom_loyer = int(round(160 / (len(aff_prenom) + len(str(aff_loyer)))))
             align_loyer_charges = int(round(35 / len(str(aff_loyer)) + len(str(aff_charges))))
             align_charges_date = int(round(10 / len(str(aff_charges)) + len(aff_date)))

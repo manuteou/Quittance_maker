@@ -34,7 +34,7 @@ class sql_database_init():
         sql_create_tenant_table = """ CREATE TABLE IF NOT EXISTS tenant(
                id INTEGER PRIMARY KEY,
                nom TEXT NOT NULL,
-               prenom TEXT NOT NULL,
+               prenom TEXT,
                adresse TEXT NOT NULL,
                cp_ville TEXT NOT NULL,
                tel TEXT NOT NULL,

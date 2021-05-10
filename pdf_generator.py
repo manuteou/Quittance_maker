@@ -1,5 +1,5 @@
-
 from locataire import sql_database
+from pathlib import Path
 import os
 
 
@@ -33,30 +33,41 @@ class pdf_generator():
         self.database = sql_database()
 
     def generator(self):
+        self.pdf.setFont("Helvetica", 15)
+
         if self.cat == 1:  # habitation case
             # Coordonnées de la SCI
             self.pdf.drawString(20, 800, f"{self.sci_nom}")  # colon, row ( 0 down / 800 up) ( 0 left / 600 right)
             self.pdf.drawString(20, 785, f"{self.sci_adresse}")
             self.pdf.drawString(20, 770, f"{self.sci_cp_ville}")
             self.pdf.drawString(20, 755, f"{self.sci_tel}")
-            self.pdf.drawString(20, 740, f"{self.sci_tel}")
-            self.pdf.drawString(20, 725, f"SIRET : {self.sci_siret}")
+            self.pdf.drawString(20, 740, f"{self.sci_siret}")
             # Coordonnées du locataire
             self.pdf.drawString(350, 700, f"{self.nom} {self.prenom}")
             self.pdf.drawString(350, 685, f"{self.adresse}")
             self.pdf.drawString(350, 670, f"{self.ville}")
             # Date
-            self.pdf.drawString(350, 600, f"A LIEU le {self.day}/{self.month}/{self.year}")
+            self.pdf.drawString(350, 600, f"A {self.ville.split()[1]} le {self.day}/{self.month}/{self.year}")
             # corps
+            self.pdf.drawCentredString(160, 613, "QUITTANCE DE LOYER")
             self.pdf.drawString(150, 550,
-                                f"Quittance de loyer pour le mois de {self.month_list[int(self.month)]} {self.year}")
-            self.pdf.drawString(150, 500, "Montant hors charges")
-            self.pdf.drawString(350, 500, f"{self.loyer} €")
-            self.pdf.drawString(150, 485, "Charges")
-            self.pdf.drawString(357, 485, f"{self.charge} €")
-            self.pdf.drawString(150, 450, "Total")
-            self.pdf.drawString(350, 450, f"{int(self.loyer) + int(self.charge)} €")
-
+                                f"Loyer pour le mois de {self.month_list[int(self.month)]} {self.year}")
+            self.pdf.drawString(140, 450, "Loyer")
+            self.pdf.drawString(340, 450, f"{self.loyer} €")
+            self.pdf.drawString(140, 420, "Provision pour charges")
+            self.pdf.drawString(340, 420, f"{self.charge} €")
+            self.pdf.drawString(140, 400, "Total")
+            self.pdf.drawString(340, 400, f"{int(self.loyer) + int(self.charge)} €")
+            # graphic elements
+            self.pdf.line(10, 630, 590, 630)
+            self.pdf.line(10, 595, 590, 595)
+            self.pdf.line(10, 630, 10, 595)
+            self.pdf.line(590, 630, 590, 595)
+            p = Path()
+            s = p / 'sign.PNG'
+            if s.exists() == True:
+                self.pdf.drawImage("sign.PNG", 350, 80, width=120, height=120)
+            # ending
             self.pdf.showPage()
             self.pdf.save()
 
@@ -66,34 +77,45 @@ class pdf_generator():
             self.pdf.drawString(20, 785, f"{self.sci_adresse}")
             self.pdf.drawString(20, 770, f"{self.sci_cp_ville}")
             self.pdf.drawString(20, 755, f"{self.sci_tel}")
-            self.pdf.drawString(20, 740, f"{self.sci_tel}")
-            self.pdf.drawString(20, 725, f"{self.sci_siret}")
+            self.pdf.drawString(20, 740, f"{self.sci_siret}")
             # Coordonnées du locataire
             self.pdf.drawString(350, 700, f"{self.nom} {self.prenom}")
             self.pdf.drawString(350, 685, f"{self.adresse}")
             self.pdf.drawString(350, 670, f"{self.ville}")
             # Date
-            self.pdf.drawString(350, 600, f"A LIEU le {self.day}/{self.month}/{self.year}")
+            self.pdf.drawString(350, 600, f"A {self.ville.split()[1]} le {self.day}/{self.month}/{self.year}")
             # corps
+            self.pdf.drawCentredString(160, 613, "QUITTANCE DE LOYER")
             self.pdf.drawString(150, 570, f"FACTURE N° {self.month}/{self.year}")
             self.pdf.drawString(150, 550,
-                                f"Quittance de loyer pour le mois de {self.month_list[int(self.month)]} {self.year}")
+                                f"Loyer pour le mois de {self.month_list[int(self.month)]} {self.year}")
 
-            self.pdf.drawString(150, 500, "Montant hors charges")
-            self.pdf.drawString(350, 500, f"{self.loyer} €")
+            self.pdf.drawString(150, 500, "Loyer hors charges")
+            self.pdf.drawString(350, 500, f"{int(self.loyer / 1.20)} €")
 
             self.pdf.drawString(150, 485, "TVA 20.00 %")
-            self.pdf.drawString(357, 485, f"{float(self.loyer) * 1.20 - float(self.loyer)} €")
+            self.pdf.drawString(357, 485, f"{int(float(self.loyer) * 1.20 - float(self.loyer))} €")
 
-            self.pdf.drawString(150, 460, "Charges")
+            self.pdf.drawString(150, 460, "Provision pour charges")
             self.pdf.drawString(357, 460, f"{self.charge} €")
 
             self.pdf.drawString(150, 445, "Montant TTC")
             self.pdf.drawString(350, 445, f"{int(self.loyer) + int(self.charge)} €")
 
-            self.pdf.drawString(150, 420, "Rest à payer")
-            self.pdf.drawString(350, 420, f"{float(self.loyer) * 1.20 + float(self.charge)} €")
+            self.pdf.drawString(150, 420, "Reste à payer")
+            self.pdf.drawString(350, 420, f"{int(float(self.loyer) * 1.20 + float(self.charge))} €")
 
+            # graphic elements
+            self.pdf.line(10, 630, 590, 630)
+            self.pdf.line(10, 595, 590, 595)
+            self.pdf.line(10, 630, 10, 595)
+            self.pdf.line(590, 630, 590, 595)
+            p = Path()
+            s = p / 'sign.PNG'
+            if s.exists() == True:
+                self.pdf.drawImage("sign.PNG", 350, 80, width=120, height=120)
+
+            # ending
             self.pdf.showPage()
             self.pdf.save()
 
@@ -116,15 +138,5 @@ class make_directories():
 
 
 if __name__ == "__main__":
-    from datetime import date
-    from reportlab.pdfgen import canvas
-    date = date.today()
-    day = date.day
-    month = date.month
-    year = date.year
-    path = os.path.dirname(__file__)
-    pdf = canvas.Canvas(path)
-    pdf_gen = pdf_generator(pdf, "nom", "prenom", "adresse", "ville", 2500, 100, day, month, year, 1,
-                            "sci_nom", "sci_adresse", "sci_cp_ville", "sci_tel", "sci_mail", "sci_siret")
-    pdf_gen.generator()
+    pass
 
