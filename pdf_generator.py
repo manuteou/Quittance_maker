@@ -90,20 +90,18 @@ class pdf_generator():
             self.pdf.drawString(150, 550,
                                 f"Loyer pour le mois de {self.month_list[int(self.month)]} {self.year}")
 
-            self.pdf.drawString(150, 500, "Loyer hors charges")
-            self.pdf.drawString(350, 500, f"{int(self.loyer / 1.20)} €")
+            self.pdf.drawString(150, 500, "Loyer hors taxes")
+            loyer_ht = int(self.loyer / 1.20)
+            self.pdf.drawString(350, 500, f"{loyer_ht} €")
 
-            self.pdf.drawString(150, 485, "TVA 20.00 %")
-            self.pdf.drawString(357, 485, f"{int(float(self.loyer) * 1.20 - float(self.loyer))} €")
+            self.pdf.drawString(150, 485, "TVA 20 %")
+            self.pdf.drawString(357, 485, f"{int(self.loyer) - loyer_ht} €")
 
             self.pdf.drawString(150, 460, "Provision pour charges")
             self.pdf.drawString(357, 460, f"{self.charge} €")
 
             self.pdf.drawString(150, 445, "Montant TTC")
             self.pdf.drawString(350, 445, f"{int(self.loyer) + int(self.charge)} €")
-
-            self.pdf.drawString(150, 420, "Reste à payer")
-            self.pdf.drawString(350, 420, f"{int(float(self.loyer) * 1.20 + float(self.charge))} €")
 
             # graphic elements
             self.pdf.line(10, 630, 590, 630)

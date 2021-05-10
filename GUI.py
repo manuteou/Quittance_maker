@@ -14,7 +14,7 @@ class main_gui(tk.Frame):
         tk.Frame.__init__(self)
         self.master.geometry("850x350")
         self.master.minsize(300, 150)
-        self.master.title("Quittances Maker V1.4")
+        self.master.title("Quittances Maker V1.42")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
