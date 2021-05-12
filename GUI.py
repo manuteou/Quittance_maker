@@ -23,7 +23,7 @@ class splash_screen(tk.Frame):
 
     def splash_screen(self):
         splash_frame = tk.Frame(self)
-        splash_label = tk.Label(splash_frame, text="QUITTANCE MAKER\nVersion 1.44", font=font.Font(self, font=(('Courier', 40, "bold"))), bg="#1A5276", fg="#74D0F1")
+        splash_label = tk.Label(splash_frame, text="QUITTANCE MAKER\nVersion 1.45", font=font.Font(self, font=(('Courier', 40, "bold"))), bg="#1A5276", fg="#74D0F1")
         splash_frame.pack()
         splash_label.pack()
         self.after(2000, self.quit)
