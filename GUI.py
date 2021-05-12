@@ -110,8 +110,8 @@ class main_gui(tk.Frame):
                                command=self.config_sci)
 
         # Progress bar
-        self.bar_all = ttk.Progressbar(frame2, mode="determinate")
-        self.bar_one = ttk.Progressbar(frame2, mode="determinate")
+        self.bar_all = ttk.Progressbar(frame2, mode="indeterminate")
+        self.bar_one = ttk.Progressbar(frame2, mode="indeterminate")
         # widgets' position
         frame1.grid(column=0, row=0, sticky='NSEW')
         frame2.grid(column=0, row=1, sticky='NSEW')
