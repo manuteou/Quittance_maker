@@ -1,4 +1,4 @@
-from GUI import main_gui
+from GUI import splash_screen
 from locataire import sql_database_init
 from pathlib import Path
 import json
@@ -26,4 +26,4 @@ if m.exists() == False:
         text_file.write(text)
 
 # GUI launch
-main_gui().mainloop()
+splash_screen().mainloop()

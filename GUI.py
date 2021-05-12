@@ -5,16 +5,40 @@ from locataire import locataire, sql_database, sci
 from pdf_generator import pdf_generator, make_directories
 from mail_sender import send_mail
 from tkinter import messagebox
-import sys, json, re
+import sys, json, re, threading, time
 from reportlab.pdfgen import canvas
 from pathlib import Path
+import tkinter.font as font
+
+
+class splash_screen(tk.Frame):
+    def __init__(self):
+        tk.Frame.__init__(self)
+        self.master.geometry("850x350+600+600")
+        self.master.overrideredirect(True)
+        self.master.configure(bg='#1A5276')
+        self.splash_screen()
+        self.pack(expand=True)
+
+
+    def splash_screen(self):
+        splash_frame = tk.Frame(self)
+        splash_label = tk.Label(splash_frame, text="QUITTANCE MAKER\nVersion 1.44", font=font.Font(self, font=(('Courier', 40, "bold"))), bg="#1A5276", fg="#74D0F1")
+        splash_frame.pack()
+        splash_label.pack()
+        self.after(2000, self.quit)
+
+    def quit(self):
+        self.destroy()
+        main_gui().mainloop()
 
 class main_gui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.geometry("850x350")
+        self.master.overrideredirect(False)
         self.master.minsize(300, 150)
-        self.master.title("Quittances Maker V1.42")
+        self.master.title("Quittances Maker V1.45")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -84,19 +108,25 @@ class main_gui(tk.Frame):
                                     command=self.maj_rent)
         button_sci = tk.Button(frame3, text="Gestion SCI", borderwidth=2, relief=tk.GROOVE,
                                command=self.config_sci)
+
+        # Progress bar
+        self.bar_all = ttk.Progressbar(frame2, mode="determinate")
+        self.bar_one = ttk.Progressbar(frame2, mode="determinate")
         # widgets' position
         frame1.grid(column=0, row=0, sticky='NSEW')
         frame2.grid(column=0, row=1, sticky='NSEW')
         frame3.grid(column=1, row=0)
-        ##position widgets 1
+        ## position widgets 1
         self.head_list.grid(column=0, row=0)
         self.tenant_list.grid(column=0, row=1, rowspan=10)
-        ##position widget 2
+        ## position widget 2
         date_s_label.grid(column=0, row=0, sticky='NW')
         date_s_entry.grid(column=0, row=0, sticky='NE')
         button_all.grid(column=0, row=10, sticky='NSEW')
         button_selection.grid(column=0, row=9, sticky='NSEW')
-        ##position widgets3
+        self.bar_all.grid(column=1, row=10)
+        self.bar_one.grid(column=1, row=9)
+        ## position widgets3
         button_config.grid(column=0, row=0, sticky='NSEW')
         button_rent_maj.grid(column=0, row=3, sticky='NSEW')
         button_blk0.grid(column=0, row=1, sticky='NSEW')
@@ -108,8 +138,23 @@ class main_gui(tk.Frame):
         button_del.grid(column=0, row=9, sticky='NSEW')
         button_sci.grid(column=0, row=1, sticky='NSEW')
 
+
+    def progress_bar(self):
+        self.bar_all.start(5)
+        time.sleep(1.5)
+        self.bar_all.stop()
+        messagebox.showinfo("Information", "Envoies effectués")
+
+    def progress_bar_s(self):
+        self.bar_one.start(5)
+        time.sleep(1.5)
+        self.bar_one.stop()
+        messagebox.showinfo("Information", "Envoies effectués")
+
     def validation_button_all(self):
         print("debut de l'envoie pour tous")
+        self.thread = threading.Thread(target=self.progress_bar)
+        self.thread.start()
         day, month, year = self.date_s.get().split("/")
         make_directories(year, month)
         if getattr(sys, 'frozen', False):
@@ -117,7 +162,6 @@ class main_gui(tk.Frame):
         else:
             directory = Path(__file__).parent
         print(directory)
-        #directory = os.path.dirname(__file__)
         with open("config.json", "r") as json_file:
             config = json.load(json_file)
         for elt in self.database.pdf_table():
@@ -141,12 +185,12 @@ class main_gui(tk.Frame):
             print("mail : mail ----> envoyé")
 
         print("fin de l'envoie")
-        messagebox.showinfo("Information", "Envoies effectués")
-
 
     def validation_button_s(self):
         value = (self.tenant_list.get(tk.ACTIVE))
         print(f"""debut de l"envoie pour {(value.split(" ")[0])}""")
+        self.thread = threading.Thread(target=self.progress_bar_s)
+        self.thread.start()
         day, month, year = self.date_s.get().split("/")
         make_directories(year, month)
         if getattr(sys, 'frozen', False):
@@ -157,8 +201,7 @@ class main_gui(tk.Frame):
         with open("config.json", "r") as json_file:
             config = json.load(json_file)
         print(self.database.pdf_table_single(f'{value.split(" ")[0]}'))
-        nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, sci_cp_ville, sci_tel, \
-        sci_mail, sci_siret = self.database.pdf_table_single(f'{value.split(" ")[0]}')[0]
+        nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret = self.database.pdf_table_single(f'{value.split(" ")[0]}')[0]
         path_dir = directory.joinpath(sci_nom, year, month)
         print(path_dir)
         path_dir.mkdir(parents=True, exist_ok=True)
@@ -174,7 +217,7 @@ class main_gui(tk.Frame):
                          config["port"], path)
         mail.send()
         print("mail : mail ----> envoyé")
-        messagebox.showinfo("Information", "Envoie effectue")
+
 
     def new_entry(self):
         with open('config.json', 'r') as json_files:
@@ -982,13 +1025,6 @@ class del_sci_gui(tk.Frame):
 
 if __name__ == "__main__":
 
-    def verification_indice(value):
-        if isinstance(value, str):
-            print("valeur incorrect")
-            # messagebox.showinfo("Attention", "Saisie incorrect")
-        else:
-            print("(indice) format saisie correct")
+  splash_screen().mainloop()
 
 
-
-    verification_indice(15)
