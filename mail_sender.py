@@ -29,7 +29,7 @@ class send_mail:
         msg.attach(MIMEText(open(filename).read()))
 
         pdf = MIMEApplication(open(self.path, 'rb').read())
-        pdf.add_header('Content-Disposition', 'attachment', filename="example.pdf")
+        pdf.add_header('Content-Disposition', 'attachment', filename="quittance.pdf")
         msg.attach(pdf)
 
         try:

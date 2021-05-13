@@ -14,7 +14,7 @@ import tkinter.font as font
 class SplashScreen(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
-        self.master.geometry("850x350+600+600")
+        self.master.geometry("850x350+300+300")
         self.master.overrideredirect(True)
         self.master.configure(bg='#1A5276')
         self.splash_screen()
@@ -59,13 +59,20 @@ class MainGui(tk.Frame):
         frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE)
         frame3 = tk.Frame(self, main_frame)
         # widgets on the left side
+        #
+        print(self.database.elt_table("nom", "tenant")[0])
+        print(self.database.elt_table("prenom", "tenant")[0])
+        print(self.database.elt_table("loyer", "location")[0])
+        print(self.database.elt_table("charges", "location")[0])
+        #
         self.head_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Helvetica", 15), width=600, height=1,
                                     bg="#333366",
                                     fg='white')
         self.tenant_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Helvetica", 15), width=600, bg="#5472AE",
                                       fg='white')
         self.head_list.insert(0,
-                              5 * " " + "NOM" + 10 * " " + "PRENOM" + 10 * " " + "LOYER" + 5 * " " + "CHARGES" + 5 * " " + "DATE D'ENTREE")
+                              5 * " " + "NOM" + 10 * " " + "PRENOM" + 10 * " " + "LOYER" + 5 * " " + "CHARGES" + 5 * " "
+                              + "INFO" + 5 * " " + "Statut")
         for i, nom in enumerate(self.database.elt_table("nom", "tenant")):
             aff_nom = self.database.affichage_table(nom[0])[0][0]
             aff_prenom = self.database.affichage_table(nom[0])[0][1]
@@ -78,7 +85,7 @@ class MainGui(tk.Frame):
             align_charges_date = int(round(10 / len(str(aff_charges)) + len(aff_date)))
             self.tenant_list.insert(i + 1, aff_nom + align_nom_prenom * " " + aff_prenom + align_prenom_loyer * " " +
                                     str(aff_loyer) + align_loyer_charges * " " + str(aff_charges) +
-                                    align_charges_date * " " + aff_date + " " + self.maj_tenant(nom))
+                                    align_charges_date * " " + self.maj_tenant(nom))
         # widgets under left
         date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1)
         date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE)
@@ -230,6 +237,9 @@ class MainGui(tk.Frame):
         month_tenant = int(self.database.affichage_table(nom[0])[0][4].split("/")[1])
         if (month - month_tenant) == 0:
             return "MAJ Loyer"
+        elif (month - month_tenant) == -1:
+
+            return "MAJ prochain mois"
         else:
             return ""
 
