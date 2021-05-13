@@ -65,7 +65,7 @@ class PdfGenerator:
             self.pdf.line(590, 630, 590, 595)
             p = Path()
             s = p / 'sign.PNG'
-            if s.exists() == True:
+            if s.exists():
                 self.pdf.drawImage("sign.PNG", 350, 80, width=120, height=120)
             # ending
             self.pdf.showPage()

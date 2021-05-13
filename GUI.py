@@ -36,7 +36,7 @@ class SplashScreen(tk.Frame):
 class MainGui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
-        self.master.geometry("850x350")
+        self.master.geometry("920x350")
         self.master.overrideredirect(False)
         self.master.minsize(300, 150)
         self.master.title("Quittances Maker V1.5")
@@ -51,41 +51,76 @@ class MainGui(tk.Frame):
         self.date_s = tk.StringVar()
         self.date_s.set(f"{self.today.day}/{self.today.month}/{self.today.year}")
         # widget's Creation
-        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg="#1A5276")
         main_frame.columnconfigure(0, weight=0)
         main_frame.columnconfigure(1, weight=1)
 
-        frame1 = tk.LabelFrame(self, main_frame, text="LOCATAIRES", borderwidth=2, relief=tk.GROOVE)
-        frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE)
-        frame3 = tk.Frame(self, main_frame)
+        frame1 = tk.LabelFrame(self, main_frame, text="LOCATAIRES", font=('Courier', 14, "bold"), fg='#74D0F1', borderwidth=4, relief=tk.GROOVE,  bg="#5472AE")
+        frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE, bg="#1A5276")
+        frame3 = tk.Frame(self, main_frame, bg="#1A5276")
         # widgets on the left side
         #
-        print(self.database.elt_table("nom", "tenant")[0])
-        print(self.database.elt_table("prenom", "tenant")[0])
-        print(self.database.elt_table("loyer", "location")[0])
-        print(self.database.elt_table("charges", "location")[0])
+        head_nom = tk.Label(frame1, text="NOM", font=('Courier', 14, "bold"), fg='#74D0F1',  bg="#5472AE")
+        head_nom.grid(column=0, row=0, sticky='W', padx=10)
+        head_prenom = tk.Label(frame1, text="PRENOM", font=('Courier', 14, "bold"), fg='#74D0F1',  bg="#5472AE")
+        head_prenom.grid(column=1, row=0, sticky='W', padx=10)
+        head_loyer = tk.Label(frame1, text="LOYER", font=('Courier', 14, "bold"), fg='#74D0F1',  bg="#5472AE")
+        head_loyer.grid(column=2, row=0, sticky='W', padx=10)
+        head_charges = tk.Label(frame1, text="CHARGES", font=('Courier', 14, "bold"), fg='#74D0F1',  bg="#5472AE")
+        head_charges.grid(column=3, row=0, sticky='W', padx=10)
+        head_info = tk.Label(frame1, text="INFO", font=('Courier', 14, "bold"), fg='#74D0F1',  bg="#5472AE")
+        head_info.grid(column=4, row=0, sticky='W', padx=10)
+
+        self.nom_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Times", 12), bg="#5472AE", fg='white', borderwidth=0, relief=tk.FLAT, width=15, highlightthickness=0)
+        for i, e in enumerate(self.database.elt_table("nom", "tenant")):
+            self.nom_list.insert(i + 1, e[0])
+        self.nom_list.grid(column=0, row=1, padx=12)
+
+        self.prenom_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Times", 12), bg="#5472AE", fg='white', borderwidth=0, width=15, selectbackground="#5472AE",highlightthickness=0)
+        for i, e in enumerate(self.database.elt_table("prenom", "tenant")):
+            self.prenom_list.insert(i + 1, e[0])
+        self.prenom_list.grid(column=1, row=1, padx=15)
+
+        self.loyer_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Times", 12), bg="#5472AE", fg='white',borderwidth=0, width=15, selectbackground="#5472AE", highlightthickness=0)
+        for i, e in enumerate(self.database.elt_table("loyer", "location")):
+            print(e)
+            self.loyer_list.insert(i + 1, e[0])
+        self.loyer_list.grid(column=2, row=1, padx=20)
+
+        self.charges_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Times", 12), bg="#5472AE", fg='white',borderwidth=0, width=15, selectbackground="#5472AE",highlightthickness=0)
+        for i, e in enumerate(self.database.elt_table("charges", "location")):
+            self.charges_list.insert(i + 1, e[0])
+        self.charges_list.grid(column=3, row=1, padx=30)
+
+        self.info_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Times", 12), bg="#5472AE", fg='white',borderwidth=0, width=15, selectbackground="#5472AE",highlightthickness=0)
+        for i, e in enumerate(self.database.elt_table("nom", "tenant")):
+            #print(e[0])
+            self.info_list.insert(i + 1, 'info')
+        self.info_list.grid(column=4, row=1,  padx=12)
+
         #
-        self.head_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Helvetica", 15), width=600, height=1,
-                                    bg="#333366",
-                                    fg='white')
-        self.tenant_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Helvetica", 15), width=600, bg="#5472AE",
-                                      fg='white')
-        self.head_list.insert(0,
-                              5 * " " + "NOM" + 10 * " " + "PRENOM" + 10 * " " + "LOYER" + 5 * " " + "CHARGES" + 5 * " "
-                              + "INFO" + 5 * " " + "Statut")
-        for i, nom in enumerate(self.database.elt_table("nom", "tenant")):
-            aff_nom = self.database.affichage_table(nom[0])[0][0]
-            aff_prenom = self.database.affichage_table(nom[0])[0][1]
-            aff_loyer = int(self.database.affichage_table(nom[0])[0][2])
-            aff_charges = self.database.affichage_table(nom[0])[0][3]
-            aff_date = self.database.affichage_table(nom[0])[0][4]
-            align_nom_prenom = int(round(150 / (len(aff_nom) + len(aff_prenom))))
-            align_prenom_loyer = int(round(130 / (len(aff_prenom) + len(str(aff_loyer)))))
-            align_loyer_charges = int(round(30 / len(str(aff_loyer)) + len(str(aff_charges))))
-            align_charges_date = int(round(10 / len(str(aff_charges)) + len(aff_date)))
-            self.tenant_list.insert(i + 1, aff_nom + align_nom_prenom * " " + aff_prenom + align_prenom_loyer * " " +
-                                    str(aff_loyer) + align_loyer_charges * " " + str(aff_charges) +
-                                    align_charges_date * " " + self.maj_tenant(nom))
+        # self.head_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Helvetica", 15), width=600, height=1,
+        #                             bg="#333366",
+        #                             fg='white')
+        # self.tenant_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Helvetica", 15), width=600, bg="#5472AE",
+        #                               fg='white')
+        # self.head_list.insert(0,
+        #                       5 * " " + "NOM" + 10 * " " + "PRENOM" + 10 * " " + "LOYER" + 5 * " " + "CHARGES" + 5 * " "
+        #                       + "INFO" + 5 * " " + "Statut")
+        # for i, nom in enumerate(self.database.elt_table("nom", "tenant")):
+        #     aff_nom = self.database.affichage_table(nom[0])[0][0]
+        #     aff_prenom = self.database.affichage_table(nom[0])[0][1]
+        #     aff_loyer = int(self.database.affichage_table(nom[0])[0][2])
+        #     aff_charges = self.database.affichage_table(nom[0])[0][3]
+        #     aff_date = self.database.affichage_table(nom[0])[0][4]
+        #     align_nom_prenom = int(round(150 / (len(aff_nom) + len(aff_prenom))))
+        #     print(align_nom_prenom)
+        #     align_prenom_loyer = int(round(130 / (len(aff_prenom) + len(str(aff_loyer)))))
+        #     align_loyer_charges = int(round(30 / len(str(aff_loyer)) + len(str(aff_charges))))
+        #     align_charges_date = int(round(10 / len(str(aff_charges)) + len(aff_date)))
+        #     self.tenant_list.insert(i + 1, aff_nom + align_nom_prenom * "  " + aff_prenom + align_prenom_loyer * " " +
+        #                             str(aff_loyer) + align_loyer_charges * " " + str(aff_charges) +
+        #                             align_charges_date * " " + self.maj_tenant(nom))
         # widgets under left
         date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1)
         date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE)
@@ -96,10 +131,10 @@ class MainGui(tk.Frame):
                                      relief=tk.GROOVE, command=self.validation_select_tenant)
         # widgets on right
         button_config = tk.Button(frame3, text='Config', borderwidth=2, relief=tk.GROOVE, command=self.config)
-        button_blk0 = tk.Button(frame3, state='disabled', bd=0)
-        button_blk1 = tk.Button(frame3, state='disabled', bd=0)
+        button_blk0 = tk.Button(frame3, state='disabled', bd=0, bg="#1A5276")
+        button_blk1 = tk.Button(frame3, state='disabled', bd=0, bg="#1A5276")
         button_info = tk.Button(frame3, text='Info Locataire', borderwidth=2, relief=tk.GROOVE, command=self.info_entry)
-        button_blk2 = tk.Button(frame3, state='disabled', bd=0)
+        button_blk2 = tk.Button(frame3, state='disabled', bd=0, bg="#1A5276")
         button_new = tk.Button(frame3, text='Nouvelle Entrée', borderwidth=2, relief=tk.GROOVE, command=self.new_entry)
         button_modify = tk.Button(frame3, text="Modifier un locataire", borderwidth=2, relief=tk.GROOVE,
                                   command=self.modify_entry)
@@ -116,10 +151,10 @@ class MainGui(tk.Frame):
         # widgets' position
         frame1.grid(column=0, row=0, sticky='NSEW')
         frame2.grid(column=0, row=1, sticky='NSEW')
-        frame3.grid(column=1, row=0)
+        frame3.grid(column=1, row=0, rowspan=2, sticky='NSEW')
         # position widgets 1
-        self.head_list.grid(column=0, row=0)
-        self.tenant_list.grid(column=0, row=1, rowspan=10)
+        #self.head_list.grid(column=0, row=0)
+        #self.tenant_list.grid(column=0, row=1, rowspan=10)
         # position widget 2
         date_s_label.grid(column=0, row=0, sticky='NW')
         date_s_entry.grid(column=0, row=0, sticky='NE')
