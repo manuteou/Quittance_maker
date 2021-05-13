@@ -4,7 +4,7 @@ import os
 
 
 # pdf function generator
-class pdf_generator():
+class PdfGenerator:
 
     def __init__(self, pdf, nom, prenom, adresse, ville, loyer, charge, day, month, years, cat,
                  sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret):
@@ -110,29 +110,12 @@ class pdf_generator():
             self.pdf.line(590, 630, 590, 595)
             p = Path()
             s = p / 'sign.PNG'
-            if s.exists() == True:
+            if s.exists():
                 self.pdf.drawImage("sign.PNG", 350, 80, width=120, height=120)
 
             # ending
             self.pdf.showPage()
             self.pdf.save()
-
-
-class make_directories():
-    def __init__(self, years, month):
-        self.years = years
-        self.month = month
-        self.database = sql_database()
-
-        sci_list = []
-        for elt in self.database.elt_table("SCI", "location"):
-            if elt[0] not in sci_list:
-                sci_list.append(elt[0])
-        directory = os.path.dirname(__file__)
-        for n in sci_list:
-            dir = (os.path.join(directory, n + "\\" + self.years + "\\" + self.month + "\\"))
-            if not os.path.exists(dir):
-                os.makedirs(dir)
 
 
 if __name__ == "__main__":

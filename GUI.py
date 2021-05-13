@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import date
 from locataire import locataire, sql_database, sci
-from pdf_generator import pdf_generator, make_directories
+from pdfgenerator import PdfGenerator
 from mail_sender import send_mail
 from tkinter import messagebox
 import sys, json, re, threading, time
@@ -11,7 +11,7 @@ from pathlib import Path
 import tkinter.font as font
 
 
-class splash_screen(tk.Frame):
+class SplashScreen(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.geometry("850x350+600+600")
@@ -19,7 +19,6 @@ class splash_screen(tk.Frame):
         self.master.configure(bg='#1A5276')
         self.splash_screen()
         self.pack(expand=True)
-
 
     def splash_screen(self):
         splash_frame = tk.Frame(self)
@@ -30,9 +29,10 @@ class splash_screen(tk.Frame):
 
     def quit(self):
         self.destroy()
-        main_gui().mainloop()
+        MainGui().mainloop()
 
-class main_gui(tk.Frame):
+
+class MainGui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.geometry("850x350")
@@ -47,7 +47,8 @@ class main_gui(tk.Frame):
         self.database = sql_database()
         self.createWidgets()
 
-    def loadconfig(self):
+    @staticmethod
+    def loadconfig():
         with open("config.json", "r") as json_file:
             config = json.load(json_file)
         return config
@@ -90,9 +91,9 @@ class main_gui(tk.Frame):
         date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE)
 
         button_all = tk.Button(frame2, text="Créer Quittance et Envoyer pour TOUS", borderwidth=2, relief=tk.GROOVE,
-                               command=self.validation_button_all)
+                               command=self.validation_all_tenant)
         button_selection = tk.Button(frame2, text="Créer Quittance et Envoyer pour selection", borderwidth=2,
-                                     relief=tk.GROOVE, command=self.validation_button_s)
+                                     relief=tk.GROOVE, command=self.validation_select_tenant)
         # widgets on right
         button_config = tk.Button(frame3, text='Config', borderwidth=2, relief=tk.GROOVE, command=self.config)
         button_blk0 = tk.Button(frame3, state='disabled', bd=0)
@@ -110,8 +111,8 @@ class main_gui(tk.Frame):
                                command=self.config_sci)
 
         # Progress bar
-        self.bar_all = ttk.Progressbar(frame2, mode="indeterminate")
-        self.bar_one = ttk.Progressbar(frame2, mode="indeterminate")
+        self.bar_all = ttk.Progressbar(frame2, mode="determinate")
+        self.bar_one = ttk.Progressbar(frame2, mode="determinate")
         # widgets' position
         frame1.grid(column=0, row=0, sticky='NSEW')
         frame2.grid(column=0, row=1, sticky='NSEW')
@@ -138,132 +139,113 @@ class main_gui(tk.Frame):
         button_del.grid(column=0, row=9, sticky='NSEW')
         button_sci.grid(column=0, row=1, sticky='NSEW')
 
-
     def progress_bar(self):
         self.bar_all.start(5)
-        time.sleep(1.5)
+        time.sleep(1)
         self.bar_all.stop()
-        messagebox.showinfo("Information", "Envoies effectués")
 
     def progress_bar_s(self):
         self.bar_one.start(5)
-        time.sleep(1.5)
+        time.sleep(1)
         self.bar_one.stop()
+
+    @staticmethod
+    def config_data():
+        with open("config.json", "r") as json_file:
+            return json.load(json_file)
+
+    @staticmethod
+    def directory():
+        if getattr(sys, 'frozen', False):
+            directory = Path(sys.executable).parent
+        else:
+            directory = Path(__file__).parent
+        return directory
+
+    def validation_all_tenant(self):
+        directory = self.directory()
+        config = self.config_data()
+        for elt in self.database. affichage_table_all():
+            thread = threading.Thread(target=self.progress_bar)
+            thread.start()
+            result = ""
+            for i in elt:
+                result += str(f"{i}   ")
+            self.creation_pdf(result, directory, config)
         messagebox.showinfo("Information", "Envoies effectués")
 
-    def validation_button_all(self):
-        print("debut de l'envoie pour tous")
-        self.thread = threading.Thread(target=self.progress_bar)
-        self.thread.start()
-        day, month, year = self.date_s.get().split("/")
-        make_directories(year, month)
-        if getattr(sys, 'frozen', False):
-            directory = Path(sys.executable).parent
-        else:
-            directory = Path(__file__).parent
-        print(directory)
-        with open("config.json", "r") as json_file:
-            config = json.load(json_file)
-        for elt in self.database.pdf_table():
-            #print(elt)
-            nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, \
-            sci_cp_ville, sci_tel, sci_mail, sci_siret = elt
-            path_dir = directory.joinpath(sci_nom, year, month)
-            print(path_dir)
-            path_dir.mkdir(parents=True, exist_ok=True)
-            path = path_dir.joinpath(nom + ".pdf")
-            print(path)
-            pdf = canvas.Canvas(str(path))
-            pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, loyer, charges, day, month, year, cat,
-                                    sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret)
-            pdf_gen.generator()
-            print(f"Quittance {nom} ----> crée")
-            print(f"""SMTP{config["SMTP"]}""")
-            mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"],
-                             config["port"], path)
-            mail.send()
-            print("mail : mail ----> envoyé")
+    def validation_select_tenant(self):
+        elt = (self.tenant_list.get(tk.ACTIVE))
+        directory = self.directory()
+        config = self.config_data()
+        thread = threading.Thread(target=self.progress_bar_s)
+        thread.start()
+        print(elt)
+        self.creation_pdf(elt, directory, config)
+        messagebox.showinfo("Information", "Envoie effectué")
 
-        print("fin de l'envoie")
-
-    def validation_button_s(self):
-        value = (self.tenant_list.get(tk.ACTIVE))
-        print(f"""debut de l"envoie pour {(value.split(" ")[0])}""")
-        self.thread = threading.Thread(target=self.progress_bar_s)
-        self.thread.start()
+    def creation_pdf(self, tenant, directory, config):
         day, month, year = self.date_s.get().split("/")
-        make_directories(year, month)
-        if getattr(sys, 'frozen', False):
-            directory = Path(sys.executable).parent
-        else:
-            directory = Path(__file__).parent
-        print(directory)
-        with open("config.json", "r") as json_file:
-            config = json.load(json_file)
-        print(self.database.pdf_table_single(f'{value.split(" ")[0]}'))
-        nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret = self.database.pdf_table_single(f'{value.split(" ")[0]}')[0]
+        nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, sci_cp_ville, sci_tel,\
+            sci_mail, sci_siret = self.database.pdf_table_single(f'{tenant.split("  ")[0]}')[0]
         path_dir = directory.joinpath(sci_nom, year, month)
-        print(path_dir)
         path_dir.mkdir(parents=True, exist_ok=True)
         path = path_dir.joinpath(nom + ".pdf")
-
-        print(path)
         pdf = canvas.Canvas(str(path))
-        pdf_gen = pdf_generator(pdf, nom, prenom, adresse, ville, loyer, charges, day, month, year, cat,
-                                sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret)
-        print(f"Quittance {nom} ----> crée")
+        pdf_gen = PdfGenerator(pdf, nom, prenom, adresse, ville, loyer, charges, day, month, year, cat, sci_nom,
+                               sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret)
         pdf_gen.generator()
+        print(config["master_mail"], config["password"], mail, config["SMTP"],
+                         config["port"], path)
         mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"],
                          config["port"], path)
         mail.send()
-        print("mail : mail ----> envoyé")
-
 
     def new_entry(self):
         with open('config.json', 'r') as json_files:
             config = json.load(json_files)
-        if config['sci'] == []:
+        if not config['sci']:
             messagebox.showinfo("Attention", "Renseigner un SCI, avant de pouvoir acceder à ce menu")
             pass
         else:
             self.destroy()
-            creation_gui().mainloop()
+            CreationGui().mainloop()
 
     def modify_entry(self):
         self.destroy()
-        modification_gui().mainloop()
+        ModificationGui().mainloop()
 
     def del_entry(self):
         self.destroy()
-        delete_gui().mainloop()
+        DeleteGui().mainloop()
 
     def info_entry(self):
         value = (self.tenant_list.get(tk.ACTIVE).split(" ")[0])
-        info_gui(value)
+        InfoGui(value)
 
     def config(self):
         self.destroy()
-        config_gui().mainloop()
+        ConfigGUI().mainloop()
 
     def maj_rent(self):
         value = (self.tenant_list.get(tk.ACTIVE).split(" ")[0])
         self.destroy()
-        maj_rent_gui(value).mainloop()
+        MajRentGui(value).mainloop()
 
     def maj_tenant(self, nom):
-        self.month = date.today().month
+        month = date.today().month
         month_tenant = int(self.database.affichage_table(nom[0])[0][4].split("/")[1])
-        if (self.month - month_tenant) == 0:
+        if (month - month_tenant) == 0:
             return "MAJ Loyer"
         else:
             return ""
 
     def config_sci(self):
         self.destroy()
-        gestion_sci().mainloop()
+        GestionSci().mainloop()
 
 
-class creation_gui(tk.Frame):
+class CreationGui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.title("Création de Locataire")
@@ -404,72 +386,29 @@ class creation_gui(tk.Frame):
 
     def quit(self):
         self.destroy()
-        main_gui().mainloop()
-
+        MainGui().mainloop()
 
     def verification_mail(self):
-
-        pattern = re.compile(r"^[a-z\d].+[a-z]@[a-z\d]+.[a-z]+$")
-        if re.match(pattern, self.mailVar.get()):
-            print("Format du mail  correct")
-            return True
-        else:
-            print("Format de saisie incorrect")
-            messagebox.showinfo("Mail", "Saisie incorrect")
-            return False
+        Verification(self.mailVar.get()).verification_mail()
 
     def verification_tel(self):
-        num = re.sub(r"[^\\+|\d]", "", self.telVar.get())
-        pattern = re.compile(r"(\+33|^0)\d{9}$")
-        print(pattern)
-        if re.match(pattern, num):
-            print("Format telephone valide")
-            return True
-        else:
-            print("Format de saisie  telephone incorrect")
-            messagebox.showinfo("Telephone", "Saisie incorrect")
-            return False
+        Verification(self.telVar.get()).verification_tel()
 
     def verification_date(self):
-        pattern = re.compile(
-            r"^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$")
-        if re.match(pattern, self.date_entreeVar.get()):
-            print(" format date compatible")
-            return True
-        else:
-            print("Format de saisie incorrect")
-            messagebox.showinfo("Date", "Saisie incorrect")
-            return False
+        Verification(self.date_entreeVar.get()).verification_date()
 
     def verification_loyer(self):
-        if isinstance(self.loyerVar.get(), str):
-            print("valeur incorrect")
-            messagebox.showinfo("Loyer", "Saisie incorrect")
-            return False
-        else:
-            print("(loyer) format saisie correct")
-            return True
+        Verification(self.loyerVar.get()).verification_loyer()
+
 
     def verification_charges(self):
-        if isinstance(self.chargesVar.get(), str):
-            print("valeur incorrect")
-            messagebox.showinfo("Charges", "Saisie incorrect")
-            return False
-        else:
-            print("(saisie) format saisie correct")
-            return True
+        Verification(self.chargesVar.get()).verification_charges()
 
     def verification_indice(self):
-        if isinstance(self.indice_base.get(), str):
-            print("valeur incorrect")
-            messagebox.showinfo("Indice", "Saisie incorrect")
-            return False
-        else:
-            print("(indice) format saisie correct")
-            return True
+        Verification(self.indice_base.get()).verification_indice()
 
 
-class modification_gui(tk.Frame):
+class ModificationGui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.title("modification de locataire")
@@ -481,14 +420,13 @@ class modification_gui(tk.Frame):
         self.database = sql_database()
         self.createWidgets()
 
-
     def createWidgets(self):
         self.tenant_var = tk.StringVar()
         self.champs_var = tk.StringVar()
         self.newval_var = tk.StringVar()
         self.old_var = tk.StringVar()
         self.old_var.set("En Attente de la selection")
-        #tracing
+        # tracing
         self.champs_var.trace("w", self.observer)
         # check box
         ok_format = self.register(self.check_format)
@@ -528,7 +466,8 @@ class modification_gui(tk.Frame):
 
     def observer(self, *args):
         watch = self.champs_var.get()
-        nom, prenom, adresse, cp_ville, loyer, charges, mail, cat, sci, _, _, _, _, _ = self.database.pdf_table_single(self.tenant_var.get())[0]
+        nom, prenom, adresse, cp_ville, loyer, charges, mail, cat, sci, _, _, _, _, _ = \
+            self.database.pdf_table_single(self.tenant_var.get())[0]
         tel = self.database.one_elt("tel", "tenant", self.tenant_var.get())
         mail = self.database.one_elt("mail", "tenant", self.tenant_var.get())
         value = {"nom": nom, "prenom": prenom, "adresse": adresse, "cp_ville": cp_ville, "tel": tel, "mail": mail,
@@ -539,9 +478,10 @@ class modification_gui(tk.Frame):
 
     def quit(self):
         self.destroy()
-        main_gui().mainloop()
+        MainGui().mainloop()
 
     def mod_entry(self):
+        print(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
         self.database.modif_table(self.tenant_var.get(), self.champs_var.get(),
                                   self.newval_var.get())
         print(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
@@ -549,42 +489,15 @@ class modification_gui(tk.Frame):
 
     def check_format(self):
         if self.champs_var.get() == "tel":
-            num = re.sub(r"\D", "", self.newval_var.get())
-            pattern = re.compile(r"(\+33|^0)\d{9}$")
-            print(pattern)
-            if re.match(pattern, num):
-                print("Format telephone valide")
-                return True
-            else:
-                print("Format de saisie  telephone incorrect")
-                messagebox.showinfo("Telephone", "Saisie incorrect")
-                return False
+            Verification(self.newval_var.get()).verification_tel()
 
         elif self.champs_var.get() == "mail":
-            pattern = re.compile(r"^[a-z\d]+@[a-z\d]+.[a-z]+$")
-            if re.match(pattern, self.newval_var.get()):
-                print("Format du mail  correct")
-                return True
-            else:
-                print("Format de saisie incorrect")
-                messagebox.showinfo("mail", "Saisie incorrect")
-                return False
+            Verification(self.newval_var.get()).verification_mail()
 
         elif self.champs_var.get() == "date":
-            pattern = re.compile(
-                r"^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$")
-            if re.match(pattern, self.newval_var.get()):
-                print(" format date compatible")
-                return True
-            else:
-                print("Format de saisie incorrect")
-                messagebox.showinfo("date", "Saisie incorrect")
-                return False
+            Verification(self.newval_var.get()).verification_date()
 
-        else:
-            return True
-
-class delete_gui(tk.Frame):
+class DeleteGui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.title("Supression de locataire")
@@ -620,19 +533,20 @@ class delete_gui(tk.Frame):
 
     def del_entry(self):
         if self.nom_var.get() != "Attention action definitive":
+            print(self.nom_var.get())
             self.database.delete_entry("tenant", self.nom_var.get())
             self.database.delete_entry("location", self.nom_var.get())
             print("suppression effectuée")
             messagebox.showinfo("Attention", "Supression effectuée")
             self.destroy()
-            main_gui().mainloop()
+            MainGui().mainloop()
 
     def quit(self):
         self.destroy()
-        main_gui().mainloop()
+        MainGui().mainloop()
 
 
-class info_gui(tk.Frame):
+class InfoGui(tk.Frame):
     def __init__(self, value):
         tk.Frame.__init__(self)
         self.master.title("Information")
@@ -666,7 +580,7 @@ class info_gui(tk.Frame):
         self.destroy()
 
 
-class maj_rent_gui(tk.Frame):
+class MajRentGui(tk.Frame):
     def __init__(self, value):
         tk.Frame.__init__(self)
         self.master.title("MAJ Loyer")
@@ -711,14 +625,14 @@ class maj_rent_gui(tk.Frame):
 
     def quit(self):
         self.destroy()
-        main_gui().mainloop()
+        MainGui().mainloop()
 
     def validation(self):
         new_rent = int(self.rent) * (int(self.new_indice.get()) / int(self.base_indice))
         self.database.modif_table(self.nom, "loyer", new_rent)
 
 
-class config_gui(tk.Frame):
+class ConfigGUI(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.title("Configuration")
@@ -773,7 +687,7 @@ class config_gui(tk.Frame):
 
     def quit(self):
         self.destroy()
-        main_gui().mainloop()
+        MainGui().mainloop()
 
     def mod_entry(self):
         self.config["master_mail"] = self.master_mail_var.get()
@@ -785,7 +699,8 @@ class config_gui(tk.Frame):
         print("mise à jour du fichier config")
         messagebox.showinfo("Information", "Modification(s) effectuée(s)")
 
-class gestion_sci(tk.Frame):
+
+class GestionSci(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.title("Configuration sci")
@@ -811,20 +726,20 @@ class gestion_sci(tk.Frame):
         boutton_quitter.grid(column=3, row=0, sticky="NSEW")
 
     def add_sci(self):
-        new_sci_gui().mainloop()
+        NewSciGUI().mainloop()
 
     def mod_sci(self):
-        mod_sci_gui().mainloop()
+        ModSciGui().mainloop()
 
     def del_sci(self):
-        del_sci_gui().mainloop()
+        DelSciGui().mainloop()
 
     def quit(self):
         self.destroy()
-        main_gui().mainloop()
+        MainGui().mainloop()
 
 
-class new_sci_gui(tk.Frame):
+class NewSciGUI(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.title("Nouvelle sci")
@@ -899,10 +814,10 @@ class new_sci_gui(tk.Frame):
 
     def quit(self):
         self.destroy()
-        gestion_sci.mainloop(self)
+        GestionSci.mainloop(self)
 
 
-class mod_sci_gui(tk.Frame):
+class ModSciGui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.title("Modification sci")
@@ -968,10 +883,10 @@ class mod_sci_gui(tk.Frame):
 
     def quit(self):
         self.destroy()
-        gestion_sci.mainloop(self)
+        GestionSci.mainloop(self)
 
 
-class del_sci_gui(tk.Frame):
+class DelSciGui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.title("Supression SCI")
@@ -1020,11 +935,81 @@ class del_sci_gui(tk.Frame):
 
     def quit(self):
         self.destroy()
-        gestion_sci.mainloop(self)
+        GestionSci.mainloop(self)
 
+
+class Verification:
+    def __init__(self, value_to_check):
+        self.value = value_to_check
+
+    def verification_mail(self):
+        pattern = re.compile(r"^[a-z\d].+[a-z]@[a-z\d]+.[a-z]+$")
+        if re.match(pattern, self.value):
+            print("Format du mail  correct")
+            return True
+        else:
+            print("Format de saisie incorrect")
+            messagebox.showinfo("Mail", "Saisie incorrect")
+            return False
+
+    def verification_tel(self):
+        num = re.sub(r"[^\\+|\d]", "", self.value)
+        pattern = re.compile(r"(\+33|^0)\d{9}$")
+        print(pattern)
+        if re.match(pattern, num):
+            print("Format telephone valide")
+            return True
+        else:
+            print("Format de saisie  telephone incorrect")
+            messagebox.showinfo("Telephone", "Saisie incorrect")
+            return False
+
+    def verification_date(self):
+        pattern = re.compile(
+            r"^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$")
+        if re.match(pattern, self.value):
+            print(" format date compatible")
+            return True
+        else:
+            print("Format de saisie incorrect")
+            messagebox.showinfo("Date", "Saisie incorrect")
+            return False
+
+    def verification_loyer(self):
+        if isinstance(self.value, str):
+            print("valeur incorrect")
+            messagebox.showinfo("Loyer", "Saisie incorrect")
+            return False
+        else:
+            print("(loyer) format saisie correct")
+            return True
+
+    def verification_charges(self):
+        if isinstance(self.value, str):
+            print("valeur incorrect")
+            messagebox.showinfo("Charges", "Saisie incorrect")
+            return False
+        else:
+            print("(saisie) format saisie correct")
+            return True
+
+    def verification_indice(self):
+        if isinstance(self.value, str):
+            print("valeur incorrect")
+            messagebox.showinfo("Indice", "Saisie incorrect")
+            return False
+        else:
+            print("(indice) format saisie correct")
+            return True
 
 if __name__ == "__main__":
 
-  splash_screen().mainloop()
+  SplashScreen().mainloop()
+
+
+
+
+
+
 
 
