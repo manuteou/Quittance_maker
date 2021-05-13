@@ -22,7 +22,8 @@ class SplashScreen(tk.Frame):
 
     def splash_screen(self):
         splash_frame = tk.Frame(self)
-        splash_label = tk.Label(splash_frame, text="QUITTANCE MAKER\nVersion 1.5", font=font.Font(self, font=(('Courier', 40, "bold"))), bg="#1A5276", fg="#74D0F1")
+        splash_label = tk.Label(splash_frame, text="QUITTANCE MAKER\nVersion 1.5", font=font.Font(self, font=(
+            'Courier', 40, "bold")), bg="#1A5276", fg="#74D0F1")
         splash_frame.pack()
         splash_label.pack()
         self.after(2000, self.quit)
@@ -45,20 +46,10 @@ class MainGui(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.database = sql_database()
-        self.createWidgets()
-
-    @staticmethod
-    def loadconfig():
-        with open("config.json", "r") as json_file:
-            config = json.load(json_file)
-        return config
-
-    def createWidgets(self):
         # variable's creation
         self.today = date.today()
         self.date_s = tk.StringVar()
         self.date_s.set(f"{self.today.day}/{self.today.month}/{self.today.year}")
-
         # widget's Creation
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
         main_frame.columnconfigure(0, weight=0)
@@ -68,11 +59,13 @@ class MainGui(tk.Frame):
         frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE)
         frame3 = tk.Frame(self, main_frame)
         # widgets on the left side
-        self.head_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Helvetica", 15), width=600, height=1, bg="#333366",
-                                      fg='white')
+        self.head_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Helvetica", 15), width=600, height=1,
+                                    bg="#333366",
+                                    fg='white')
         self.tenant_list = tk.Listbox(frame1, selectmode=tk.SINGLE, font=("Helvetica", 15), width=600, bg="#5472AE",
                                       fg='white')
-        self.head_list.insert(0, 5 * " " + "NOM" + 10 * " " + "PRENOM" + 10 * " " + "LOYER" + 5 * " " + "CHARGES" + 5 * " " +"DATE D'ENTREE")
+        self.head_list.insert(0,
+                              5 * " " + "NOM" + 10 * " " + "PRENOM" + 10 * " " + "LOYER" + 5 * " " + "CHARGES" + 5 * " " + "DATE D'ENTREE")
         for i, nom in enumerate(self.database.elt_table("nom", "tenant")):
             aff_nom = self.database.affichage_table(nom[0])[0][0]
             aff_prenom = self.database.affichage_table(nom[0])[0][1]
@@ -83,7 +76,7 @@ class MainGui(tk.Frame):
             align_prenom_loyer = int(round(130 / (len(aff_prenom) + len(str(aff_loyer)))))
             align_loyer_charges = int(round(30 / len(str(aff_loyer)) + len(str(aff_charges))))
             align_charges_date = int(round(10 / len(str(aff_charges)) + len(aff_date)))
-            self.tenant_list.insert(i + 1,  aff_nom + align_nom_prenom * " " + aff_prenom + align_prenom_loyer * " " +
+            self.tenant_list.insert(i + 1, aff_nom + align_nom_prenom * " " + aff_prenom + align_prenom_loyer * " " +
                                     str(aff_loyer) + align_loyer_charges * " " + str(aff_charges) +
                                     align_charges_date * " " + aff_date + " " + self.maj_tenant(nom))
         # widgets under left
@@ -117,17 +110,17 @@ class MainGui(tk.Frame):
         frame1.grid(column=0, row=0, sticky='NSEW')
         frame2.grid(column=0, row=1, sticky='NSEW')
         frame3.grid(column=1, row=0)
-        ## position widgets 1
+        # position widgets 1
         self.head_list.grid(column=0, row=0)
         self.tenant_list.grid(column=0, row=1, rowspan=10)
-        ## position widget 2
+        # position widget 2
         date_s_label.grid(column=0, row=0, sticky='NW')
         date_s_entry.grid(column=0, row=0, sticky='NE')
         button_all.grid(column=0, row=10, sticky='NSEW')
         button_selection.grid(column=0, row=9, sticky='NSEW')
         self.bar_all.grid(column=1, row=10)
         self.bar_one.grid(column=1, row=9)
-        ## position widgets3
+        # position widgets3
         button_config.grid(column=0, row=0, sticky='NSEW')
         button_rent_maj.grid(column=0, row=3, sticky='NSEW')
         button_blk0.grid(column=0, row=1, sticky='NSEW')
@@ -165,7 +158,7 @@ class MainGui(tk.Frame):
     def validation_all_tenant(self):
         directory = self.directory()
         config = self.config_data()
-        for elt in self.database. affichage_table_all():
+        for elt in self.database.affichage_table_all():
             thread = threading.Thread(target=self.progress_bar)
             thread.start()
             result = ""
@@ -186,7 +179,7 @@ class MainGui(tk.Frame):
 
     def creation_pdf(self, tenant, directory, config):
         day, month, year = self.date_s.get().split("/")
-        nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, sci_cp_ville, sci_tel,\
+        nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, sci_cp_ville, sci_tel, \
             sci_mail, sci_siret = self.database.pdf_table_single(f'{tenant.split("  ")[0]}')[0]
         path_dir = directory.joinpath(sci_nom, year, month)
         path_dir.mkdir(parents=True, exist_ok=True)
@@ -196,7 +189,7 @@ class MainGui(tk.Frame):
                                sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret)
         pdf_gen.generator()
         print(config["master_mail"], config["password"], mail, config["SMTP"],
-                         config["port"], path)
+              config["port"], path)
         mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"],
                          config["port"], path)
         mail.send()
@@ -254,10 +247,7 @@ class CreationGui(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
-        self.createWidgets()
         self.database = sql_database()
-
-    def createWidgets(self):
         # varaibles' creation
         self.nomVar = tk.StringVar()
         self.prenomVar = tk.StringVar()
@@ -355,9 +345,9 @@ class CreationGui(tk.Frame):
         button2.grid(column=0, columnspan=1, row=13, sticky='NSEW')
 
     def validation_tenant(self):
-        if self.nomVar.get() == "" or self.prenomVar.get() == "" or self.adresseVar.get() == ""\
-            or self.villeVar.get() == "" or self.telVar.get() == ""or self.mailVar.get() == ""\
-            or self.sciVar.get() == "" or self.loyerVar.get() == ""or self.chargesVar.get() == ""\
+        if self.nomVar.get() == "" or self.prenomVar.get() == "" or self.adresseVar.get() == "" \
+                or self.villeVar.get() == "" or self.telVar.get() == "" or self.mailVar.get() == "" \
+                or self.sciVar.get() == "" or self.loyerVar.get() == "" or self.chargesVar.get() == "" \
                 or self.indice_base.get() == "":
             print("champs vide")
             messagebox.showinfo("Attention", "un ou plusieurs champs vides, validation impossible")
@@ -381,7 +371,8 @@ class CreationGui(tk.Frame):
             self.database.create_entry("tenant", insert_tenant)
             self.database.create_entry("location", insert_location)
             messagebox.showinfo("Nouvelle Entrée", "Locataire enregistré")
-            print(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(), self.villeVar.get(), self.telVar.get(),
+            print(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(), self.villeVar.get(),
+                  self.telVar.get(),
                   self.mailVar.get(), self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get())
 
     def quit(self):
@@ -400,7 +391,6 @@ class CreationGui(tk.Frame):
     def verification_loyer(self):
         Verification(self.loyerVar.get()).verification_loyer()
 
-
     def verification_charges(self):
         Verification(self.chargesVar.get()).verification_charges()
 
@@ -418,9 +408,7 @@ class ModificationGui(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.database = sql_database()
-        self.createWidgets()
-
-    def createWidgets(self):
+        # variables
         self.tenant_var = tk.StringVar()
         self.champs_var = tk.StringVar()
         self.newval_var = tk.StringVar()
@@ -474,8 +462,6 @@ class ModificationGui(tk.Frame):
                  "cat": cat, "sci": sci, "loyer": loyer, "charges": charges, "indice de base": "test"}
         self.old_var.set(value[watch])
 
-
-
     def quit(self):
         self.destroy()
         MainGui().mainloop()
@@ -497,6 +483,7 @@ class ModificationGui(tk.Frame):
         elif self.champs_var.get() == "date":
             Verification(self.newval_var.get()).verification_date()
 
+
 class DeleteGui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
@@ -507,10 +494,6 @@ class DeleteGui(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.database = sql_database()
-        self.createWidgets()
-
-
-    def createWidgets(self):
         # variable creation
         self.nom_var = tk.StringVar()
         self.nom_var.set("Attention action definitive")
@@ -557,9 +540,6 @@ class InfoGui(tk.Frame):
         self.grid(sticky="NSEW")
         self.nom = value
         self.database = sql_database()
-        self.createWidgets()
-
-    def createWidgets(self):
         _, _, _, adresse, ville, tel, mail, _ = self.database.elt_table_one("nom", "tenant", self.nom)[0]
         # widget label
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
@@ -591,9 +571,6 @@ class MajRentGui(tk.Frame):
         self.grid(sticky="NSEW")
         self.nom = value
         self.database = sql_database()
-        self.createWidgets()
-
-    def createWidgets(self):
         # variables
         _, _, _, _, self.rent, _, _, self.base_indice = self.database.elt_table_one("nom", "location", self.nom)[0]
         self.new_indice = tk.IntVar()
@@ -641,11 +618,7 @@ class ConfigGUI(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
-        self.createWidgets()
-
-    def createWidgets(self):
-        with open('config.json', 'r') as json_files:
-            self.config = json.load(json_files)
+        self.config = self.config_files()
         # variables
         self.master_mail_var = tk.StringVar()
         self.master_mail_var.set(self.config["master_mail"])
@@ -670,8 +643,6 @@ class ConfigGUI(tk.Frame):
         port_entry = tk.Entry(main_frame, textvariable=self.port_var)
         button_validation = tk.Button(main_frame, text="Appliquer les modification", command=self.mod_entry)
         button_exit = tk.Button(main_frame, text="Quitter", command=self.quit)
-
-
         # position
         main_frame.grid(column=0, row=0, sticky="NSEW")
         master_mail_label.grid(column=0, row=0, sticky="NSEW")
@@ -699,6 +670,11 @@ class ConfigGUI(tk.Frame):
         print("mise à jour du fichier config")
         messagebox.showinfo("Information", "Modification(s) effectuée(s)")
 
+    @staticmethod
+    def config_files():
+        with open('config.json', 'r') as json_files:
+            return json.load(json_files)
+
 
 class GestionSci(tk.Frame):
     def __init__(self):
@@ -709,9 +685,6 @@ class GestionSci(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
-        self.createWidgets()
-
-    def createWidgets(self):
         # Widget
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
         boutton_add = tk.Button(main_frame, text="Ajouter SCI", command=self.add_sci)
@@ -725,13 +698,16 @@ class GestionSci(tk.Frame):
         boutton_sup.grid(column=2, row=0, sticky="NSEW")
         boutton_quitter.grid(column=3, row=0, sticky="NSEW")
 
-    def add_sci(self):
+    @staticmethod
+    def add_sci():
         NewSciGUI().mainloop()
 
-    def mod_sci(self):
+    @staticmethod
+    def mod_sci():
         ModSciGui().mainloop()
 
-    def del_sci(self):
+    @staticmethod
+    def del_sci():
         DelSciGui().mainloop()
 
     def quit(self):
@@ -749,9 +725,6 @@ class NewSciGUI(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.database = sql_database()
-        self.createWidgets()
-
-    def createWidgets(self):
         # Variables
         self.name_var = tk.StringVar()
         self.adresse_var = tk.StringVar()
@@ -775,7 +748,6 @@ class NewSciGUI(tk.Frame):
         siret_entry = tk.Entry(main_frame, textvariable=self.siret_var)
         boutton_add = tk.Button(main_frame, text="Ajouter", command=self.add_sci)
         boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
-
         # position
         main_frame.grid(column=0, row=0, sticky="NSEW")
         name_label.grid(column=0, row=0, sticky="NSEW")
@@ -827,11 +799,7 @@ class ModSciGui(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.database = sql_database()
-        self.createWidgets()
-
-
-
-    def createWidgets(self):
+        # widgets variables
         self.sci_var = tk.StringVar()
         self.sci_var.set("nom de la sci à modifier")
         self.champs_var = tk.StringVar()
@@ -853,7 +821,6 @@ class ModSciGui(tk.Frame):
         selec_entry['values'] = sci_list
         mod_label = tk.Label(main_frame, text="modification")
         mod_entry = tk.Entry(main_frame, textvariable=self.newval_var)
-
         boutton_add = tk.Button(main_frame, text="Ajouter", command=self.mod_sci)
         boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
         # position
@@ -896,10 +863,6 @@ class DelSciGui(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.database = sql_database()
-        self.createWidgets()
-
-
-    def createWidgets(self):
         # variable creation
         self.nom_var = tk.StringVar()
         self.nom_var.set("Attention action definitive")
@@ -1002,14 +965,6 @@ class Verification:
             print("(indice) format saisie correct")
             return True
 
+
 if __name__ == "__main__":
-
-  SplashScreen().mainloop()
-
-
-
-
-
-
-
-
+    SplashScreen().mainloop()
