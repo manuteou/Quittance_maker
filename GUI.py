@@ -255,10 +255,14 @@ class MainGui(tk.Frame):
                          config["port"], path)
         mail.send()
 
-    def index_menu_selection(self):
-        pass
+    def index_menu_selection(self, v):
+        if self.menu_index.get() == 'Lettre':
+            pass
+        elif self.menu_index.get()== 'MAJ Loyer':
+            self.destroy()
+            MajRentGui().mainloop()
 
-    def tenant_menu_selection(self,v):
+    def tenant_menu_selection(self, v):
         if self.menu_tenant.get() == 'info':
             value = (self.nom_list.get(tk.ACTIVE).split(" ")[0])
             InfoGui(value)
@@ -292,11 +296,6 @@ class MainGui(tk.Frame):
     def config(self):
         self.destroy()
         ConfigGUI().mainloop()
-
-    def maj_rent(self):
-        value = (self.nom.get(tk.ACTIVE).split(" ")[0])
-        self.destroy()
-        MajRentGui(value).mainloop()
 
     def maj_tenant(self, nom):
         month = date.today().month
@@ -637,44 +636,60 @@ class InfoGui(tk.Frame):
 
 
 class MajRentGui(tk.Frame):
-    def __init__(self, value):
+    def __init__(self):
         tk.Frame.__init__(self)
         self.master.title("MAJ Loyer")
+        self.master.geometry("300x300")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
-        self.nom = value
         self.database = sql_database()
         # variables
-        _, _, _, _, self.rent, _, _, self.base_indice = self.database.elt_table_one("nom", "location", self.nom)[0]
+        self.tenant_name = tk.StringVar()
+        self.tenant_name.trace("w", self.observer)
+
         self.new_indice = tk.IntVar()
-        self.new_indice.set(self.base_indice)
         # widget label
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
-        rent_label = tk.Label(main_frame, text="Loyer")
-        rent_aff = tk.Label(main_frame, text=int(self.rent))
-        base_indice_lable = tk.Label(main_frame, text='Indice de base')
-        base_indice_aff = tk.Label(main_frame, text=self.base_indice)
-        new_indice_label = tk.Label(main_frame, text="Nouvel indice")
-        new_indice_entry = tk.Entry(main_frame, textvariable=self.new_indice)
-        button_blk0 = tk.Button(main_frame, state='disabled', bd=0)
-        button_val = tk.Button(main_frame, text="Appliquer", command=self.validation)
-        button_back = tk.Button(main_frame, text="Quitter et revenir", command=self.quit)
-        # widget position
         main_frame.grid(column=0, row=0, sticky="NSEW")
+        rent_label = tk.Label(main_frame, text="Loyer")
         rent_label.grid(column=0, row=0, sticky="NSEW")
-        base_indice_lable.grid(column=1, row=0, sticky="NSEW")
-        new_indice_label.grid(column=2, row=0, sticky="NSEW")
 
-        rent_aff.grid(column=0, row=1, sticky="NSEW")
-        base_indice_aff.grid(column=1, row=1, sticky="NSEW")
-        new_indice_entry.grid(column=2, row=1, sticky="NSEW")
+        label_name = tk.Label(main_frame, text="choisir le locataire")
+        label_name.grid(column=0, row=0)
+        selec_name_entry = ttk.Combobox(main_frame, textvariable=self.tenant_name, state='readonly')
+        selec_name_entry.grid(column=1, row=0)
+        select_name = self.database.elt_table("nom", "tenant")
+        selec_name_entry['values'] = select_name
+        print(self.database.elt_table_one("nom", "tenant", self.tenant_name.get()))
 
-        button_blk0.grid(column=4, row=1, sticky="NSEW")
-        button_val.grid(column=3, row=1, sticky="NSEW")
-        button_back.grid(column=5, row=1, sticky="NSEW")
+        def observer(self, *args):
+            watch = self.champs_var.get()
+        #_, _, _, _, self.rent, _, _, self.base_indice = self.database.elt_table_one("nom", "tenant",self.tenant_name.get())
+
+        #rent_aff = tk.Label(main_frame, text=int(self.rent))
+        #base_indice_lable = tk.Label(main_frame, text='Indice de base')
+        #base_indice_aff = tk.Label(main_frame, text=self.base_indice)
+        #new_indice_label = tk.Label(main_frame, text="Nouvel indice")
+        #new_indice_entry = tk.Entry(main_frame, textvariable=self.new_indice)
+        #button_blk0 = tk.Button(main_frame, state='disabled', bd=0)
+        #button_val = tk.Button(main_frame, text="Appliquer", command=self.validation)
+        #button_back = tk.Button(main_frame, text="Quitter et revenir", command=self.quit)
+        # widget position
+
+
+        #base_indice_lable.grid(column=1, row=0, sticky="NSEW")
+        #new_indice_label.grid(column=2, row=0, sticky="NSEW")
+
+        #rent_aff.grid(column=0, row=1, sticky="NSEW")
+        #base_indice_aff.grid(column=1, row=1, sticky="NSEW")
+        #new_indice_entry.grid(column=2, row=1, sticky="NSEW")
+
+        #button_blk0.grid(column=4, row=1, sticky="NSEW")
+        #button_val.grid(column=3, row=1, sticky="NSEW")
+        #button_back.grid(column=5, row=1, sticky="NSEW")
 
     def quit(self):
         self.destroy()
