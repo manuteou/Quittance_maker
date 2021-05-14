@@ -105,7 +105,6 @@ class MainGui(tk.Frame):
 
         self.loyer_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Times", 12), bg="#1A5276", fg='white',borderwidth=0, width=15, selectbackground="#5472AE", highlightthickness=0, relief=tk.FLAT)
         for i, e in enumerate(self.database.elt_table("loyer", "location")):
-            print(e)
             self.loyer_list.insert(tk.END, e[0])
         self.loyer_list.grid(column=2, row=1, padx=20)
 
@@ -150,7 +149,7 @@ class MainGui(tk.Frame):
         self.menu_sci = tk.StringVar()
         menu_sci_list = ["création", "modification", "suppression"]
         self.menu_sci.set("SCI")
-        SciMenu = tk.OptionMenu(frame3, self.menu_sci, *menu_sci_list, command="clic")
+        SciMenu = tk.OptionMenu(frame3, self.menu_sci, *menu_sci_list, command=self.sci_menu_selection)
         SciMenu.configure(bg="#3D4A56",  font=('Courier', 14, "bold"), fg='#74D0F1')
         SciMenu.grid(column=0, row=2, sticky='NSEW')
 
@@ -229,7 +228,6 @@ class MainGui(tk.Frame):
             for n, e in enumerate(self.database.elt_table("nom", "tenant")):
                 if n == i:
                     list_selected.append(e[0])
-        print(list_selected)
         directory = self.directory()
         config = self.config_data()
         for elt in list_selected:
@@ -282,16 +280,14 @@ class MainGui(tk.Frame):
             self.destroy()
             DeleteGui().mainloop()
 
-    def new_entry(self):
-        with open('config.json', 'r') as json_files:
-            config = json.load(json_files)
-        if not config['sci']:
-            messagebox.showinfo("Attention", "Renseigner un SCI, avant de pouvoir acceder à ce menu")
-            pass
-        else:
+    def sci_menu_selection(self, v):
+        if self.menu_sci.get() == "création":
             self.destroy()
-            CreationGui().mainloop()
-
+            GestionSci().mainloop()
+        if self.menu_sci.get() == "modification":
+            pass
+        if self.menu_sci.get() == "suppression":
+            pass
 
     def config(self):
         self.destroy()
@@ -438,10 +434,9 @@ class CreationGui(tk.Frame):
                              'CP_ville': client.cp_ville, 'tel': client.tel, 'mail': client.mail.lower(),
                              'cat': client.cat}
 
-            insert_location = {'SCI': client.sci.upper(), 'nom': client.nom, 'type': client.cat,
-                               'loyer': client.loyer,
-                               'charges': client.charges, 'date_entree': client.date_entree,
-                               'indice_base': client.base_indice}
+            insert_location = {'SCI': client.sci.upper(), 'nom': client.nom, 'type': client.cat,'loyer': client.loyer,
+                                'base_loyer': client.loyer, 'charges': client.charges, 'date_entree': client.date_entree
+                                , 'indice_base': client.base_indice}
 
             self.database.create_entry("tenant", insert_tenant)
             self.database.create_entry("location", insert_location)
@@ -649,24 +644,79 @@ class MajRentGui(tk.Frame):
         # variables
         self.tenant_name = tk.StringVar()
         self.tenant_name.trace("w", self.observer)
-
-        self.new_indice = tk.IntVar()
+        self.base_loyer = tk.StringVar()
+        self.base_loyer.set("En Attente de la selection")
+        self.new_indice = tk.StringVar()
+        self.new_indice.trace("w", self.observer_2)
+        self.new_rent = tk.StringVar()
+        self.base_loyer.set("En Attente de la selection")
         # widget label
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
         main_frame.grid(column=0, row=0, sticky="NSEW")
-        rent_label = tk.Label(main_frame, text="Loyer")
-        rent_label.grid(column=0, row=0, sticky="NSEW")
 
-        label_name = tk.Label(main_frame, text="choisir le locataire")
-        label_name.grid(column=0, row=0)
+
+        label_name = tk.Label(main_frame, text="Locataire")
+        label_name.grid(column=0, row=0, sticky="NSEW")
+
         selec_name_entry = ttk.Combobox(main_frame, textvariable=self.tenant_name, state='readonly')
-        selec_name_entry.grid(column=1, row=0)
+        selec_name_entry.grid(column=1, row=0, sticky="NSEW")
+
         select_name = self.database.elt_table("nom", "tenant")
         selec_name_entry['values'] = select_name
-        print(self.database.elt_table_one("nom", "tenant", self.tenant_name.get()))
 
-        def observer(self, *args):
-            watch = self.champs_var.get()
+        label_loyer_base = tk.Label(main_frame, text="Base loyer")
+        label_loyer_base.grid(column=0, row=1, sticky="NSEW")
+
+        aff_loyer_base = tk.Label(main_frame, textvariable=self.base_loyer)
+        aff_loyer_base.grid(column=1, row=1, sticky="NSEW")
+
+        label_indice = tk.Label(main_frame, text="Nouvel indice")
+        label_indice.grid(column=0, row=3, sticky="NSEW")
+
+        Entry_indice = tk.Entry(main_frame, textvariable=self.new_indice)
+        Entry_indice.grid(column=1, row=3, sticky="NSEW")
+
+        label_new_rent = tk.Label(main_frame, text="Nouveau loyer")
+        label_new_rent.grid(column=0, row=4, sticky="NSEW")
+
+        aff_new_rent = tk.Label(main_frame, textvariable=self.new_rent)
+        aff_new_rent.grid(column=1, row=4)
+
+        label_blank = tk.Label(main_frame)
+        label_blank.grid(column=1, row=6,sticky="NSEW")
+
+        label_validation = tk.Button(main_frame, text="VALIDER", command=self.validation)
+        label_validation.grid(column=1, row=7, sticky="NSEW")
+
+        label_blank = tk.Label(main_frame)
+        label_blank.grid(column=1, row=8, sticky="NSEW")
+
+        label_retour = tk.Button(main_frame, text="RETOUR", command=self.quitter)
+        label_retour.grid(column=1, row=9, sticky="NSEW")
+
+    def observer(self, *args):
+        watch = self.tenant_name.get()
+        self.base_loyer.set(f'{self.database.one_elt("base_loyer", "location", watch)[0][0]} €')
+
+    def observer_2(self, *args):
+        if not self.tenant_name.get():
+            self.new_rent.set("En attente du locataire")
+        else:
+            watch = self.new_indice.get()
+            new_indice = int(watch)
+            num = re.compile(r"(\d+.\d+)")
+            base_rent = num.search(self.base_loyer.get())
+            base_rent = int(base_rent.group(0))
+            base_indice = self.database.one_elt("indice_base", "location", self.tenant_name.get())[0][0]
+            self.new_rent.set(f"{round(base_rent * new_indice / base_indice, 2)} €")
+
+    def validation(self):
+        pass
+
+    def quitter(self):
+        self.destroy()
+        MainGui().mainloop()
+
         #_, _, _, _, self.rent, _, _, self.base_indice = self.database.elt_table_one("nom", "tenant",self.tenant_name.get())
 
         #rent_aff = tk.Label(main_frame, text=int(self.rent))

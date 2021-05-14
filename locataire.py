@@ -48,6 +48,7 @@ class sql_database_init():
                nom TEXT NOT NULL,
                type TEXT NOT NULL,
                loyer INTEGER NOT NULL,
+               base_loyer INTEGER NOT NULL,
                charges INTEGER NOT NULL,
                date_entree DATE NOT NULL,
                indice_base INTEGER NOT NULL
