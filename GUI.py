@@ -1,15 +1,16 @@
 import tkinter as tk
 from tkinter import ttk
 from datetime import date
+import functions
 from locataire import locataire, sql_database, sci
-from pdfgenerator import PdfGenerator
+from pdfgenerator import PdfGenerator, IndexLetter
 from mail_sender import send_mail
 from tkinter import messagebox
 import sys, json, re
 from reportlab.pdfgen import canvas
 from pathlib import Path
 from functions import Verification
-
+import webbrowser
 
 class SplashScreen(tk.Frame):
     def __init__(self):
@@ -200,26 +201,12 @@ class MainGui(tk.Frame):
                                command=self.closing, bg="#3D4A56", fg='#74D0F1', font=('Courier', 14, "bold"), bd=0)
         button_end.grid(column=0, row=10, sticky='NSEW')
 
-
     def closing(self):
         self.master.destroy()
 
-    @staticmethod
-    def config_data():
-        with open("config.json", "r") as json_file:
-            return json.load(json_file)
-
-    @staticmethod
-    def directory():
-        if getattr(sys, 'frozen', False):
-            directory = Path(sys.executable).parent
-        else:
-            directory = Path(__file__).parent
-        return directory
-
     def validation_all_tenant(self):
-        directory = self.directory()
-        config = self.config_data()
+        directory = functions.directory()
+        config = functions.config_data()
         for elt in self.database.affichage_table_all():
             result = ""
             for i in elt:
@@ -235,8 +222,8 @@ class MainGui(tk.Frame):
             for n, e in enumerate(self.database.elt_table("nom", "tenant")):
                 if n == i:
                     list_selected.append(e[0])
-        directory = self.directory()
-        config = self.config_data()
+        directory = functions.directory()
+        config = functions.config_data()
         for elt in list_selected:
             self.creation_pdf(elt, directory, config)
         self.destroy()
@@ -278,7 +265,7 @@ class MainGui(tk.Frame):
         date = self.date_s.get()
         _, month, year = date.split("/")
         sci = self.database.one_elt("sci", "location", e[0])
-        directory = self.directory()
+        directory = functions.directory()
         path_dir = directory.joinpath(sci[0][0], year, month, e[0] + ".pdf")
         if path_dir.exists():
             return "SEND"
@@ -289,7 +276,7 @@ class MainGui(tk.Frame):
             self.destroy()
             LetterGui().mainloop()
 
-        elif self.menu_index.get()== 'MAJ Loyer':
+        elif self.menu_index.get() == 'MAJ Loyer':
             self.destroy()
             MajRentGui().mainloop()
 
@@ -346,18 +333,19 @@ class CreatModGui(tk.Frame):
         self.telVar = tk.StringVar()
         self.mailVar = tk.StringVar()
         self.sciVar = tk.StringVar()
-        self.loyerVar = tk.IntVar()
-        self.chargesVar = tk.IntVar()
-        self.selectorVar = tk.IntVar()
+        self.loyerVar = tk.StringVar()
+        self.chargesVar = tk.StringVar()
+        self.selectorVar = tk.StringVar()
         self.selectorVar.set(1)
         self.date_entreeVar = tk.StringVar()
-        self.indice_base = tk.IntVar()
+        self.indice_base = tk.StringVar()
 
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg="#1A5276")
         main_frame.grid(column=0, row=0, sticky="NSEW")
 
         if value == 1:
             n = 1
+            self.type_field = 1
             self.tenant_old = tk.StringVar()
             self.master.title("Modification de Locataire")
             self.tenant_old.trace("w", self.observer)
@@ -372,8 +360,8 @@ class CreatModGui(tk.Frame):
 
         if value == 0:
             n = 0
+            self.type_field = 0
             self.master.title("Création de Locataire")
-
 
         nom_label = tk.Label(main_frame, text="Nom", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
         nom_label.grid(column=0, row=1 + n, sticky="EW")
@@ -460,36 +448,40 @@ class CreatModGui(tk.Frame):
 
     def observer(self, *args):
         watch = self.tenant_old.get()
-        self.tenant_var.set(self.database.one_elt("nom", "tenant", watch))
-        self.prenomVar.set(self.database.one_elt("prenom", "tenant", watch))
-        self.adresseVar.set(self.database.one_elt("adresse", "tenant", watch)[0][0].replace("{", "").replace("}", ""))
-        self.villeVar.set(self.database.one_elt("cp_ville", "tenant", watch)[0][0].replace("{", "").replace("}", ""))
-        self.telVar.set(self.database.one_elt("tel", "tenant", watch))
-        self.mailVar.set(self.database.one_elt("mail", "tenant", watch))
-        self.sciVar.set(self.database.one_elt("sci", "location", watch))
-        self.loyerVar.set(self.database.one_elt("loyer", "location", watch))
-        self.chargesVar.set(self.database.one_elt("charges", "location", watch))
-        self.selectorVar.set(self.database.one_elt("cat", "tenant", watch))
-        self.date_entreeVar.set(self.database.one_elt("date_entree", "location", watch))
-        self.indice_base.set(self.database.one_elt("indice_base", "location", watch))
+        modification_table = self.database.modification_call(watch)
+        print(modification_table)
+        self.tenant_var.set(modification_table[1])
+        self.prenomVar.set(modification_table[2])
+        self.adresseVar.set(modification_table[3])
+        self.villeVar.set(modification_table[4])
+        self.telVar.set(modification_table[5])
+        self.mailVar.set(modification_table[6])
+        self.sciVar.set(modification_table[7])
+        self.date_entreeVar.set(modification_table[8])
+        self.loyerVar.set(modification_table[9])
+        self.chargesVar.set(modification_table[10])
+        self.indice_base.set(modification_table[11])
+        self.selectorVar.set(modification_table[12])
+
+    def cleaning(self, var):
+        return var.replace("((", "").replace(",),)", "").replace("'", "")
 
     def check_entry(self):
+        print(self.tenant_var.get())
+        print(type(self.tenant_var.get()))
         if self.tenant_var.get() == "" or self.prenomVar.get() == "" or self.adresseVar.get() == "" \
-                or self.villeVar.get() == "" or self.telVar.get() == "" or self.mailVar.get() == "" \
-                or self.sciVar.get() == "" or self.loyerVar.get() == "" or self.chargesVar.get() == "" \
-                or self.indice_base.get() == "":
+                or self.villeVar.get() == "":
             print("champs vide")
             messagebox.showinfo("Attention", "un ou plusieurs champs vides, validation impossible")
             return False
 
-        elif not Verification(self.mailVar.get()).verification_mail() or\
-            not Verification(self.telVar.get()).verification_tel() or\
-            not Verification(self.date_entreeVar.get()).verification_date() or\
-            not Verification(self.loyerVar.get()).verification_loyer() or\
-            not Verification(self.loyerVar.get()).verification_loyer() or\
-            not Verification(self.chargesVar.get()).verification_charges() or\
-            not Verification(self.indice_base.get()).verification_indice():
-            messagebox.showinfo("Attention", "un ou plusieurs chamsp mal renseignée, validation impossible")
+        if not Verification(self.cleaning(self.mailVar.get())).verification_mail() or\
+            not Verification(self.cleaning(self.telVar.get())).verification_tel() or\
+            not Verification(self.cleaning(self.date_entreeVar.get())).verification_date() or\
+            not Verification(float(self.cleaning(self.loyerVar.get()))).verification_loyer() or\
+            not Verification(float(self.cleaning(self.chargesVar.get()))).verification_charges() or\
+            not Verification(float(self.cleaning(self.indice_base.get()))).verification_indice():
+            messagebox.showinfo("Attention", "un ou plusieurs champs mal renseignés, validation impossible")
             return False
 
         else:
@@ -499,11 +491,13 @@ class CreatModGui(tk.Frame):
         if not self.check_entry():
             return "erreur de champs"
 
-        elif self.check_entry():
-            client = locataire(self.tenant_var.get(), self.prenomVar.get(), self.adresseVar.get(),
-                               self.villeVar.get(), self.telVar.get(), self.mailVar.get(),
-                               self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get(),
-                               self.selectorVar.get(), self.date_entreeVar.get(), self.indice_base.get())
+        else:
+            client = locataire(self.tenant_var.get(), self.prenomVar.get(),
+                                self.adresseVar.get(), self.villeVar.get(),
+                               self.telVar.get(), self.mailVar.get(),
+                               self.sciVar.get(), self.loyerVar.get(),
+                               self.chargesVar.get(), self.selectorVar.get()
+                               , self.date_entreeVar.get(), self.indice_base.get())
 
             insert_tenant = {'nom': client.nom, 'prenom': client.prenom, 'adresse': client.adresse,
                              'CP_ville': client.cp_ville, 'tel': client.tel, 'mail': client.mail.lower(),
@@ -513,12 +507,24 @@ class CreatModGui(tk.Frame):
                                 'base_loyer': client.loyer, 'charges': client.charges, 'date_entree': client.date_entree
                                 , 'indice_base': client.base_indice}
 
-            self.database.create_entry("tenant", insert_tenant)
-            self.database.create_entry("location", insert_location)
-            messagebox.showinfo("Nouvelle Entrée", "Locataire enregistré")
-            print(self.tenant_var.get(), self.prenomVar.get(), self.adresseVar.get(), self.villeVar.get(),
-                  self.telVar.get(),
-                  self.mailVar.get(), self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get())
+            if self.type_field == 1:
+                print("modification")
+
+                self.database.update_entry(modification_table[0], "tenant", insert_tenant)
+                self.database.update_entry(modification_table[0], "location", insert_location)
+
+
+
+            elif self.type_field == 0:
+                print("ajout")
+
+                self.database.create_entry("tenant", insert_tenant)
+                self.database.create_entry("location", insert_location)
+                messagebox.showinfo("Nouvelle Entrée", "Locataire enregistré")
+                print("creation")
+                print(self.tenant_var.get(), self.prenomVar.get(), self.adresseVar.get(), self.villeVar.get(),
+                      self.telVar.get(),
+                      self.mailVar.get(), self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get())
 
     def quit(self):
         self.destroy()
@@ -930,18 +936,42 @@ class LetterGui(tk.Frame):
         self.combostyle.theme_use('custom.TCombobox')
         # variables
         self.tenant_name = tk.StringVar()
+        self.new_indice = tk.IntVar()
+        self.date = date.today()
         # widget label
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg="#1A5276")
         main_frame.grid(column=0, row=0, sticky="NSEW")
 
+        label_indice_particulier = tk.Label(main_frame, text="Indice particulier", borderwidth=2, relief=tk.GROOVE,
+                                            bg="#3D4A56", font=('Courier', 9, "bold"), fg='#74D0F1')
+        label_indice_particulier.grid(column=1, row=0, sticky="NSEW")
+        label_indice_particulier.bind("<Button-1>", self.callback_particulier)
+
+        label_indice_pro = tk.Label(main_frame, text="Indice professionel", borderwidth=2, relief=tk.GROOVE,
+                                            bg="#3D4A56", font=('Courier', 9, "bold"), fg='#74D0F1')
+        label_indice_pro.grid(column=1, row=1, sticky="NSEW")
+        label_indice_pro.bind("<Button-1>", self.callbackone_professionel)
+
+        label_blank = tk.Label(main_frame, bg="#1A5276")
+        label_blank.grid(column=1, row=2, sticky="NSEW")
+
         label_name = tk.Label(main_frame, text="Locataire", bg="#1A5276", font=('Courier', 9, "bold"), fg='#74D0F1')
-        label_name.grid(column=0, row=0, sticky="W")
+        label_name.grid(column=0, row=3, sticky="W")
 
         selec_name_entry = ttk.Combobox(main_frame, textvariable=self.tenant_name, state='readonly', style='custom.TCombobox')
-        selec_name_entry.grid(column=1, row=0, sticky="NSEW")
+        selec_name_entry.grid(column=1, row=3, sticky="NSEW")
 
         select_name = self.database.elt_table("nom", "tenant")
         selec_name_entry['values'] = select_name
+
+        label_blank = tk.Label(main_frame, bg="#1A5276")
+        label_blank.grid(column=1, row=4, sticky="NSEW")
+
+        label_indice_new = tk.Label(main_frame, text="Nouvelle indice", bg="#1A5276", font=('Courier', 9, "bold"), fg='#74D0F1')
+        label_indice_new.grid(column=0, row=5, sticky="NSEW")
+
+        entry_indice = tk.Entry(main_frame, textvariable=self.new_indice, bg="#4F7292", fg='white')
+        entry_indice.grid(column=1, row=5, sticky="NSEW")
 
         label_blank = tk.Label(main_frame, bg="#1A5276")
         label_blank.grid(column=1, row=6, sticky="NSEW")
@@ -953,12 +983,73 @@ class LetterGui(tk.Frame):
         label_blank = tk.Label(main_frame, bg="#1A5276")
         label_blank.grid(column=1, row=8, sticky="NSEW")
 
+
         label_retour = tk.Button(main_frame, text="RETOUR", command=self.quitter, borderwidth=2, relief=tk.GROOVE,
                                  bg="#3D4A56", font=('Courier', 9, "bold"), fg='#74D0F1')
         label_retour.grid(column=1, row=9, sticky="NSEW")
 
+    @staticmethod
+    def callback_particulier(v):
+        webbrowser.open_new(r"https://www.insee.fr/fr/statistiques/serie/001515333")
+
+    @staticmethod
+    def callbackone_professionel(v):
+        webbrowser.open_new(r"https://www.insee.fr/fr/statistiques/serie/001532540")
+
+    def check_entry(self):
+        if self.tenant_name.get() == "" or self.new_indice.get() == 0:
+            messagebox.showinfo("Attention", "Champs vide")
+            return False
+
+        elif not Verification(self.new_indice.get()).verification_indice():
+            messagebox.showinfo("Attention", "Valeur incorrecte")
+            return False
+
+        else:
+            return True
+
     def validation(self):
-        pass
+        if not self.check_entry():
+            return "erreur de champs"
+
+        elif self.check_entry():
+            directory = functions.directory()
+            config = functions.config_data()
+            name = self.tenant_name.get()
+            self.letter_pdf(name, directory, config)
+
+    def letter_pdf(self, name, directory, config):
+        nom = name
+        year = str(self.date.year)
+        path_dir = directory.joinpath("indexation", year)
+        path_dir.mkdir(parents=True, exist_ok=True)
+        path = path_dir.joinpath("indexation_" + nom + "_" + year + ".pdf")
+        print(path)
+        pdf = canvas.Canvas(str(path))
+        prenom = self.database.one_elt("prenom", "tenant", nom)[0][0]
+        adresse = self.database.one_elt("adresse", "tenant", nom)[0][0]
+        ville = self.database.one_elt("cp_ville", "tenant", nom)[0][0]
+        loyer = self.database.one_elt("loyer", "location", nom)[0][0]
+        charge = self.database.one_elt("charges", "location", nom)[0][0]
+        day = 1
+        month = str(self.date.month + 1)
+        cat = self.database.one_elt("cat", "tenant", nom)[0][0]
+        sci_nom = self.database.one_elt("sci", "location", nom)[0][0]
+        sci_adresse = self.database.one_elt("adresse", "sci", sci_nom)[0][0]
+        sci_ville = self.database.one_elt("cp_ville", "sci", sci_nom)[0][0]
+        sci_tel = self.database.one_elt("tel", "sci", sci_nom)[0][0]
+        sci_mail = self.database.one_elt("mail", "sci", sci_nom)[0][0]
+        sci_siret = self.database.one_elt("siret", "sci", sci_nom)[0][0]
+        indice_base = self.database.one_elt("indice_base", "location", nom)[0][0]
+        mail = self.database.one_elt("mail", "tenant", nom)[0][0]
+
+        pdf_gen = IndexLetter(pdf, nom, prenom, adresse, ville, loyer, charge, day, month, year, sci_nom, sci_adresse,
+                              sci_ville, sci_tel, sci_mail, sci_siret, indice_base, self.new_indice.get(), cat)
+
+        pdf_gen.generator()
+        mail = send_mail("Lettre d'indexation", config["master_mail"], config["password"], mail, config["SMTP"],
+                         config["port"], path)
+        mail.send()
 
     def quitter(self):
         self.destroy()
@@ -1309,71 +1400,6 @@ class DelSciGui(tk.Frame):
     def quit(self):
         self.destroy()
         MainGui().mainloop()
-
-
-# class Verification:
-#     def __init__(self, value_to_check):
-#         self.value = value_to_check
-#
-#     def verification_mail(self):
-#         pattern = re.compile(r"^[a-z\d].+[a-z]@[a-z\d]+.[a-z]+$")
-#         if re.match(pattern, self.value):
-#             print("Format du mail  correct")
-#             return True
-#         else:
-#             print("Format de saisie incorrect")
-#             messagebox.showinfo("Mail", "Saisie incorrect")
-#             return False
-#
-#     def verification_tel(self):
-#         num = re.sub(r"[^\\+|\d]", "", self.value)
-#         pattern = re.compile(r"(\+33|^0)\d{9}$")
-#         print(pattern)
-#         if re.match(pattern, num):
-#             print("Format telephone valide")
-#             return True
-#         else:
-#             print("Format de saisie  telephone incorrect")
-#             messagebox.showinfo("Telephone", "Saisie incorrect")
-#             return False
-#
-#     def verification_date(self):
-#         pattern = re.compile(
-#             r"^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$")
-#         if re.match(pattern, self.value):
-#             print(" format date compatible")
-#             return True
-#         else:
-#             print("Format de saisie incorrect")
-#             messagebox.showinfo("Date", "Saisie incorrect")
-#             return False
-#
-#     def verification_loyer(self):
-#         if isinstance(self.value, str):
-#             print("valeur incorrect")
-#             messagebox.showinfo("Loyer", "Saisie incorrect")
-#             return False
-#         else:
-#             print("(loyer) format saisie correct")
-#             return True
-#
-#     def verification_charges(self):
-#         if isinstance(self.value, str):
-#             print("valeur incorrect")
-#             messagebox.showinfo("Charges", "Saisie incorrect")
-#             return False
-#         else:
-#             print("(saisie) format saisie correct")
-#             return True
-#
-#     def verification_indice(self):
-#         if isinstance(self.value, str):
-#             print("valeur incorrect")
-#             messagebox.showinfo("Indice", "Saisie incorrect")
-#             return False
-#         else:
-#             print("(indice) format saisie correct")
-#             return True
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
-import re
+import re, sys, json
+from pathlib import Path
 
 class Verification:
     def __init__(self, value_to_check):
@@ -63,3 +64,15 @@ class Verification:
         else:
             print("(indice) format saisie correct")
             return True
+
+
+def config_data():
+    with open("config.json", "r") as json_file:
+        return json.load(json_file)
+
+def directory():
+    if getattr(sys, 'frozen', False):
+        directory = Path(sys.executable).parent
+    else:
+        directory = Path(__file__).parent
+    return directory

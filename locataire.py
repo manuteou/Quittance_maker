@@ -91,6 +91,24 @@ class sql_database():
         self.c.execute(sql_insert_entry, field_value)
         self.conn.commit()
 
+    def update_entry(self, nom, table, insert: dict):
+        field_name = []
+        field_value = []
+        table_choice = table
+        for k, v in insert.items():
+            field_name.append(k)
+            field_value.append(v)
+        for i in range(len(field_value)):
+            sql_update_entry = f"""UPDATE {table_choice}
+                                SET '{field_name}' = '{field_value}, 
+                                    '{field_name}' = '{field_value}',
+                                WHERE
+                                id = '{nom}'; """
+            print(sql_update_entry)
+            # self.c.execute(sql_update_entry, field_value)
+            # self.conn.commit()
+
+
     def delete_entry(self, table, entry):
         entry = entry.replace("{", "").replace("}", "")
         sql_delete_entry = f"""DELETE FROM {table} WHERE nom= '{entry}'"""
@@ -162,6 +180,17 @@ class sql_database():
         affichage_table = self.c.fetchall()
         return affichage_table
 
+    def modification_call(self, nom):
+        sql_affichage_table = f"""SELECT t.id, t.nom, prenom, t.adresse, t.CP_ville, tel, t.mail, l.sci, date_entree, loyer, charges, indice_base, cat
+                                FROM tenant as t
+                                INNER JOIN location as l
+                                ON t.nom = l.nom
+                                WHERE t.nom = "{nom}";"""
+
+        self.c.execute(sql_affichage_table)
+        affichage_table = self.c.fetchone()
+        return affichage_table
+
     def affichage_table(self, nom):
         nom = nom.replace("{", "").replace("}", "")
         sql_affichage_table = f"""SELECT t.nom, prenom, loyer, charges, date_entree 
@@ -169,6 +198,7 @@ class sql_database():
                                 INNER JOIN location as l
                                 ON t.nom = l.nom
                                 WHERE t.nom = "{nom}";"""
+
         #print(sql_affichage_table)
         self.c.execute(sql_affichage_table)
         affichage_table = self.c.fetchall()
