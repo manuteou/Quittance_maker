@@ -474,7 +474,7 @@ class CreatModGui(tk.Frame):
         self.indice_base.set(self.database.one_elt("indice_base", "location", watch))
 
     def check_entry(self):
-        if self.nomVar.get() == "" or self.prenomVar.get() == "" or self.adresseVar.get() == "" \
+        if self.tenant_var.get() == "" or self.prenomVar.get() == "" or self.adresseVar.get() == "" \
                 or self.villeVar.get() == "" or self.telVar.get() == "" or self.mailVar.get() == "" \
                 or self.sciVar.get() == "" or self.loyerVar.get() == "" or self.chargesVar.get() == "" \
                 or self.indice_base.get() == "":
@@ -500,7 +500,7 @@ class CreatModGui(tk.Frame):
             return "erreur de champs"
 
         elif self.check_entry():
-            client = locataire(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(),
+            client = locataire(self.tenant_var.get(), self.prenomVar.get(), self.adresseVar.get(),
                                self.villeVar.get(), self.telVar.get(), self.mailVar.get(),
                                self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get(),
                                self.selectorVar.get(), self.date_entreeVar.get(), self.indice_base.get())
@@ -516,7 +516,7 @@ class CreatModGui(tk.Frame):
             self.database.create_entry("tenant", insert_tenant)
             self.database.create_entry("location", insert_location)
             messagebox.showinfo("Nouvelle Entrée", "Locataire enregistré")
-            print(self.nomVar.get(), self.prenomVar.get(), self.adresseVar.get(), self.villeVar.get(),
+            print(self.tenant_var.get(), self.prenomVar.get(), self.adresseVar.get(), self.villeVar.get(),
                   self.telVar.get(),
                   self.mailVar.get(), self.sciVar.get(), self.loyerVar.get(), self.chargesVar.get())
 
