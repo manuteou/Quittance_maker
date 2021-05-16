@@ -450,6 +450,7 @@ class CreatModGui(tk.Frame):
         watch = self.tenant_old.get()
         modification_table = self.database.modification_call(watch)
         print(modification_table)
+        self.tenant_id = modification_table[0]
         self.tenant_var.set(modification_table[1])
         self.prenomVar.set(modification_table[2])
         self.adresseVar.set(modification_table[3])
@@ -509,9 +510,8 @@ class CreatModGui(tk.Frame):
 
             if self.type_field == 1:
                 print("modification")
-
-                self.database.update_entry(modification_table[0], "tenant", insert_tenant)
-                self.database.update_entry(modification_table[0], "location", insert_location)
+                self.database.update_entry(self.tenant_id, "tenant", insert_tenant)
+                self.database.update_entry(self.tenant_id, "location", insert_location)
 
 
 
@@ -889,25 +889,26 @@ class MajRentGui(tk.Frame):
 
     def observer(self, *args):
         watch = self.tenant_name.get()
-        self.base_loyer.set(f'{self.database.one_elt("base_loyer", "location", watch)[0][0]} €')
+        base_loyer = self.database.one_elt("base_loyer", "location", watch)[0][0]
+        self.base_loyer.set(f'{float(base_loyer):0.2f} €')
 
     def observer_2(self, *args):
         if not self.tenant_name.get():
             self.new_rent.set("En attente du locataire")
         else:
             try:
-                watch = self.new_indice.get()
-                new_indice = float(watch)
-                num = re.compile(r"(\d+.\d+)")
-                base_rent = num.search(self.base_loyer.get())
-                base_rent = int(base_rent.group(0))
+                new_indice = self.new_indice.get()
+                pattern = re.compile(r"(^\d+.\d{2})")
+                base_rent = pattern.search(self.base_loyer.get())
+                base_rent = base_rent.group(0)
                 base_indice = self.database.one_elt("indice_base", "location", self.tenant_name.get())[0][0]
-                self.new_rent.set(f"{round(base_rent * new_indice / base_indice, 2)} €")
+                self.new_rent.set(f"{(float(base_rent) * float(new_indice) / float(base_indice)):0.2f} €")
             except ValueError as e:
-                print (e)
+                print(e)
 
     def validation(self):
-        pattern = re.compile(r"(^\d+.\d{2}$)")
+
+        pattern = re.compile(r"(^\d+.?|\d{2})")
         if re.match(pattern, self.new_indice.get()):
             num = re.compile(r"(\d+.\d+)")
             new_rent = num.search(self.new_rent.get())
@@ -915,6 +916,7 @@ class MajRentGui(tk.Frame):
             self.database.modif_table(self.tenant_name.get(), "loyer", new_rent)
 
         else:
+            print(type(self.new_indice.get()))
             messagebox.showinfo("Attention", "Saisie de l'indice incorrect")
 
     def quitter(self):

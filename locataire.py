@@ -91,22 +91,18 @@ class sql_database():
         self.c.execute(sql_insert_entry, field_value)
         self.conn.commit()
 
-    def update_entry(self, nom, table, insert: dict):
-        field_name = []
-        field_value = []
-        table_choice = table
+    def update_entry(self, id, table, insert: dict):
+        sql = ""
         for k, v in insert.items():
-            field_name.append(k)
-            field_value.append(v)
-        for i in range(len(field_value)):
-            sql_update_entry = f"""UPDATE {table_choice}
-                                SET '{field_name}' = '{field_value}, 
-                                    '{field_name}' = '{field_value}',
-                                WHERE
-                                id = '{nom}'; """
-            print(sql_update_entry)
-            # self.c.execute(sql_update_entry, field_value)
-            # self.conn.commit()
+            sql += f"{k} = '{v}',"
+        sql = sql[:-1]
+        sql_update_entry = f"""UPDATE {table}
+                            SET {sql} 
+                            WHERE
+                            id = {id}; """
+        print(sql_update_entry)
+        self.c.execute(sql_update_entry)
+        self.conn.commit()
 
 
     def delete_entry(self, table, entry):
