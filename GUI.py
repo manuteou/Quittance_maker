@@ -222,16 +222,18 @@ class MainGui(tk.Frame):
         day, month, year = self.date_s.get().split("/")
 
         for elt in list_to_send:
-            path_dir = directory.joinpath(elt[0][11], year, month)
+            print(elt[0])
+            path_dir = directory.joinpath(elt[0][10], year, month)
+            print (path_dir)
             path_dir.mkdir(parents=True, exist_ok=True)
             path = path_dir.joinpath(f"{elt[0][3]}_{elt[0][4]}" + ".pdf")
             pdf = canvas.Canvas(str(path))
-            pdf_gen = PdfGenerator(pdf, nom=elt[0][3], prenom=elt[0][4], adresse=elt[0][5], ville=elt[0][6],
-                                   loyer=elt[0][7], charge=elt[0][8], day=day, month=month, years=year, cat=elt[0][10],
-                                   sci_nom=elt[0][11], sci_adresse=elt[0][12], sci_cp_ville=elt[0][13],
-                                   sci_tel=elt[0][14], sci_mail=elt[0][15], sci_siret=elt[0][16])
+            pdf_gen = PdfGenerator(pdf, nom=elt[0][2], prenom=elt[0][3], adresse=elt[0][4], ville=elt[0][5],
+                                   loyer=elt[0][6], charge=elt[0][7], day=day, month=month, years=year, cat=elt[0][9],
+                                   sci_nom=elt[0][10], sci_adresse=elt[0][11], sci_cp_ville=elt[0][12],
+                                   sci_tel=elt[0][13], sci_mail=elt[0][14], sci_siret=elt[0][15])
             pdf_gen.generator()
-            mail = send_mail("Quittance", config["master_mail"], config["password"], elt[0][9], config["SMTP"],
+            mail = send_mail("Quittance", config["master_mail"], config["password"], elt[0][8], config["SMTP"],
                                  config["port"], path)
             mail.send()
             self.destroy()
