@@ -47,11 +47,11 @@ class sql_database_init():
                sci TEXT NOT NULL,
                nom TEXT NOT NULL,
                type TEXT NOT NULL,
-               loyer INTEGER NOT NULL,
-               base_loyer INTEGER NOT NULL,
+               loyer REAL NOT NULL,
+               base_loyer REAL NOT NULL,
                charges INTEGER NOT NULL,
                date_entree DATE NOT NULL,
-               indice_base INTEGER NOT NULL
+               indice_base REAL NOT NULL
            );"""
 
         sql_create_sci_table = """CREATE TABLE IF NOT EXISTS sci(
@@ -114,7 +114,7 @@ class sql_database():
 
     def elt_table(self, elt, table):
         elt = elt.replace("{", "").replace("}", "")
-        sql_elt_table = f"""SELECT {elt} FROM {table} """
+        sql_elt_table = f"""SELECT id, {elt} FROM {table} """
         self.c.execute(sql_elt_table)
         elt = self.c.fetchall()
         return elt
@@ -128,101 +128,80 @@ class sql_database():
         elt = self.c.fetchall()
         return elt
 
-    def one_elt(self, elt, table, champs):
-        elt = elt.replace("{", "").replace("}", "")
-        champs = champs.replace("{", "").replace("}", "")
-        sql_elt_table = f"""SELECT {elt} FROM {table} 
-                            WHERE nom = "{champs}";"""
-        self.c.execute(sql_elt_table)
-        elt = self.c.fetchall()
-        return elt
 
-    def pdf_table(self):
-        sql_pdf_table = f"""SELECT t.nom, prenom, t.adresse, t.cp_ville, loyer, charges, t.mail, cat, s.nom, 
-                            s.adresse, s.cp_ville, s.tel, s.mail, s.siret
-                            FROM location as l
-                            INNER JOIN tenant as t
-                            ON l.nom = t.nom
-                            INNER JOIN sci as s
-                            ON l.sci = s.nom;"""
-        #print(sql_pdf_table)
-        self.c.execute(sql_pdf_table)
-        pdf_table = self.c.fetchall()
-        return pdf_table
-
-    def pdf_table_single(self, nom):
-        nom = nom.replace("{", "").replace("}", "")
-        sql_pdf_table_single = f"""SELECT  t.nom, prenom, t.adresse, t.CP_ville, loyer, charges, t.mail, cat, s.nom, 
+    def pdf_table_single(self, index):
+        sql_pdf_table_single = f"""SELECT  t.id, l.id,   t.nom, prenom, t.adresse, t.CP_ville, loyer, charges, t.mail, cat, s.nom, 
                                 s.adresse, s.cp_ville, s.tel, s.mail, s.siret
                                 FROM location as l
                                 INNER JOIN tenant as t
-                                ON l.nom = t.nom
+                                ON l.id = t.id
                                 INNER JOIN sci as s
                                 ON l.sci = s.nom
-                                WHERE t.nom = "{nom}";"""
+                                WHERE l.id = {index};"""
         #print(sql_pdf_table_single)
         self.c.execute(sql_pdf_table_single)
         pdf_table = self.c.fetchall()
         return pdf_table
 
-    def affichage_table_all(self):
-        sql_affichage_table = f"""SELECT t.nom, prenom, loyer, charges, date_entree 
-                                        FROM tenant as t
-                                        INNER JOIN location as l
-                                        ON t.nom = l.nom
-                                        ;"""
-        # print(sql_affichage_table)
-        self.c.execute(sql_affichage_table)
+    def letter_request(self, index):
+        sql_letter_request = f"""SELECT t.id, t.nom, prenom, t.adresse, t.cp_ville, indice_base, l.id, s.nom,
+                            loyer, charges, cat, s.nom, s.adresse, s.cp_ville, s.tel, s.mail, s.siret, t.mail
+                            FROM tenant as t
+                            INNER JOIN location as l
+                            ON t.id=l.id
+                            INNER JOIN sci as s
+                            ON l.sci = s.nom
+                            WHERE t.id = {index};
+                                                    """
+        self.c.execute(sql_letter_request)
+        pdf_table = self.c.fetchall()
+        return pdf_table
+
+    def test_table(self):
+        sql_test_table = f"""SELECT t.id, l.id, t.nom, prenom, loyer, charges,sci, date_entree
+                                FROM tenant as t
+                                INNER JOIN location as l
+                                ON t.id = l.id;"""
+        self.c.execute(sql_test_table)
         affichage_table = self.c.fetchall()
         return affichage_table
 
-    def modification_call(self, nom):
+    def info_table(self, id):
+        sql_info_table = f"""SELECT t.id, prenom, adresse, cp_ville, tel, mail, sci, cat, date_entree
+                                FROM tenant as t
+                                INNER JOIN location as l
+                                ON t.id = l.id
+                                WHERE t.id = {id};"""
+        self.c.execute(sql_info_table)
+        affichage_table = self.c.fetchall()
+        return affichage_table
+
+    def info_sci(self, id):
+        sql_info_sci = f"""SELECT *
+                            FROM sci
+                            WHERE id ={id}"""
+        self.c.execute(sql_info_sci)
+        affichage_table = self.c.fetchall()
+        return affichage_table
+
+    def modification_call(self, id):
         sql_affichage_table = f"""SELECT t.id, t.nom, prenom, t.adresse, t.CP_ville, tel, t.mail, l.sci, date_entree, loyer, charges, indice_base, cat
                                 FROM tenant as t
                                 INNER JOIN location as l
                                 ON t.nom = l.nom
-                                WHERE t.nom = "{nom}";"""
+                                WHERE t.id = "{id}";"""
 
         self.c.execute(sql_affichage_table)
         affichage_table = self.c.fetchone()
         return affichage_table
 
-    def affichage_table(self, nom):
-        nom = nom.replace("{", "").replace("}", "")
-        sql_affichage_table = f"""SELECT t.nom, prenom, loyer, charges, date_entree 
-                                FROM tenant as t
-                                INNER JOIN location as l
-                                ON t.nom = l.nom
-                                WHERE t.nom = "{nom}";"""
-
-        #print(sql_affichage_table)
-        self.c.execute(sql_affichage_table)
-        affichage_table = self.c.fetchall()
-        return affichage_table
-
-
-    def modif_table(self, nom, champs, valeur):
-        nom = nom.replace("{", "").replace("}", "")
-        champs = champs.replace("{", "").replace("}", "")
-        if (champs == 'loyer') or (champs == 'charges'):
-            table = "location"
-            sql_table_modif = f"""UPDATE {table}
-                                SET {champs} = {valeur}
-                                WHERE nom = '{nom}';"""
-            print(sql_table_modif)
-
-        else:
-            for table in ["tenant", "location", "sci"]:
-                print(table)
-                sql_table_modif = f"""UPDATE {table}
-                                    SET '{champs}' = '{valeur}'
-                                     WHERE nom = '{nom}';"""
-                print(sql_table_modif)
-                try:
-                    self.c.execute(sql_table_modif)
-                except:
-                    pass
-        self.c.execute(sql_table_modif)
+    def maj_rent_request(self, value, index):
+        sql_maj_rent_request = f"""UPDATE location 
+                                        SET loyer =  '{value}'
+         
+                                       WHERE id = {index};"""
+        print(sql_maj_rent_request)
+        self.c.execute(sql_maj_rent_request)
         self.conn.commit()
 
 

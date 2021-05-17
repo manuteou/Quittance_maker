@@ -64,7 +64,7 @@ class SplashScreen(tk.Frame):
 class MainGui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
-        self.master.geometry("1050x350")
+        self.master.geometry("900x350")
         self.master.overrideredirect(False)
         self.master.minsize(300, 150)
         self.master.title("Quittances Maker V1.6")
@@ -78,66 +78,66 @@ class MainGui(tk.Frame):
         self.today = date.today()
         self.date_s = tk.StringVar()
         self.date_s.set(f"{self.today.day}/{self.today.month}/{self.today.year}")
-
+        self.info = tk.StringVar()
         # widget's Creation
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg="#1A5276")
         main_frame.columnconfigure(0, weight=0)
         main_frame.columnconfigure(1, weight=1)
 
-        frame1 = tk.LabelFrame(self, main_frame, text="LOCATAIRES", font=('Courier', 14, "bold"), fg='#74D0F1', borderwidth=4, relief=tk.GROOVE,  bg="#1A5276")
+        frame1 = tk.LabelFrame(self, main_frame, text="LOCATAIRES", font=('Courier', 14, "bold"), fg='#74D0F1', borderwidth=4, relief=tk.GROOVE,  bg="#3D4A56")
         frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE, bg="#1A5276")
         frame3 = tk.Frame(self, main_frame, bg="#1A5276")
         frame1.grid(column=0, row=0, sticky='NSEW')
         frame2.grid(column=0, row=1, sticky='NSEW')
         frame3.grid(column=1, row=0, rowspan=2, sticky='NSEW')
-        # widgets menu
+        # widgets menu*
 
+        self.selection = []
         # widgets on the left side
         #
-        head_nom = tk.Label(frame1, text="NOM", font=('Courier', 14, "bold"), fg='#74D0F1',  bg="#1A5276")
-        head_nom.grid(column=0, row=0, sticky='W', padx=10)
-        head_prenom = tk.Label(frame1, text="PRENOM", font=('Courier', 14, "bold"), fg='#74D0F1',  bg="#1A5276")
-        head_prenom.grid(column=1, row=0, sticky='W', padx=10)
-        head_loyer = tk.Label(frame1, text="LOYER", font=('Courier', 14, "bold"), fg='#74D0F1',  bg="#1A5276")
-        head_loyer.grid(column=2, row=0, sticky='W', padx=10)
-        head_charges = tk.Label(frame1, text="CHARGES", font=('Courier', 14, "bold"), fg='#74D0F1',  bg="#1A5276")
-        head_charges.grid(column=3, row=0, sticky='W', padx=10)
-        head_info = tk.Label(frame1, text="INFO", font=('Courier', 14, "bold"), fg='#74D0F1',  bg="#1A5276")
-        head_info.grid(column=4, row=0, sticky='W', padx=10)
-        head_info = tk.Label(frame1, text="STATUT", font=('Courier', 14, "bold"), fg='#74D0F1', bg="#1A5276")
-        head_info.grid(column=5, row=0, sticky='W', padx=2)
+        column = ["Select", "nom", "prenom", "loyer", "charges", "info", "statut"]
+        i = 0
+        for e in column:
+            label = tk.Label(frame1, text=e.upper(), font=('Courier', 14, "bold"), fg='#74D0F1',  bg="#3D4A56")
+            label.grid(column=i, row=0, sticky='W', padx=10)
+            i += 1
 
-        self.nom_list = tk.Listbox(frame1, selectmode=tk.MULTIPLE, font=("Times", 12), bg="#1A5276", fg='white', borderwidth=0, relief=tk.FLAT, width=15, highlightthickness=0)
-        for i, e in enumerate(self.database.elt_table("nom", "tenant")):
-            self.nom_list.insert(tk.END, e[0])
-        self.nom_list.grid(column=0, row=1, padx=12)
+        aff_list = self.database.test_table()
 
-        self.prenom_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Times", 12), bg="#1A5276", fg='white', borderwidth=0, width=15, selectbackground="#5472AE",highlightthickness=0, relief=tk.FLAT)
-        for i, e in enumerate(self.database.elt_table("prenom", "tenant")):
-            self.prenom_list.insert(tk.END, e[0])
-        self.prenom_list.grid(column=1, row=1, padx=15)
+        variable_list = []
+        for e in aff_list:
+            variable_list.append(e[2])
 
-        self.loyer_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Times", 12), bg="#1A5276", fg='white',borderwidth=0, width=15, selectbackground="#5472AE", highlightthickness=0, relief=tk.FLAT)
-        for i, e in enumerate(self.database.elt_table("loyer", "location")):
-            self.loyer_list.insert(tk.END, e[0])
-        self.loyer_list.grid(column=2, row=1, padx=20)
+        r = 1
+        for i, elt in enumerate(aff_list):
+            c = 1
+            self.selection.append(tk.BooleanVar(value=0))
+            check_box = tk.Checkbutton(frame1, variable=self.selection[i], bg="#3D4A56")
+            check_box.grid(column=0, row=r)
 
-        self.charges_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Times", 12), bg="#1A5276", fg='white',borderwidth=0, width=15, selectbackground="#5472AE",highlightthickness=0, relief=tk.FLAT)
-        for i, e in enumerate(self.database.elt_table("charges", "location")):
-            self.charges_list.insert(tk.END, e[0])
-        self.charges_list.grid(column=3, row=1, padx=30)
+            if self.info_tenant(elt[7]) == 0:
+                info_field = tk.Label(frame1, text="MAJ Loyer", bg="#3D4A56", fg='white', font=("Times", 12))
+                info_field.grid(column=5, row=r)
+            if self.info_tenant(elt[7]) == 1:
+                info_field = tk.Label(frame1, text="Lettre d'indexation", bg="#3D4A56", fg='white', font=("Times", 12))
+                info_field.grid(column=5, row=r)
+            else:
+                info_field = tk.Label(frame1, bg="#3D4A56", fg='white', font=("Times", 12))
+                info_field.grid(column=5, row=r)
 
-        self.info_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Times", 12), bg="#1A5276", fg='red', borderwidth=0, width=15, selectbackground="#5472AE", highlightthickness=0, relief=tk.FLAT)
-        for i, e in enumerate(self.database.elt_table("nom", "tenant")):
-            self.info_list.insert(tk.END, self.info_tenant(e))
-        self.info_list.grid(column=4, row=1,  padx=12)
+            if not self.statut_check(elt[2], elt[3], elt[6]):
 
-        self.info_list = tk.Listbox(frame1, selectmode=tk.NONE, font=("Times", 12), bg="#1A5276", fg='white',
-                                    borderwidth=0, width=15, selectbackground="#5472AE", highlightthickness=0,
-                                    relief=tk.FLAT)
-        for i, e in enumerate(self.database.elt_table("nom", "tenant")):
-            self.info_list.insert(tk.END, self.statut(e))
-        self.info_list.grid(column=5, row=1, padx=20)
+                statut_field = tk.Label(frame1, text="NOT SEND", bg="#3D4A56", fg='white', font=("Times", 12))
+                statut_field.grid(column=6, row=r)
+            else:
+                statut_field = tk.Label(frame1, text="SEND", bg="#3D4A56", fg='green', font=("Times", 12))
+                statut_field.grid(column=6, row=r)
+
+            for e in elt[2:-2]:
+                label = tk.Label(frame1, text=e, bg="#3D4A56", fg='white', font=("Times", 12))
+                label.grid(column=c, row=r, sticky='NSEW', padx=10)
+                c += 1
+            r += 1
 
         # widgets under
         date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1, bg="#1A5276",  font=('Courier', 10, "bold"), fg='#74D0F1')
@@ -146,8 +146,8 @@ class MainGui(tk.Frame):
         date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE, bg="#4F7292", bd=0, font=('Courier', 10, "bold"), fg="white")
         date_s_entry.grid(column=1, row=0, sticky='NE')
 
-        button_all = tk.Button(frame2, text=" ENVOIE TOUS", height=2, borderwidth=2, relief=tk.GROOVE, bg="#3D4A56", font=('Courier', 9, "bold"), fg='#74D0F1', command=self.validation_all_tenant)
-        button_all.grid(column=0, row=10, sticky='NSEW')
+        # button_all = tk.Button(frame2, text=" ENVOIE TOUS", height=2, borderwidth=2, relief=tk.GROOVE, bg="#3D4A56", font=('Courier', 9, "bold"), fg='#74D0F1', command=self.validation_all_tenant)
+        # button_all.grid(column=0, row=10, sticky='NSEW')
 
         button_selection = tk.Button(frame2, text="ENVOIE SELECTION", height=2, borderwidth=2, bg="#3D4A56",font=('Courier', 9, "bold"), fg='#74D0F1', relief=tk.GROOVE, command=self.validation_select_tenant)
         button_selection.grid(column=0, row=9, sticky='NSEW')
@@ -205,70 +205,60 @@ class MainGui(tk.Frame):
         self.master.destroy()
 
     def validation_all_tenant(self):
-        directory = functions.directory()
-        config = functions.config_data()
-        for elt in self.database.affichage_table_all():
-            result = ""
-            for i in elt:
-                result += str(f"{i}   ")
-            self.creation_pdf(result, directory, config)
-        self.destroy()
-        MainGui().mainloop()
+        pass
 
     def validation_select_tenant(self):
-        elt = (self.nom_list.curselection())
-        list_selected = []
-        for i in elt:
-            for n, e in enumerate(self.database.elt_table("nom", "tenant")):
-                if n == i:
-                    list_selected.append(e[0])
+        result_selection = []
+        list_to_send = []
+        for i, e in enumerate(self.selection):
+            result_selection.append(self.selection[i].get())
+
+        for i, value in enumerate(result_selection):
+            if value:
+                list_to_send.append(self.database.pdf_table_single(i+1))
+
         directory = functions.directory()
         config = functions.config_data()
-        for elt in list_selected:
-            self.creation_pdf(elt, directory, config)
-        self.destroy()
-        MainGui().mainloop()
-
-    def creation_pdf(self, tenant, directory, config):
         day, month, year = self.date_s.get().split("/")
-        nom, prenom, adresse, ville, loyer, charges, mail, cat, sci_nom, sci_adresse, sci_cp_ville, sci_tel, \
-            sci_mail, sci_siret = self.database.pdf_table_single(f'{tenant.split("  ")[0]}')[0]
-        path_dir = directory.joinpath(sci_nom, year, month)
-        path_dir.mkdir(parents=True, exist_ok=True)
-        path = path_dir.joinpath(nom + ".pdf")
-        pdf = canvas.Canvas(str(path))
-        pdf_gen = PdfGenerator(pdf, nom, prenom, adresse, ville, loyer, charges, day, month, year, cat, sci_nom,
-                               sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret)
-        pdf_gen.generator()
-        print(config["master_mail"], config["password"], mail, config["SMTP"],
-              config["port"], path)
-        mail = send_mail("Quittance", config["master_mail"], config["password"], mail, config["SMTP"],
-                         config["port"], path)
-        mail.send()
+
+        for elt in list_to_send:
+            path_dir = directory.joinpath(elt[0][11], year, month)
+            path_dir.mkdir(parents=True, exist_ok=True)
+            path = path_dir.joinpath(f"{elt[0][3]}_{elt[0][4]}" + ".pdf")
+            pdf = canvas.Canvas(str(path))
+            pdf_gen = PdfGenerator(pdf, nom=elt[0][3], prenom=elt[0][4], adresse=elt[0][5], ville=elt[0][6],
+                                   loyer=elt[0][7], charge=elt[0][8], day=day, month=month, years=year, cat=elt[0][10],
+                                   sci_nom=elt[0][11], sci_adresse=elt[0][12], sci_cp_ville=elt[0][13],
+                                   sci_tel=elt[0][14], sci_mail=elt[0][15], sci_siret=elt[0][16])
+            pdf_gen.generator()
+            mail = send_mail("Quittance", config["master_mail"], config["password"], elt[0][9], config["SMTP"],
+                                 config["port"], path)
+            mail.send()
+            self.destroy()
+            MainGui().mainloop()
 
     def config(self):
         self.destroy()
         ConfigGUI().mainloop()
 
-    def info_tenant(self, nom):
-        month = date.today().month
-        month_tenant = int(self.database.affichage_table(nom[0])[0][4].split("/")[1])
-        if (month - month_tenant) == 0:
-            return "Loyer indexation"
-        elif (month - month_tenant) == -1:
-
-            return "lettre d'indexation"
-        else:
-            return ""
-
-    def statut(self, e):
+    def statut_check(self, nom, prenom, sci):
+        directory = functions.directory()
         date = self.date_s.get()
         _, month, year = date.split("/")
-        sci = self.database.one_elt("sci", "location", e[0])
-        directory = functions.directory()
-        path_dir = directory.joinpath(sci[0][0], year, month, e[0] + ".pdf")
+        path_dir = directory.joinpath(sci, year, month, f"{nom}_{prenom}" + ".pdf")
+
         if path_dir.exists():
-            return "SEND"
+            return True
+        else:
+            return False
+
+    def info_tenant(self, date_entree):
+        month = date.today().month
+        month_tenant = int(date_entree.split("/")[1])
+        if (month - month_tenant) == 0:
+            return 0
+        elif (month - month_tenant) == -1:
+            return 1
 
     # Main Menus
     def index_menu_selection(self, v):
@@ -363,82 +353,40 @@ class CreatModGui(tk.Frame):
             self.type_field = 0
             self.master.title("Création de Locataire")
 
-        nom_label = tk.Label(main_frame, text="Nom", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        nom_label.grid(column=0, row=1 + n, sticky="EW")
+        selector1 = tk.Radiobutton(main_frame, text="Particulier", variable=self.selectorVar, value=1, bd=0,
+                                  relief=tk.FLAT, bg="#1A5276", fg='#74D0F1', font=('Courier', 9))
+        selector1.grid(column=1, row=0, sticky="NSEW", padx=1)
 
-        prenom_label = tk.Label(main_frame, text="Prenom", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        prenom_label.grid(column=0, row=2 + n, sticky="EW")
+        selector2 = tk.Radiobutton(main_frame, text="Professionel", variable=self.selectorVar, value=2, bd=0,
+                                   relief=tk.FLAT, bg="#1A5276", fg='#74D0F1', font=('Courier', 9))
+        selector2.grid(column=2, row=0, sticky="NSEW", padx=1)
+        champs = ["Nom", "Prenom", "Adresse", "CP_ville", "Telephone", "Email", "SCI", "Date d'entrée", "Loyer",
+                  "Charges", "Indice"]
+        i = 1
+        for elt in champs:
+            label = tk.Label(main_frame, text=elt, font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
+            label.grid(column=0, row=i + n, sticky="EW")
+            i += 1
 
-        adresse_label = tk.Label(main_frame, text="Adresse", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        adresse_label.grid(column=0, row=3 + n, sticky="EW")
-
-        ville_label = tk.Label(main_frame, text="CP_ville", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        ville_label.grid(column=0, row=4 + n, sticky="EW")
-
-        tel_label = tk.Label(main_frame, text="Telephone", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        tel_label.grid(column=0, row=5 + n, sticky="EW")
-
-        mail_label = tk.Label(main_frame, text="Email", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        mail_label.grid(column=0, row=6 + n, sticky="EW")
-
-        sci_label = tk.Label(main_frame, text="SCI", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        sci_label.grid(column=0, row=8 + n, sticky="EW")
-
-        date_label = tk.Label(main_frame, text="Date d'entrée", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        date_label.grid(column=0, row=9 + n, sticky="EW")
-
-        loyer_label = tk.Label(main_frame, text="Loyer", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        loyer_label.grid(column=0, row=10 + n, sticky="EW")
-
-        charges_label = tk.Label(main_frame, text="Charges", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        charges_label.grid(column=0, row=11 + n, sticky="EW")
-
-        indice_label = tk.Label(main_frame, text="Indice", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        indice_label.grid(column=0, row=12 + n, sticky="EW")
-
-        nom_entry = tk.Entry(main_frame, textvariable=self.tenant_var, bg="#4F7292", fg='white')
-        nom_entry.grid(column=1, row=1 + n, columnspan=2, sticky="EW")
-
-        prenom_entry = tk.Entry(main_frame, textvariable=self.prenomVar, bg="#4F7292", fg='white')
-        prenom_entry.grid(column=1, row=2 + n, columnspan=2, sticky="EW")
-
-        adresse_entry = tk.Entry(main_frame, textvariable=self.adresseVar, bg="#4F7292", fg='white')
-        adresse_entry.grid(column=1, row=3 + n, columnspan=2, sticky="EW")
-
-        ville_entry = tk.Entry(main_frame, textvariable=self.villeVar, bg="#4F7292", fg='white')
-        ville_entry.grid(column=1, row=4 + n, columnspan=2, sticky="EW")
-
-        tel_entry = tk.Entry(main_frame, textvariable=self.telVar, bg="#4F7292", fg='white')
-        tel_entry.grid(column=1, row=5 + n, columnspan=2, sticky="EW")
-
-        mail_entry = tk.Entry(main_frame, textvariable=self.mailVar, bg="#4F7292", fg='white')
-        mail_entry.grid(column=1, row=6 + n, columnspan=2, sticky="EW")
+        entries = [self.tenant_var, self.prenomVar, self.adresseVar, self.villeVar, self.telVar, self.mailVar]
+        i = 1
+        for elt in entries:
+            entry = tk.Entry(main_frame, textvariable=elt, bg="#4F7292", fg='white')
+            entry.grid(column=1, row=i + n, columnspan=2, sticky="EW")
+            i += 1
 
         sci_choise = ttk.Combobox(main_frame, textvariable=self.sciVar, state='readonly', style='custom.TCombobox')
-        sci_choise.grid(column=1, row=8 + n, columnspan=2, sticky="EW")
+        sci_choise.grid(column=1, row=7 + n, columnspan=2, sticky="EW")
         with open('config.json', 'r') as json_files:
             config = json.load(json_files)
         sci_choise['values'] = config['sci']
 
-        date_entry = tk.Entry(main_frame, textvariable=self.date_entreeVar, bg="#4F7292")
-        date_entry.grid(column=1, row=9 + n, columnspan=2, sticky="EW")
-
-        loyer_entry = tk.Entry(main_frame, textvariable=self.loyerVar, bg="#4F7292", fg='white')
-        loyer_entry.grid(column=1, row=10 + n, columnspan=2, sticky="EW")
-
-        charges_entry = tk.Entry(main_frame, textvariable=self.chargesVar, bg="#4F7292", fg='white')
-        charges_entry.grid(column=1, row=11 + n, columnspan=2, sticky="EW")
-
-        indice_entry = tk.Entry(main_frame, textvariable=self.indice_base, bg="#4F7292", fg='white')
-        indice_entry.grid(column=1, row=12 + n, columnspan=2, sticky="EW")
-
-        selector1 = tk.Radiobutton(main_frame, text="Particulier", variable=self.selectorVar, value=1, bd=0,
-                                   relief=tk.FLAT,  bg="#1A5276", fg='#74D0F1', font=('Courier', 9))
-        selector1.grid(column=1, row=0, sticky="NSEW", padx=1)
-
-        selector2 = tk.Radiobutton(main_frame, text="Professionel", variable=self.selectorVar, value=2, bd=0,
-                                   relief=tk.FLAT,  bg="#1A5276", fg='#74D0F1', font=('Courier', 9))
-        selector2.grid(column=2, row=0, sticky="NSEW", padx=1)
+        entries = [self.date_entreeVar, self.loyerVar, self.chargesVar, self.indice_base]
+        i = 8
+        for elt in entries:
+            entry = tk.Entry(main_frame, textvariable=elt, bg="#4F7292", fg='white')
+            entry.grid(column=1, row=i + n, columnspan=2, sticky="EW")
+            i += 1
 
         button = tk.Button(main_frame, text="VALIDER", command=self.validation_tenant, bg="#3D4A56", fg='#74D0F1', font=('Courier', 9, "bold"), bd=0, relief=tk.GROOVE)
         button.grid(column=2, row=13 + n, sticky='NSEW', padx=1)
@@ -448,7 +396,8 @@ class CreatModGui(tk.Frame):
 
     def observer(self, *args):
         watch = self.tenant_old.get()
-        modification_table = self.database.modification_call(watch)
+        print(watch)
+        modification_table = self.database.modification_call(watch.split(" ")[0])
         print(modification_table)
         self.tenant_id = modification_table[0]
         self.tenant_var.set(modification_table[1])
@@ -464,8 +413,8 @@ class CreatModGui(tk.Frame):
         self.indice_base.set(modification_table[11])
         self.selectorVar.set(modification_table[12])
 
-    def cleaning(self, var):
-        return var.replace("((", "").replace(",),)", "").replace("'", "")
+    # def cleaning(self, var):
+    #     return var.replace("((", "").replace(",),)", "").replace("'", "")
 
     def check_entry(self):
         print(self.tenant_var.get())
@@ -476,12 +425,12 @@ class CreatModGui(tk.Frame):
             messagebox.showinfo("Attention", "un ou plusieurs champs vides, validation impossible")
             return False
 
-        if not Verification(self.cleaning(self.mailVar.get())).verification_mail() or\
-            not Verification(self.cleaning(self.telVar.get())).verification_tel() or\
-            not Verification(self.cleaning(self.date_entreeVar.get())).verification_date() or\
-            not Verification(float(self.cleaning(self.loyerVar.get()))).verification_loyer() or\
-            not Verification(float(self.cleaning(self.chargesVar.get()))).verification_charges() or\
-            not Verification(float(self.cleaning(self.indice_base.get()))).verification_indice():
+        if not Verification(self.mailVar.get()).verification_mail() or\
+            not Verification(self.telVar.get()).verification_tel() or\
+            not Verification(self.date_entreeVar.get()).verification_date() or\
+            not Verification(float(self.loyerVar.get())).verification_loyer() or\
+            not Verification(float(self.chargesVar.get())).verification_charges() or\
+            not Verification(float(self.indice_base.get())).verification_indice():
             messagebox.showinfo("Attention", "un ou plusieurs champs mal renseignés, validation impossible")
             return False
 
@@ -529,117 +478,6 @@ class CreatModGui(tk.Frame):
     def quit(self):
         self.destroy()
         MainGui().mainloop()
-
-
-
-# class ModificationGui(tk.Frame):
-#     def __init__(self):
-#         tk.Frame.__init__(self)
-#         self.master.title("modification de locataire")
-#         self.master.geometry("350x350")
-#         self.master.columnconfigure(0, weight=1)
-#         self.master.rowconfigure(0, weight=1)
-#         self.columnconfigure(0, weight=1)
-#         self.rowconfigure(0, weight=1)
-#         self.grid(sticky="NSEW")
-#         self.combostyle = ttk.Style()
-#         self.combostyle.theme_use('custom.TCombobox')
-#         self.database = sql_database()
-#         # variables
-#         self.tenant_var = tk.StringVar()
-#         self.champs_var = tk.StringVar()
-#         self.newval_var = tk.StringVar()
-#         self.old_var = tk.StringVar()
-#         self.old_var.set("En Attente de la selection")
-#         # tracing
-#         self.champs_var.trace("w", self.observer)
-#         # check box
-#         ok_format = self.register(self.check_format)
-#         # widget creation
-#         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg="#1A5276")
-#         main_frame.grid(column=0, row=0, sticky="NSEW")
-#
-#         tenant_label = tk.Label(main_frame, text="nom du locataire", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-#         tenant_label.grid(column=0, row=0, sticky="EW")
-#
-#         selec_entry = ttk.Combobox(main_frame, textvariable=self.tenant_var, state='readonly', style='custom.TCombobox')
-#         selec_entry.grid(column=1, row=0, sticky="EW")
-#
-#         tenant_list = self.database.elt_table("nom", "tenant")
-#         selec_entry['values'] = tenant_list
-#         nom_label = tk.Label(main_frame, text="champs à modifier", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-#         nom_label.grid(column=0, row=1, sticky="EW")
-#
-#         champs_entry = ttk.Combobox(main_frame, textvariable=self.champs_var, state='readonly', style='custom.TCombobox')
-#         champs_list = ["nom", "prenom", "adresse", "cp_ville", "tel", "mail", "cat", "sci", "loyer",
-#                        "charges", "date_d'entree", "indice_base"]
-#         champs_entry['values'] = champs_list
-#         champs_entry.grid(column=1, row=1, sticky="EW")
-#
-#         old_label = tk.Label(main_frame, text="Valeur actuelle", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-#         old_label.grid(column=0, row=4, sticky="EW")
-#
-#         old_data = tk.Label(main_frame, textvariable=self.old_var, font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-#         old_data.grid(column=1, row=4, sticky="EW")
-#
-#         mod_label = tk.Label(main_frame, text="modification", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-#         mod_label.grid(column=0, row=3, sticky="EW")
-#
-#         mod_entry = tk.Entry(main_frame, textvariable=self.newval_var, validatecommand=ok_format, validate='focusout',
-#                              bg="#4F7292", fg='red')
-#         mod_entry.grid(column=1, row=3, sticky="EW")
-#
-#         blank_label = tk.Label(main_frame, bg="#1A5276")
-#         blank_label.grid(column=1, row=5)
-#
-#         button_val = tk.Button(main_frame, text="Appliquer la modification", command=self.mod_entry, bg="#3D4A56",
-#                                fg='#74D0F1', font=('Courier', 9, "bold"), bd=0, relief=tk.GROOVE)
-#         button_val.grid(column=1, row=6, sticky="NSEW")
-#
-#         blank_label = tk.Label(main_frame, bg="#1A5276")
-#         blank_label.grid(column=1, row=7)
-#
-#         button_back = tk.Button(main_frame, text="Quitter et revenir", command=self.quit, bg="#3D4A56", fg='#74D0F1',
-#                                 font=('Courier', 9, "bold"), bd=0, relief=tk.GROOVE)
-#         button_back.grid(column=1, row=8, sticky="NSEW")
-#
-#
-#     def observer(self, *args):
-#         watch = self.champs_var.get()
-#         nom, prenom, adresse, cp_ville, loyer, charges, mail, cat, sci, _, _, _, _, _ = \
-#             self.database.pdf_table_single(self.tenant_var.get())[0]
-#         tel = self.database.one_elt("tel", "tenant", self.tenant_var.get())
-#         #mail = self.database.one_elt("mail", "tenant", self.tenant_var.get())
-#         date = self.database.one_elt("date_entree", "location", self.tenant_var.get())
-#         indice = self.database.one_elt("indice_base", "location", self.tenant_var.get())
-#         value = {"nom": nom, "prenom": prenom, "adresse": adresse, "cp_ville": cp_ville, "tel": tel, "mail": mail,
-#                  "cat": cat, "sci": sci, "loyer": loyer, "charges": charges, "date_d'entree": date, "indice_base": indice}
-#         self.old_var.set(value[watch])
-#
-#     def quit(self):
-#         self.destroy()
-#         MainGui().mainloop()
-#
-#     def mod_entry(self):
-#         if self.tenant_var.get() != "" and self.champs_var.get() != "":
-#             print(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
-#             self.database.modif_table(self.tenant_var.get(), self.champs_var.get(),
-#                                       self.newval_var.get())
-#             print(self.tenant_var.get(), self.champs_var.get(), self.newval_var.get())
-#             print("modification effectuée")
-#         else:
-#             print("champs vide")
-#             messagebox.showinfo("Attention", "un ou plusieurs champs vides, validation impossible")
-#
-#     def check_format(self):
-#         if self.champs_var.get() == "tel":
-#             Verification(self.newval_var.get()).verification_tel()
-#
-#         elif self.champs_var.get() == "mail":
-#             Verification(self.newval_var.get()).verification_mail()
-#
-#         elif self.champs_var.get() == "date":
-#             Verification(self.newval_var.get()).verification_date()
 
 
 class DeleteGui(tk.Frame):
@@ -726,7 +564,13 @@ class InfoGui(tk.Frame):
 
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg="#1A5276")
         main_frame.grid(column=0, row=0, sticky="NSEW")
-
+        champs = ["Nom du loctaire", 'Prenom', "Adresse", "CP_Ville", "Tel", "Email", "SCI", "catégorie", "Date_entrée"]
+        i = 0
+        for elt in champs:
+            nom_label = tk.Label(main_frame, text=elt, font=('Courier', 9, "bold"), bg="#1A5276",
+                                 fg="#74D0F1")
+            nom_label.grid(column=0, row=i, sticky="EW")
+            i +=1
         nom_label = tk.Label(main_frame, text="Nom du loctaire", font=('Courier', 9, "bold"), bg="#1A5276",
                              fg="#74D0F1")
         nom_label.grid(column=0, row=0, sticky="EW")
@@ -736,60 +580,12 @@ class InfoGui(tk.Frame):
         selec_entry['values'] = list_tenant
         selec_entry.grid(column=1, row=0, sticky="EW")
 
-        label_prenom = tk.Label(main_frame, text='Prenom', font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        label_prenom.grid(column=0, row=1, sticky="NSEW")
-
-        aff_prenom = tk.Label(main_frame, textvariable=self.prenom, font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        aff_prenom.grid(column=1, row=1, sticky="EW")
-
-        label_adresse = tk.Label(main_frame, text="Adresse", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        label_adresse.grid(column=0, row=2, sticky="NSEW")
-
-        aff_adresse = tk.Label(main_frame, textvariable=self.adresse, font=('Courier', 9, "bold"), bg="#1A5276",
-                              fg="#74D0F1")
-        aff_adresse.grid(column=1, row=2, sticky="EW")
-
-        label_ville = tk.Label(main_frame, text="CP_Ville", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        label_ville.grid(column=0, row=3, sticky="NSEW")
-
-        aff_ville = tk.Label(main_frame, textvariable=self.ville, font=('Courier', 9, "bold"), bg="#1A5276",
-                              fg="#74D0F1")
-        aff_ville.grid(column=1, row=3, sticky="EW")
-
-        label_tel = tk.Label(main_frame, text="Tel", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        label_tel.grid(column=0, row=4, sticky="NSEW")
-
-        aff_tel = tk.Label(main_frame, textvariable=self.tel, font=('Courier', 9, "bold"), bg="#1A5276",
-                              fg="#74D0F1")
-        aff_tel.grid(column=1, row=4, sticky="EW")
-
-        label_mail = tk.Label(main_frame, text="Email", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        label_mail.grid(column=0, row=5, sticky="NSEW")
-
-        aff_mail = tk.Label(main_frame, textvariable=self.mail, font=('Courier', 9, "bold"), bg="#1A5276",
-                              fg="#74D0F1")
-        aff_mail.grid(column=1, row=5, sticky="EW")
-
-        label_sci = tk.Label(main_frame, text="SCI", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        label_sci.grid(column=0, row=6, sticky="NSEW")
-
-        aff_sci = tk.Label(main_frame, textvariable=self.sci, font=('Courier', 9, "bold"), bg="#1A5276",
-                            fg="#74D0F1")
-        aff_sci.grid(column=1, row=6, sticky="EW")
-
-        label_cat = tk.Label(main_frame, text="catégorie", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        label_cat.grid(column=0, row=7, sticky="NSEW")
-
-        aff_cat = tk.Label(main_frame, textvariable=self.cat, font=('Courier', 9, "bold"), bg="#1A5276",
-                            fg="#74D0F1")
-        aff_cat.grid(column=1, row=7, sticky="EW")
-
-        label_date = tk.Label(main_frame, text="Date_entrée", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        label_date.grid(column=0, row=8, sticky="NSEW")
-
-        aff_date = tk.Label(main_frame, textvariable=self.date_entree, font=('Courier', 9, "bold"), bg="#1A5276",
-                            fg="#74D0F1")
-        aff_date.grid(column=1, row=8, sticky="EW")
+        entries = [self.prenom, self.adresse, self.ville, self.tel, self.mail, self.sci, self.cat, self.date_entree]
+        i = 1
+        for elt in entries:
+            entry = tk.Label(main_frame, textvariable=elt, font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
+            entry.grid(column=1, row=i, sticky="EW")
+            i += 1
 
         blank_label = tk.Label(main_frame, bg="#1A5276")
         blank_label.grid(column=0, row=9, columnspan=2)
@@ -800,17 +596,16 @@ class InfoGui(tk.Frame):
 
     def observer(self, *args):
         watch = self.nom.get()
-        _, _, prenom, adresse, ville, tel, mail, cat = self.database.elt_table_one("nom", "tenant", watch)[0]
-        _, sci, _, _, _, _, _, dates_entree, _ = self.database.elt_table_one("nom", "location", watch)[0]
-        print(prenom, adresse, ville, tel, mail, cat, sci, dates_entree)
-        self.prenom.set(prenom)
-        self.adresse.set(adresse)
-        self.ville.set(ville)
-        self.tel.set(tel)
-        self.mail.set(mail)
-        self.sci.set(sci)
-        self.date_entree.set(dates_entree)
-        if cat == "0":
+        print(watch)
+        result = self.database.info_table(watch.split(" ")[0])
+        self.prenom.set(result[0][1])
+        self.adresse.set(result[0][2])
+        self.ville.set(result[0][3])
+        self.tel.set(result[0][4])
+        self.mail.set(result[0][5])
+        self.sci.set(result[0][6])
+        self.date_entree.set(result[0][8])
+        if result[0][7] == "0":
             self.cat.set("Particulier")
         else:
             self.cat.set("Professionnel")
@@ -889,19 +684,21 @@ class MajRentGui(tk.Frame):
 
     def observer(self, *args):
         watch = self.tenant_name.get()
-        base_loyer = self.database.one_elt("base_loyer", "location", watch)[0][0]
+        base_loyer = self.database.one_elt("base_loyer", "location", watch.split(" ")[0])[0][0]
         self.base_loyer.set(f'{float(base_loyer):0.2f} €')
 
     def observer_2(self, *args):
         if not self.tenant_name.get():
             self.new_rent.set("En attente du locataire")
+
         else:
             try:
                 new_indice = self.new_indice.get()
                 pattern = re.compile(r"(^\d+.\d{2})")
                 base_rent = pattern.search(self.base_loyer.get())
                 base_rent = base_rent.group(0)
-                base_indice = self.database.one_elt("indice_base", "location", self.tenant_name.get())[0][0]
+                watch = self.tenant_name.get()
+                base_indice = self.database.one_elt("indice_base", "location", watch.split(" ")[0])[0][0]
                 self.new_rent.set(f"{(float(base_rent) * float(new_indice) / float(base_indice)):0.2f} €")
             except ValueError as e:
                 print(e)
@@ -913,8 +710,11 @@ class MajRentGui(tk.Frame):
             num = re.compile(r"(\d+.\d+)")
             new_rent = num.search(self.new_rent.get())
             new_rent = new_rent.group(0)
-            self.database.modif_table(self.tenant_name.get(), "loyer", new_rent)
-
+            watch = self.tenant_name.get()
+            print(new_rent, watch.split(" ")[0])
+            print(type(new_rent))
+            self.database.maj_rent_request(float(new_rent), watch.split(" ")[0])
+            print("done")
         else:
             print(type(self.new_indice.get()))
             messagebox.showinfo("Attention", "Saisie de l'indice incorrect")
@@ -1018,38 +818,26 @@ class LetterGui(tk.Frame):
             directory = functions.directory()
             config = functions.config_data()
             name = self.tenant_name.get()
-            self.letter_pdf(name, directory, config)
+            self.letter_pdf(name.split(" ")[0], directory, config)
 
-    def letter_pdf(self, name, directory, config):
-        nom = name
+    def letter_pdf(self, index, directory, config):
+
+        result = self.database.letter_request(index)
         year = str(self.date.year)
         path_dir = directory.joinpath("indexation", year)
         path_dir.mkdir(parents=True, exist_ok=True)
-        path = path_dir.joinpath("indexation_" + nom + "_" + year + ".pdf")
-        print(path)
+        path = path_dir.joinpath("indexation_" + f"{result[0][1]}_{result[0][2]}" + "_" + year + ".pdf")
         pdf = canvas.Canvas(str(path))
-        prenom = self.database.one_elt("prenom", "tenant", nom)[0][0]
-        adresse = self.database.one_elt("adresse", "tenant", nom)[0][0]
-        ville = self.database.one_elt("cp_ville", "tenant", nom)[0][0]
-        loyer = self.database.one_elt("loyer", "location", nom)[0][0]
-        charge = self.database.one_elt("charges", "location", nom)[0][0]
-        day = 1
         month = str(self.date.month + 1)
-        cat = self.database.one_elt("cat", "tenant", nom)[0][0]
-        sci_nom = self.database.one_elt("sci", "location", nom)[0][0]
-        sci_adresse = self.database.one_elt("adresse", "sci", sci_nom)[0][0]
-        sci_ville = self.database.one_elt("cp_ville", "sci", sci_nom)[0][0]
-        sci_tel = self.database.one_elt("tel", "sci", sci_nom)[0][0]
-        sci_mail = self.database.one_elt("mail", "sci", sci_nom)[0][0]
-        sci_siret = self.database.one_elt("siret", "sci", sci_nom)[0][0]
-        indice_base = self.database.one_elt("indice_base", "location", nom)[0][0]
-        mail = self.database.one_elt("mail", "tenant", nom)[0][0]
-
-        pdf_gen = IndexLetter(pdf, nom, prenom, adresse, ville, loyer, charge, day, month, year, sci_nom, sci_adresse,
-                              sci_ville, sci_tel, sci_mail, sci_siret, indice_base, self.new_indice.get(), cat)
+        day=1
+        pdf_gen = IndexLetter(pdf, nom=result[0][1], prenom=result[0][2], adresse=result[0][3], ville=result[0][4],
+                               loyer=result[0][8], charge=result[0][9], day=day, month=month, year=year,
+                               sci_nom=result[0][7], sci_adresse=result[0][12], sci_cp_ville=result[0][13],
+                               sci_tel=result[0][14], sci_mail=result[0][15], sci_siret=result[0][16],
+                               indice_base=result[0][5], indice_new=self.new_indice.get(), cat=result[0][10])
 
         pdf_gen.generator()
-        mail = send_mail("Lettre d'indexation", config["master_mail"], config["password"], mail, config["SMTP"],
+        mail = send_mail("Lettre d'indexation", config["master_mail"], config["password"], result[0][17], config["SMTP"],
                          config["port"], path)
         mail.send()
 
@@ -1184,41 +972,20 @@ class NewModSciGUI(tk.Frame):
             self.master.title("Nouvelle sci")
             n = 0
 
-        name_label = tk.Label(main_frame, text="SCI", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        name_label.grid(column=0, row=0 + n, sticky="NSEW")
+        champs = ["SCI", "Adresse", "CP/ville", "Tel", "Email", "SIRET"]
+        i = 0
+        for elt in champs:
+            label = tk.Label(main_frame, text=elt, font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
+            label.grid(column=0, row=i + n, sticky="NSEW")
+            i += 1
 
-        adresse_label = tk.Label(main_frame, text="Adresse", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        adresse_label.grid(column=0, row=1 + n, sticky="NSEW")
-
-        city_label = tk.Label(main_frame, text="CP/ville", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        city_label.grid(column=0, row=2 + n, sticky="NSEW")
-
-        tel_label = tk.Label(main_frame, text="Tel", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        tel_label.grid(column=0, row=3 + n, sticky="NSEW")
-
-        mail_label = tk.Label(main_frame, text="Email", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        mail_label.grid(column=0, row=4 + n, sticky="NSEW")
-
-        siret_label = tk.Label(main_frame, text="SIRET", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
-        siret_label.grid(column=0, row=5 + n, sticky="NSEW")
-
-        name_entry = tk.Entry(main_frame, textvariable=self.name_var, bg="#4F7292", fg='white')
-        name_entry.grid(column=1, row=0 + n, sticky="NSEW", columnspan=2)
-
-        adresse_entry = tk.Entry(main_frame, textvariable=self.adresse_var, bg="#4F7292", fg='white')
-        adresse_entry.grid(column=1, row=1 + n, sticky="NSEW", columnspan=2)
-
-        city_entry = tk.Entry(main_frame, textvariable=self.city_var, bg="#4F7292", fg='white')
-        city_entry.grid(column=1, row=2 + n, sticky="NSEW", columnspan=2)
-
-        tel_entry = tk.Entry(main_frame, textvariable=self.tel_var, bg="#4F7292", fg='white')
-        tel_entry.grid(column=1, row=3 + n, sticky="NSEW", columnspan=2)
-
-        mail_entry = tk.Entry(main_frame, textvariable=self.mail_var, bg="#4F7292", fg='white')
-        mail_entry.grid(column=1, row=4 + n, sticky="NSEW", columnspan=2)
-
-        siret_entry = tk.Entry(main_frame, textvariable=self.siret_var, bg="#4F7292", fg='white')
-        siret_entry.grid(column=1, row=5 + n, sticky="NSEW", columnspan=2)
+        entries = [self.name_var, self.adresse_var, self.city_var, self.tel_var, self.mail_var, self.siret_var,
+                   self.add_sci]
+        i = 0
+        for elt in entries:
+            entry = tk.Entry(main_frame, textvariable=elt, bg="#4F7292", fg='white')
+            entry.grid(column=1, row=i + n, sticky="NSEW", columnspan=2)
+            i += 1
 
         boutton_add = tk.Button(main_frame, text="Ajouter", command=self.add_sci, bg="#3D4A56", fg='#74D0F1', font=('Courier', 9, "bold"), bd=0, relief=tk.GROOVE)
         boutton_add.grid(column=1, row=6 + n, sticky="NSEW")
@@ -1228,19 +995,13 @@ class NewModSciGUI(tk.Frame):
 
     def observer(self, *args):
         watch = self.old_var.get()
-        self.name_var.set(self.database.one_elt("nom", "sci", watch))
-        self.adresse_var.set(self.database.one_elt("adresse", "sci", watch)[0][0].replace("{", "").replace("}", ""))
-        self.city_var.set(self.database.one_elt("cp_ville", "sci", watch)[0][0].replace("{", "").replace("}", ""))
-        self.tel_var.set(self.database.one_elt("tel", "sci", watch))
-        self.mail_var.set(self.database.one_elt("mail", "sci", watch))
-        self.siret_var.set(self.database.one_elt("siret", "sci", watch))
-
-        self.name_var = tk.StringVar()
-        self.adresse_var = tk.StringVar()
-        self.city_var = tk.StringVar()
-        self.tel_var = tk.StringVar()
-        self.mail_var = tk.StringVar()
-        self.siret_var = tk.StringVar()
+        result = self.database.info_sci(watch.split(" ")[0])
+        self.name_var.set(result[0][1])
+        self.adresse_var.set(result[0][2])
+        self.city_var.set(result[0][3])
+        self.tel_var.set(result[0][4])
+        self.mail_var.set(result[0][5])
+        self.siret_var.set(result[0][6])
 
     def check_entry(self):
         if self.name_var.get() == "" or self.adresse_var.get() == "" or self.city_var.get() == "" \
@@ -1289,77 +1050,13 @@ class NewModSciGUI(tk.Frame):
         self.destroy()
         MainGui().mainloop()
 
-
-# class ModSciGui(tk.Frame):
-#     def __init__(self):
-#         tk.Frame.__init__(self)
-#         self.master.title("Modification sci")
-#         self.master.geometry("350x350")
-#         self.master.columnconfigure(0, weight=1)
-#         self.master.rowconfigure(0, weight=1)
-#         self.columnconfigure(0, weight=1)
-#         self.rowconfigure(0, weight=1)
-#         self.grid(sticky="NSEW")
-#         self.database = sql_database()
-#         # widgets variables
-#         self.sci_var = tk.StringVar()
-#         self.sci_var.set("nom de la sci à modifier")
-#         self.champs_var = tk.StringVar()
-#         self.champs_var.set("champs à modifier")
-#         self.newval_var = tk.StringVar()
-#         self.newval_var.set("nouvelle valeur")
-#         # widget creation
-#         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
-#         main_frame.columnconfigure(0, weight=0)
-#         main_frame.columnconfigure(1, weight=1)
-#         sci_label = tk.Label(main_frame, text="sci")
-#         selec_entry = ttk.Combobox(main_frame, textvariable=self.sci_var, state='readonly')
-#         sci_list = self.database.elt_table("nom", "sci")
-#         selec_entry['values'] = sci_list
-#         champs_label = tk.Label(main_frame, text="champs à modifier")
-#         champs_entry = ttk.Combobox(main_frame, textvariable=self.champs_var, state='readonly')
-#         champs_list = ['nom', 'adresse', 'cp_ville', 'tel', 'mail', 'siret']
-#         champs_entry['values'] = champs_list
-#         selec_entry['values'] = sci_list
-#         mod_label = tk.Label(main_frame, text="modification")
-#         mod_entry = tk.Entry(main_frame, textvariable=self.newval_var)
-#         boutton_add = tk.Button(main_frame, text="Ajouter", command=self.mod_sci)
-#         boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
-#         # position
-#         main_frame.grid(column=0, row=0, sticky="NSEW")
-#         main_frame.grid(column=0, row=0, sticky="NSEW")
-#         sci_label.grid(column=0, row=0, sticky="EW")
-#         selec_entry.grid(column=1, row=0, sticky="EW")
-#         champs_label.grid(column=0, row=1, sticky="EW")
-#         champs_entry.grid(column=1, row=1, sticky="EW")
-#         mod_label.grid(column=0, row=2, sticky="EW")
-#         mod_entry.grid(column=1, row=2, sticky="EW")
-#         boutton_add.grid(column=0, row=6, sticky="NSEW")
-#         boutton_quitter.grid(column=1, row=6, sticky="NSEW")
-#
-#     def mod_sci(self):
-#         self.database.modif_table(self.sci_var.get(), self.champs_var.get(), self.newval_var.get())
-#         print(self.sci_var.get(), self.champs_var.get(), self.newval_var.get())
-#         with open('config.json', 'r') as json_files:
-#             config = json.load(json_files)
-#             config['sci'].remove("self.sci_var.get()")
-#             config['sci'].append("self.newval_var.get()")
-#         with open('config.json', 'w') as json_files:
-#             json.dump(config, json_files)
-#
-#         print("modifications effectuées")
-#         messagebox.showinfo("Attention", "SCI Ajoutée")
-#
-#     def quit(self):
-#         self.destroy()
-#         MainGui().mainloop()
-
-
 class DelSciGui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.title("Supression SCI")
         self.master.geometry("350x350")
+        self.combostyle = ttk.Style()
+        self.combostyle.theme_use('custom.TCombobox')
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -1370,21 +1067,30 @@ class DelSciGui(tk.Frame):
         self.nom_var = tk.StringVar()
         self.nom_var.set("Attention action definitive")
         # widget creation
-        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE)
-        main_frame.columnconfigure(0, weight=0)
-        main_frame.columnconfigure(1, weight=1)
-        nom_label = tk.Label(main_frame, text="Nom de la sci")
-        selec_entry = ttk.Combobox(main_frame, textvariable=self.nom_var, state='readonly')
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg="#1A5276")
+        main_frame.grid(column=0, row=0, sticky="NSEW")
+
+        nom_label = tk.Label(main_frame, text="Nom de la sci", font=('Courier', 9, "bold"), bg="#1A5276", fg="#74D0F1")
+        nom_label.grid(column=0, row=0, sticky="EW")
+
+        selec_entry = ttk.Combobox(main_frame, textvariable=self.nom_var, state='readonly', style='custom.TCombobox')
+        selec_entry.grid(column=1, row=0, sticky="EW")
         sci_list = self.database.elt_table("nom", "sci")
         selec_entry['values'] = sci_list
-        boutton_add = tk.Button(main_frame, text="Supprimer", command=self.del_entry)
-        boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit)
-        # widget position
-        main_frame.grid(column=0, row=0, sticky="NSEW")
-        nom_label.grid(column=0, row=0, sticky="EW")
-        selec_entry.grid(column=1, row=0, sticky="EW")
-        boutton_add.grid(column=0, row=6, sticky="NSEW")
-        boutton_quitter.grid(column=1, row=6, sticky="NSEW")
+
+        blank_label = tk.Label(main_frame, bg="#1A5276")
+        blank_label.grid(column=1, row=6, columnspan=2, sticky="NSEW")
+
+        boutton_add = tk.Button(main_frame, text="Supprimer", command=self.del_entry, bg="#3D4A56", fg='#74D0F1',
+                                font=('Courier', 9, "bold"), bd=0, relief=tk.GROOVE)
+        boutton_add.grid(column=1, row=7, sticky="NSEW")
+
+        blank_label = tk.Label(main_frame, bg="#1A5276")
+        blank_label.grid(column=1, row=8, columnspan=2, sticky="NSEW")
+
+        boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit, bg="#3D4A56", fg='#74D0F1',
+                                    font=('Courier', 9, "bold"), bd=0, relief=tk.GROOVE)
+        boutton_quitter.grid(column=1, row=9, sticky="NSEW")
 
     def del_entry(self):
         if self.nom_var.get() != "Attention action definitive":
