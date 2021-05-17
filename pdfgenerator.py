@@ -35,7 +35,7 @@ class PdfGenerator:
     def generator(self):
         self.pdf.setFont("Helvetica", 15)
 
-        if self.cat == 1:  # habitation case
+        if self.cat == 0:  # habitation case
             self.pdf.drawString(150, 550,
                                 f"Loyer pour le mois de {self.month_list[int(self.month)]} {self.year}")
             self.pdf.drawString(140, 450, "Loyer")

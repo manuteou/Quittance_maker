@@ -226,7 +226,7 @@ class MainGui(tk.Frame):
             path_dir = directory.joinpath(elt[0][10], year, month)
             print (path_dir)
             path_dir.mkdir(parents=True, exist_ok=True)
-            path = path_dir.joinpath(f"{elt[0][3]}_{elt[0][4]}" + ".pdf")
+            path = path_dir.joinpath(f"{elt[0][2]}_{elt[0][3]}" + ".pdf")
             pdf = canvas.Canvas(str(path))
             pdf_gen = PdfGenerator(pdf, nom=elt[0][2], prenom=elt[0][3], adresse=elt[0][4], ville=elt[0][5],
                                    loyer=elt[0][6], charge=elt[0][7], day=day, month=month, years=year, cat=elt[0][9],
@@ -355,11 +355,11 @@ class CreatModGui(tk.Frame):
             self.type_field = 0
             self.master.title("Création de Locataire")
 
-        selector1 = tk.Radiobutton(main_frame, text="Particulier", variable=self.selectorVar, value=1, bd=0,
+        selector1 = tk.Radiobutton(main_frame, text="Particulier", variable=self.selectorVar, value=0, bd=0,
                                   relief=tk.FLAT, bg="#1A5276", fg='#74D0F1', font=('Courier', 9))
         selector1.grid(column=1, row=0, sticky="NSEW", padx=1)
 
-        selector2 = tk.Radiobutton(main_frame, text="Professionel", variable=self.selectorVar, value=2, bd=0,
+        selector2 = tk.Radiobutton(main_frame, text="Professionel", variable=self.selectorVar, value=1, bd=0,
                                    relief=tk.FLAT, bg="#1A5276", fg='#74D0F1', font=('Courier', 9))
         selector2.grid(column=2, row=0, sticky="NSEW", padx=1)
         champs = ["Nom", "Prenom", "Adresse", "CP_ville", "Telephone", "Email", "SCI", "Date d'entrée", "Loyer",
@@ -450,7 +450,7 @@ class CreatModGui(tk.Frame):
                                self.sciVar.get(), self.loyerVar.get(),
                                self.chargesVar.get(), self.selectorVar.get()
                                , self.date_entreeVar.get(), self.indice_base.get())
-
+            print(self.selectorVar.get())
             insert_tenant = {'nom': client.nom, 'prenom': client.prenom, 'adresse': client.adresse,
                              'CP_ville': client.cp_ville, 'tel': client.tel, 'mail': client.mail.lower(),
                              'cat': client.cat}
@@ -599,7 +599,6 @@ class InfoGui(tk.Frame):
 
     def observer(self, *args):
         watch = self.nom.get()
-        print(watch)
         result = self.database.info_table(watch.split(" ")[0])
         self.prenom.set(result[0][1])
         self.adresse.set(result[0][2])
@@ -608,7 +607,8 @@ class InfoGui(tk.Frame):
         self.mail.set(result[0][5])
         self.sci.set(result[0][6])
         self.date_entree.set(result[0][8])
-        if result[0][7] == "0":
+        print(result[0][7])
+        if result[0][7] == 0:
             self.cat.set("Particulier")
         else:
             self.cat.set("Professionnel")
@@ -960,6 +960,7 @@ class NewModSciGUI(tk.Frame):
         main_frame.grid(column=0, row=0, sticky="NSEW")
 
         if value == 0:
+            self.type_field = 0
             n = 1
             self.master.title("Modification sci")
             self.old_var = tk.StringVar()
@@ -972,6 +973,7 @@ class NewModSciGUI(tk.Frame):
             selec_entry['values'] = sci_list
 
         if value == 1:
+            self.type_field = 1
             self.master.title("Nouvelle sci")
             n = 0
 
@@ -1007,8 +1009,7 @@ class NewModSciGUI(tk.Frame):
         self.siret_var.set(result[0][6])
 
     def check_entry(self):
-        if self.name_var.get() == "" or self.adresse_var.get() == "" or self.city_var.get() == "" \
-                or self.tel_var.get() == "" or self.mail_var.get() == "":
+        if self.name_var.get() == "" or self.adresse_var.get() == "" or self.city_var.get() == "":
             print("champs vide")
             messagebox.showinfo("Attention", "un ou plusieurs champs vides, validation impossible")
             return False
@@ -1036,18 +1037,27 @@ class NewModSciGUI(tk.Frame):
             print({'nom': new_sci.nom, 'adresse': new_sci.adresse, 'cp_ville': new_sci.cp_ville,
                    'tel': new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret})
 
-            self.database.create_entry("sci", insert_sci)
+            if self.type_field == 0:
+                id = self.old_var.get().split(" ")[0]
+                self.database.update_entry(id, "sci", insert_sci)
 
-            with open('config.json', 'r') as json_files:
-                config = json.load(json_files)
-            try:
-                config['sci'].remove(self.old_var.get())
-            finally:
-                config["sci"].append(self.name_var.get())
-                with open('config.json', 'w') as json_files:
-                    json.dump(config, json_files)
-                print("sci rajouter au json")
-                messagebox.showinfo("Attention", "SCI Ajoutée")
+                with open('config.json', 'r') as json_files:
+                    config = json.load(json_files)
+                try:
+                    config['sci'].remove(self.old_var.get().split(" ")[1])
+                finally:
+                    config["sci"].append(new_sci.nom)
+                    with open('config.json', 'w') as json_files:
+                        json.dump(config, json_files)
+                    print("sci rajouter au json")
+                    messagebox.showinfo("Attention", "SCI Ajoutée")
+
+            if self.type_field == 1:
+                self.database.create_entry("sci", insert_sci)
+
+
+
+
 
     def quit(self):
         self.destroy()
@@ -1101,7 +1111,8 @@ class DelSciGui(tk.Frame):
             self.database.delete_entry("sci", index)
         with open('config.json', 'r') as json_files:
             config = json.load(json_files)
-        config["sci"].remove(self.nom_var.get())
+        print(self.nom_var.get().split(" ")[1])
+        config["sci"].remove(self.nom_var.get().split(" ")[1])
         with open('config.json', 'w') as json_files:
             json.dump(config, json_files)
         messagebox.showinfo("Attention", "SCI supprimée")
