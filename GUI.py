@@ -525,9 +525,10 @@ class DeleteGui(tk.Frame):
 
     def del_entry(self):
         if self.nom_var.get() != "Attention action definitive":
-            print(self.nom_var.get())
-            self.database.delete_entry("tenant", self.nom_var.get())
-            self.database.delete_entry("location", self.nom_var.get())
+            index = self.nom_var.get().split(" ")[0]
+            print(index)
+            self.database.delete_entry("tenant", index)
+            self.database.delete_entry("location", index)
             print("suppression effectuée")
             messagebox.showinfo("Attention", "Supression effectuée")
 
@@ -1094,16 +1095,14 @@ class DelSciGui(tk.Frame):
 
     def del_entry(self):
         if self.nom_var.get() != "Attention action definitive":
-            self.database.delete_entry("sci", self.nom_var.get())
-            print("sci", self.nom_var.get())
-            print("suppression effectuée")
+            index = self.nom_var.get().split(" ")[0]
+            self.database.delete_entry("sci", index)
         with open('config.json', 'r') as json_files:
             config = json.load(json_files)
         config["sci"].remove(self.nom_var.get())
         with open('config.json', 'w') as json_files:
             json.dump(config, json_files)
-        print("suppression effectuée")
-        messagebox.showinfo("Attention", "SCI suprimée")
+        messagebox.showinfo("Attention", "SCI supprimée")
 
     def quit(self):
         self.destroy()

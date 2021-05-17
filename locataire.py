@@ -105,29 +105,31 @@ class sql_database():
         self.conn.commit()
 
 
-    def delete_entry(self, table, entry):
-        entry = entry.replace("{", "").replace("}", "")
-        sql_delete_entry = f"""DELETE FROM {table} WHERE nom= '{entry}'"""
+    def delete_entry(self, table, id):
+        sql_delete_entry = f"""DELETE FROM {table} WHERE id = {id}"""
         print(sql_delete_entry)
         self.c.execute(sql_delete_entry)
         self.conn.commit()
 
     def elt_table(self, elt, table):
-        elt = elt.replace("{", "").replace("}", "")
         sql_elt_table = f"""SELECT id, {elt} FROM {table} """
         self.c.execute(sql_elt_table)
         elt = self.c.fetchall()
         return elt
 
     def elt_table_one(self, elt, table, champs):
-        elt = elt.replace("{", "").replace("}", "")
-        champs = champs.replace("{", "").replace("}", "")
         sql_elt_table = f"""SELECT * FROM {table} 
                             WHERE {elt}= "{champs}";"""
         self.c.execute(sql_elt_table)
         elt = self.c.fetchall()
         return elt
 
+    def one_elt(self, elt, table, id):
+        sql_one_elt = f"""SELECT {elt} FROM {table}
+                            WHERE id = {id}"""
+        self.c.execute(sql_one_elt)
+        elt = self.c.fetchall()
+        return elt
 
     def pdf_table_single(self, index):
         sql_pdf_table_single = f"""SELECT  t.id, l.id,   t.nom, prenom, t.adresse, t.CP_ville, loyer, charges, t.mail, cat, s.nom, 
