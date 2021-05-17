@@ -463,7 +463,7 @@ class CreatModGui(tk.Frame):
                 print("modification")
                 self.database.update_entry(self.tenant_id, "tenant", insert_tenant)
                 self.database.update_entry(self.tenant_id, "location", insert_location)
-
+                messagebox.showinfo("Information", "modification(s) enregistré(es)")
 
 
             elif self.type_field == 0:
@@ -717,6 +717,7 @@ class MajRentGui(tk.Frame):
             print(new_rent, watch.split(" ")[0])
             print(type(new_rent))
             self.database.maj_rent_request(float(new_rent), watch.split(" ")[0])
+            messagebox.showinfo("Information", "Loyer enregistré")
             print("done")
         else:
             print(type(self.new_indice.get()))
@@ -992,10 +993,10 @@ class NewModSciGUI(tk.Frame):
             entry.grid(column=1, row=i + n, sticky="NSEW", columnspan=2)
             i += 1
 
-        boutton_add = tk.Button(main_frame, text="Ajouter", command=self.add_sci, bg="#3D4A56", fg='#74D0F1', font=('Courier', 9, "bold"), bd=0, relief=tk.GROOVE)
+        boutton_add = tk.Button(main_frame, text="VALIDER", command=self.add_sci, bg="#3D4A56", fg='#74D0F1', font=('Courier', 9, "bold"), bd=0, relief=tk.GROOVE)
         boutton_add.grid(column=1, row=6 + n, sticky="NSEW")
 
-        boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit, bg="#3D4A56", fg='#74D0F1', font=('Courier', 9, "bold"), bd=0, relief=tk.GROOVE)
+        boutton_quitter = tk.Button(main_frame, text="QUITTER", command=self.quit, bg="#3D4A56", fg='#74D0F1', font=('Courier', 9, "bold"), bd=0, relief=tk.GROOVE)
         boutton_quitter.grid(column=2, row=6 + n, sticky="NSEW")
 
     def observer(self, *args):
@@ -1050,11 +1051,11 @@ class NewModSciGUI(tk.Frame):
                     with open('config.json', 'w') as json_files:
                         json.dump(config, json_files)
                     print("sci rajouter au json")
-                    messagebox.showinfo("Attention", "SCI Ajoutée")
+                    messagebox.showinfo("Information", "modification(s) effectué(es)")
 
             if self.type_field == 1:
                 self.database.create_entry("sci", insert_sci)
-
+                messagebox.showinfo("Information", "SCI enregistrée")
 
 
 
