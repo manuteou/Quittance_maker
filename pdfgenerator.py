@@ -94,7 +94,7 @@ class PdfGenerator:
 
 class IndexLetter:
     def __init__(self, pdf, nom, prenom, adresse, ville, loyer, charge, day, month, year,
-                 sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret, indice_base, indice_new, cat):
+                 sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret, indice_base, indice_new, cat, date_entree):
         self.month_list = {1: ["Janvier", "1er trimestre"], 2: ["Fevrier", "1er trimestre"], 3: ["Mars", "1er trimestre"],
                            4: ["Avril", "2eme trimestre"], 5: ["Mai", "2eme trimestre"], 6: ["Juin", "2eme trimestre"],
                            7: ["Juillet", "3eme trimestre"], 8: ["Aout", "3eme trimestre"], 9: ["Septembre", "3eme trimestre"],
@@ -119,6 +119,7 @@ class IndexLetter:
         self.indice_base = indice_base
         self.new_indice = indice_new
         self.cat = cat
+        self.date_entree = date_entree
         self.database = sql_database()
         if self.cat == 1:
             self.type ="loyers commerciaux"
@@ -126,7 +127,6 @@ class IndexLetter:
             self.type ="de références des loyers"
 
     def generator(self):
-
         self.pdf.setFont("Helvetica", 15)
         if self.cat == 1:
             self.pdf.drawString(60, 300, "Loyer hors charges")
@@ -166,8 +166,8 @@ class IndexLetter:
         self.pdf.drawString(20, 420, f"selon l'indice de révision (indice national des {self.type} prévu dans ")
         self.pdf.drawString(20, 400, "votre bail conformément à la législation en vigeur. Le loyer hors charges est augmenté")
         self.pdf.drawString(20, 380, f"de {float(self.new_indice) / float(self.indice_base):0.2f} %. Les deux indices considérés sont :")
-        self.pdf.drawString(60, 360, f"-      {self.month_list[int(self.month)][1]} : {self.indice_base}")
-        self.pdf.drawString(60, 340, f"-      {self.month_list[int(self.month)][1]} : {self.new_indice}")
+        self.pdf.drawString(60, 360, f"-      {self.month_list[int(self.month)][1]} {self.date_entree.split('/')[2]}: {self.indice_base}")
+        self.pdf.drawString(60, 340, f"-      {self.month_list[int(self.month)][1]} {self.year} : {self.new_indice}")
         self.pdf.drawString(20, 320, "Les nouvelles données de votre quittance seront dorénavant les suivantes :")
 
         self.pdf.drawString(20, 220, "Je reste à votre dispositionpour de plus amples renseignements. Dans cette attente")

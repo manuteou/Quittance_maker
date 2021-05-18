@@ -834,11 +834,13 @@ class LetterGui(tk.Frame):
         pdf = canvas.Canvas(str(path))
         month = str(self.date.month + 1)
         day=1
+        print(result[0])
         pdf_gen = IndexLetter(pdf, nom=result[0][1], prenom=result[0][2], adresse=result[0][3], ville=result[0][4],
                                loyer=result[0][8], charge=result[0][9], day=day, month=month, year=year,
                                sci_nom=result[0][7], sci_adresse=result[0][12], sci_cp_ville=result[0][13],
                                sci_tel=result[0][14], sci_mail=result[0][15], sci_siret=result[0][16],
-                               indice_base=result[0][5], indice_new=self.new_indice.get(), cat=result[0][10])
+                               indice_base=result[0][5], indice_new=self.new_indice.get(), cat=result[0][10],
+                              date_entree=result[0][18])
 
         pdf_gen.generator()
         mail = send_mail("Lettre d'indexation", config["master_mail"], config["password"], result[0][17], config["SMTP"],
@@ -1042,20 +1044,27 @@ class NewModSciGUI(tk.Frame):
                 id = self.old_var.get().split(" ")[0]
                 self.database.update_entry(id, "sci", insert_sci)
 
+            if self.type_field == 1:
+                self.database.create_entry("sci", insert_sci)
+                messagebox.showinfo("Information", "SCI enregistrée")
+
                 with open('config.json', 'r') as json_files:
                     config = json.load(json_files)
+                    print("Ouverture config")
                 try:
+                    print("tentative de remove")
                     config['sci'].remove(self.old_var.get().split(" ")[1])
+                except AttributeError as e:
+                    print("supression non realisée car création")
                 finally:
+                    print("ecriture de la sci")
                     config["sci"].append(new_sci.nom)
                     with open('config.json', 'w') as json_files:
                         json.dump(config, json_files)
                     print("sci rajouter au json")
-                    messagebox.showinfo("Information", "modification(s) effectué(es)")
+                    #messagebox.showinfo("Information", "modification(s) effectué(es)")
 
-            if self.type_field == 1:
-                self.database.create_entry("sci", insert_sci)
-                messagebox.showinfo("Information", "SCI enregistrée")
+
 
 
 
