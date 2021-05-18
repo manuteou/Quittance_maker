@@ -1,4 +1,4 @@
-<img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Splash.PNG" alt="drawing" width="500"/>
+<img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Splash.PNG" alt="drawing" width="500" align="center"/>
 This program is done to manage tenant for frensh country.<br />
 What you can do :<br />
   - create and manage sci<br />
@@ -50,7 +50,7 @@ On this menu you can manage SCI:<br />
     
    ## Receipt model<br />
    The program send 2 types of receipt model:<br />
-      - a professional tenant version
+      - a professional tenant version<br />
       <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Quittance_pro.PNG" alt="drawing" width="500"/>
       - a particular tenant version<br />
       <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Quittance_par.PNG" alt="drawing" width="500"/>
