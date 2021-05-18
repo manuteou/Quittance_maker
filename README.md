@@ -35,9 +35,9 @@ On this menu you can manage SCI:<br />
    # Indexation Menu <br />
    On this menu you can manage the rent: <br />
       - send an email to prevent the tenant of a futur rent increase<br />
-    <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/lettre.PNG" alt="drawing" width="300"/> 
+    <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/lettre.PNG" alt="drawing" width="300"/><br /> 
       - raise the rent due to the legal indexation<br />
-     <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Maj.PNG" alt="drawing" width="300"/> 
+     <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Maj.PNG" alt="drawing" width="300"/><br /> 
     
    # Result <br />
    
@@ -46,14 +46,14 @@ On this menu you can manage SCI:<br />
       - a professional tenant version<br />
       <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/lettre_pro.PNG" alt="drawing" width="300"/><br />
       - a particular tenant version<br />
-      <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/lettre_par.PNG" alt="drawing" width="300"/>
+      <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/lettre_par.PNG" alt="drawing" width="300"/><br />
     
    ## Receipt model<br />
    The program send 2 types of receipt model:<br />
       - a professional tenant version<br />
       <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Quittance_pro.PNG" alt="drawing" width="500"/><br />
       - a particular tenant version<br />
-      <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Quittance_par.PNG" alt="drawing" width="500"/>
+      <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Quittance_par.PNG" alt="drawing" width="500"/><br />
     
   ## Good to know<br />
     you can add a sign at the root of the program as foramt : sign.PNg<br />
