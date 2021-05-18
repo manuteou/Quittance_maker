@@ -1,6 +1,6 @@
 <p align="center"><img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Splash.PNG" alt="drawing" width="800"/></p>
 <br /><br />
-This program is done to manage tenant for frensh country<br /><br />
+This program is done to manage tenant in Frensh country<br /><br />
 What you can do :<br />
   ---> create and manage sci<br />
   ---> create and manage professional or private tenant<br />
