@@ -74,7 +74,7 @@ class PdfGenerator:
         self.pdf.drawString(350, 685, f"{self.adresse}")
         self.pdf.drawString(350, 670, f"{self.ville}")
         # Date
-        self.pdf.drawString(350, 600, f"A {self.ville.split()[1]} le {self.day}/{self.month}/{self.year}")
+        self.pdf.drawString(350, 600, f"A {self.sci_cp_ville.split(' ', 1)[1]} le {self.day}/{self.month}/{self.year}")
         # corps
         self.pdf.drawCentredString(160, 613, "QUITTANCE DE LOYER")
 
@@ -157,7 +157,7 @@ class IndexLetter:
         self.pdf.drawString(350, 685, f"{self.adresse}")
         self.pdf.drawString(350, 670, f"{self.ville}")
         # Date
-        self.pdf.drawString(350, 613, f"A {self.ville.split()[1]} le {self.day}/{self.month}/{self.year}")
+        self.pdf.drawString(350, 613, f"A {self.sci_cp_ville.split(' ', 1)[1]} le {self.day}/{self.month}/{self.year}")
         # Corps
         self.pdf.drawString(20, 560, "OBJET : REVISION DU LOYER")
         self.pdf.drawString(20, 500, "Madame, Monsieur")
