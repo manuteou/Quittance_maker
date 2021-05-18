@@ -57,9 +57,9 @@ On this menu you can manage SCI:<br />
    ## Receipt model<br />
    The program send 2 types of receipt model:<br />
       - a professional tenant version<br /><br />
-      <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Quittance_pro.PNG" alt="drawing" width="500"/><br /><br />
+      <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Quittance_pro.PNG" alt="drawing" width="300"/><br /><br />
       - a particular tenant version<br /><br />
-      <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Quittance_par.PNG" alt="drawing" width="500"/><br />
+      <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Quittance_par.PNG" alt="drawing" width="300"/><br />
     
   ## Good to know<br />
     you can add a sign at the root of the program as format : sign.PNg<br />
