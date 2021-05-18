@@ -1,12 +1,15 @@
 <p align="center"><img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Splash.PNG" alt="drawing" width="800"/></p>
 <br />
-This program is done to manage tenant for frensh country.<br />
+This program is done to manage tenant for frensh country<br />
 What you can do :<br />
  - create and manage sci<br />
  - create and manage professional or private tenant<br />
  - send an email to prevent the rent increase<br />
  - send send a receipt email<br />
-  
+On this screen you have some informations about tenant:<br />
+  - info will inform you if you must send a indexation letter or a rent raise
+  - statut will inform you if you have send the receipt<br />
+  - you can send the receipt for selected tenants<br />
 # Main Menu <br />
 On this screen you have some informations about tenant:<br />
   - info will inform you if you must send a indexation letter or a rent raise
