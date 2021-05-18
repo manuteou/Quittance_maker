@@ -1,4 +1,4 @@
-<p align="center"><img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Splash.PNG" alt="drawing" width="500"/></p>
+<p align="center"><img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Splash.PNG" alt="drawing" width="800"/></p>
 <br />
 This program is done to manage tenant for frensh country.<br />
 What you can do :<br />
