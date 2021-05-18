@@ -41,7 +41,7 @@ On this menu you can manage SCI:<br />
    On this menu you can manage the rent: <br />
       - send an email to prevent the tenant of a futur rent increase<br />
       <br />
-    <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/lettre.PNG" alt="drawing" width="300"/><br /> 
+    <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/lettre.PNG" alt="drawing" width="300"/><br /><br /> 
       - raise the rent due to the legal indexation<br /><br />
      <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Maj.PNG" alt="drawing" width="300"/><br /> 
     
