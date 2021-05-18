@@ -50,7 +50,7 @@ On this menu you can manage SCI:<br />
    ## indexation letter model<br />
    The program send 2 types of letter model:<br />
       - a professional tenant version<br /><br />
-      <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/lettre_pro.PNG" alt="drawing" width="300"/><br />
+      <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/lettre_pro.PNG" alt="drawing" width="300"/><br /><br />
       - a particular tenant version<br /><br />
       <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/lettre_par.PNG" alt="drawing" width="300"/><br />
     
