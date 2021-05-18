@@ -1,4 +1,4 @@
-<img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Splash.PNG" alt="drawing" width="500" align="center"/>
+<p align="center"><img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Splash.PNG" alt="drawing" width="500"/></p>
 <br />
 This program is done to manage tenant for frensh country.<br />
 What you can do :<br />
@@ -62,6 +62,6 @@ On this menu you can manage SCI:<br />
       <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Quittance_par.PNG" alt="drawing" width="500"/><br />
     
   ## Good to know<br />
-    you can add a sign at the root of the program as foramt : sign.PNg<br />
+    you can add a sign at the root of the program as format : sign.PNg<br />
     All documents will be sign!!<br />
      
