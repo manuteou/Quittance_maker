@@ -2,10 +2,10 @@
 <br /><br />
 This program is done to manage tenant for frensh country<br /><br />
 What you can do :<br />
-  - create and manage sci<br />
-  - create and manage professional or private tenant<br />
-  - send an email to prevent the rent increase<br />
-  - send send a receipt email<br />
+  ---> create and manage sci<br />
+  ---> create and manage professional or private tenant<br />
+  ---> send an email to prevent the rent increase<br />
+  ---> send send a receipt email<br />
 
 # Main Menu <br />
 On this screen you have some informations about tenant:<br />
