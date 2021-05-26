@@ -23,6 +23,7 @@ if not c.exists():
                   "fg": '#74D0F1',
                   "tableau": "#3D4A90",
                   "fg_size": 14,
+                  "font_gui": 8
                         },
               "default": {
                   "bg": "#3D4A56",
@@ -30,6 +31,7 @@ if not c.exists():
                   "tableau": "#3D4A90",
                   "fg": '#74D0F1',
                   "fg_size": 14,
+                  "font_gui": 8
               }
               }
 

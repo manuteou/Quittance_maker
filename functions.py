@@ -65,6 +65,11 @@ class Verification:
             print("(indice) format saisie correct")
             return True
 
+    def verification_color(self):
+        pattern = re.compile("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
+        if re.match(pattern, self.value):
+            print(" format date compatible")
+            return True
 
 def config_data():
     with open("config.json", "r") as json_file:
