@@ -6,12 +6,12 @@ from locataire import locataire, sql_database, sci
 from pdfgenerator import PdfGenerator, IndexLetter
 from mail_sender import send_mail
 from tkinter import messagebox
-import sys, json, re
+import json, re
 from reportlab.pdfgen import canvas
 from pathlib import Path
 from functions import Verification
 import webbrowser
-
+from tkinter.colorchooser import askcolor
 
 class Gui_aspect:
     def __init__(self):
@@ -23,7 +23,8 @@ class Gui_aspect:
         button_color = self.config["interface"]["button_color"]
         fg = self.config["interface"]["fg"]
         fg_size = self.config["interface"]["fg_size"]
-        return bg, button_color, fg, fg_size
+        tableau = self.config["interface"]['tableau']
+        return bg, button_color, fg, fg_size, tableau
 
 class SplashScreen(tk.Frame):
     def __init__(self):
@@ -79,7 +80,7 @@ class MainGui(tk.Frame):
 
     def __init__(self):
         tk.Frame.__init__(self)
-        self.master.geometry("900x350")
+        self.master.geometry("950x350")
         self.master.overrideredirect(False)
         self.master.minsize(300, 150)
         self.master.title("Quittances Maker V1.00")
@@ -88,7 +89,7 @@ class MainGui(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
-        self.bg, self.button_color, self.fg, self.fg_size = Gui_aspect().setting()
+        self.bg, self.button_color, self.fg, self.fg_size, self.tableau = Gui_aspect().setting()
         self.database = sql_database()
         # variable's creation
         self.today = date.today()
@@ -101,8 +102,7 @@ class MainGui(tk.Frame):
         main_frame.columnconfigure(0, weight=0)
         main_frame.columnconfigure(1, weight=1)
 
-
-        frame1 = tk.LabelFrame(self, main_frame, text="LOCATAIRES", font=('Courier', 14, "bold"), fg=self.fg, borderwidth=4, relief=tk.GROOVE, bg=self.bg)
+        frame1 = tk.LabelFrame(self, main_frame, text="LOCATAIRES", font=('Courier', self.fg_size, "bold"), fg=self.fg, borderwidth=4, relief=tk.GROOVE, bg=self.tableau)
         frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE, bg=self.button_color
                           )
         frame3 = tk.Frame(self, main_frame, bg=self.button_color
@@ -118,7 +118,7 @@ class MainGui(tk.Frame):
         column = ["Select", "nom", "prenom", "loyer", "charges", "info", "statut"]
         i = 0
         for e in column:
-            label = tk.Label(frame1, text=e.upper(), font=('Courier', 14, "bold"), fg=self.fg, bg=self.bg)
+            label = tk.Label(frame1, text=e.upper(), font=('Courier', self.fg_size, "bold"), fg=self.fg, bg=self.tableau)
             label.grid(column=i, row=0, sticky='W', padx=10)
             i += 1
 
@@ -132,36 +132,30 @@ class MainGui(tk.Frame):
         for i, elt in enumerate(aff_list):
             c = 1
             self.selection.append(tk.BooleanVar(value=0))
-            check_box = tk.Checkbutton(frame1, variable=self.selection[i], bg=self.bg
-)
+            check_box = tk.Checkbutton(frame1, variable=self.selection[i], bg=self.tableau)
             check_box.grid(column=0, row=r)
 
-            fg_size = 12
+
             if self.info_tenant(elt[7]) == 0:
-                info_field = tk.Label(frame1, text="MAJ Loyer", bg=self.bg
-, fg='white', font=("Times", fg_size))
+                info_field = tk.Label(frame1, text="MAJ Loyer", bg=self.tableau, fg='white', font=("Times", self.fg_size))
                 info_field.grid(column=5, row=r)
             if self.info_tenant(elt[7]) == 1:
-                info_field = tk.Label(frame1, text="Lettre d'indexation", bg=self.bg
-, fg='white', font=("Times", fg_size))
+                info_field = tk.Label(frame1, text="Lettre d'indexation", bg=self.tableau, fg='white', font=("Times", self.fg_size))
                 info_field.grid(column=5, row=r)
             else:
-                info_field = tk.Label(frame1, bg=self.bg
-, fg='white', font=("Times", fg_size))
+                info_field = tk.Label(frame1, bg=self.tableau, fg='white', font=("Times", self.fg_size))
                 info_field.grid(column=5, row=r)
 
             if not self.statut_check(elt[2], elt[3], elt[6]):
 
-                statut_field = tk.Label(frame1, text="NOT SEND", bg=self.bg
-, fg='white', font=("Times", fg_size))
+                statut_field = tk.Label(frame1, text="NOT SEND", bg=self.tableau, fg='white', font=("Times", self.fg_size))
                 statut_field.grid(column=6, row=r)
             else:
-                statut_field = tk.Label(frame1, text="SEND", bg=self.bg
-, fg='green', font=("Times", fg_size))
+                statut_field = tk.Label(frame1, text="SEND", bg=self.tableau, fg='green', font=("Times", self.fg_size))
                 statut_field.grid(column=6, row=r)
 
             for e in elt[2:-2]:
-                label = tk.Label(frame1, text=e, bg=self.bg, fg='white', font=("Times", fg_size))
+                label = tk.Label(frame1, text=e, bg=self.tableau, fg='white', font=("Times", self.fg_size))
                 label.grid(column=c, row=r, sticky='NSEW', padx=10)
                 c += 1
             r += 1
@@ -353,7 +347,7 @@ class CreatModGui(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.database = sql_database()
-        self.bg, self.button_color, self.fg, self.fg_size = Gui_aspect().setting()
+        self.bg, self.button_color, self.fg, self.fg_size, _ = Gui_aspect().setting()
         # varaibles' creation
         self.tenant_var = tk.StringVar()
         self.prenomVar = tk.StringVar()
@@ -369,8 +363,6 @@ class CreatModGui(tk.Frame):
         self.date_entreeVar = tk.StringVar()
         self.indice_base = tk.StringVar()
 
-        self.button_color\
-            = "#1A5276"
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color
                               )
         main_frame.grid(column=0, row=0, sticky="NSEW")
@@ -410,7 +402,7 @@ class CreatModGui(tk.Frame):
         i = 1
         for elt in champs:
             label = tk.Label(main_frame, text=elt, font=('Courier', 9, "bold"), bg=self.button_color
-                             , fg="#74D0F1")
+                             , fg=self.fg)
             label.grid(column=0, row=i + n, sticky="EW")
             i += 1
 
@@ -540,7 +532,7 @@ class DeleteGui(tk.Frame):
         self.combostyle = ttk.Style()
         self.combostyle.theme_use('custom.TCombobox')
         self.database = sql_database()
-        self.bg, self.button_color, self.fg, self.fg_size = Gui_aspect().setting()
+        self.bg, self.button_color, self.fg, self.fg_size, _ = Gui_aspect().setting()
         # variable creation
         self.nom_var = tk.StringVar()
         self.nom_var.set("Attention action definitive")
@@ -603,7 +595,7 @@ class InfoGui(tk.Frame):
         self.combostyle = ttk.Style()
         self.combostyle.theme_use('custom.TCombobox')
         self.database = sql_database()
-        self.bg, self.button_color, self.fg, self.fg_size = Gui_aspect().setting()
+        self.bg, self.button_color, self.fg, self.fg_size, _ = Gui_aspect().setting()
         #variables
         self.nom = tk.StringVar()
         self.nom.set("En Attente de la selection")
@@ -686,7 +678,7 @@ class MajRentGui(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.database = sql_database()
-        self.bg, self.button_color, self.fg, self.fg_size = Gui_aspect().setting()
+        self.bg, self.button_color, self.fg, self.fg_size, _ = Gui_aspect().setting()
         self.combostyle = ttk.Style()
         self.combostyle.theme_use('custom.TCombobox')
         # variables
@@ -704,7 +696,7 @@ class MajRentGui(tk.Frame):
                               )
         main_frame.grid(column=0, row=0, sticky="NSEW")
 
-        fg = '#74D0F1'
+
         label_name = tk.Label(main_frame, text="Locataire", bg=self.button_color
                               , font=('Courier', 9, "bold"), fg=self.fg)
         label_name.grid(column=0, row=0, sticky="W")
@@ -808,7 +800,7 @@ class LetterGui(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.database = sql_database()
-        self.bg, self.button_color, self.fg, self.fg_size = Gui_aspect().setting()
+        self.bg, self.button_color, self.fg, self.fg_size, _ = Gui_aspect().setting()
         self.combostyle = ttk.Style()
         self.combostyle.theme_use('custom.TCombobox')
         # variables
@@ -939,12 +931,12 @@ class ConfigGUI(tk.Frame):
         self.master.title("Configuration")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
-        self.master.geometry("300x300")
+        self.master.geometry("300x500")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.config = self.config_files()
-        self.bg, self.button_color, self.fg, self.fg_size = Gui_aspect().setting()
+        self.bg, self.button_color, self.fg, self.fg_size, self.tableau = Gui_aspect().setting()
         # variables
         self.master_mail_var = tk.StringVar()
         self.master_mail_var.set(self.config["master_mail"])
@@ -955,9 +947,20 @@ class ConfigGUI(tk.Frame):
         self.port_var = tk.StringVar()
         self.port_var.set(self.config["port"])
 
+        self.bg_color = tk.StringVar()
+        self.bg_color.set(self.config['interface']['bg'])
+        self.btn_color = tk.StringVar()
+        self.btn_color.set(self.config['interface']['button_color'])
+        self.fg_color = tk.StringVar()
+        self.fg_color.set(self.config['interface']['fg'])
+        self.tableau_color = tk.StringVar()
+        self.tableau_color.set(self.config['interface']['tableau'])
+
+        self.font_size = tk.IntVar()
+        self.font_size.set(self.config['interface']['fg_size'])
+
         # Widget
-        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color
-                              )
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
         main_frame.grid(column=0, row=0, sticky="NSEW")
 
         main_frame.columnconfigure(0, weight=0)
@@ -994,50 +997,69 @@ class ConfigGUI(tk.Frame):
         blank_label = tk.Label(main_frame, bg=self.button_color)
         blank_label.grid(column=0, row=4, columnspan=2, sticky="NSEW")
 
-        bg_label = tk.Label(main_frame, text="couleurs du fond", font=('Courier', 9, "bold"), bg=self.button_color, fg=self.fg)
-        bg_label.grid(column=0, row=5)
+        bg_label = tk.Button(main_frame, text="couleurs du fond", command=self.change_color,
+                             font=('Courier', 9, "bold"), bg=self.button_color, fg=self.fg)
+        bg_label.grid(column=0, row=5, sticky="NSEW")
 
-        # bg_entry
-        # bg_entry
+        bg_label = tk.Button(main_frame, text="couleurs du fond", command=self.change_color, font=('Courier', 9, "bold"), bg=self.button_color, fg=self.fg)
+        bg_label.grid(column=0, row=5, sticky="NSEW")
 
-        butt_label = tk.Label(main_frame, text="couleurs bouttons", font=('Courier', 9, "bold"), bg=self.button_color, fg=self.fg)
-        butt_label.grid(column=0, row=6)
+        self.bg_entry = tk.Entry(main_frame, textvariable=self.bg_color, bg=self.bg_color.get(), fg='white')
+        self.bg_entry.grid(column=1, row=5, sticky="NSEW")
 
-        # button_entry
-        # button_entry
+        tableau_label = tk.Button(main_frame, text="couleurs du tableau", command=self.change_color_4, font=('Courier', 9, "bold"), bg=self.button_color, fg=self.fg)
+        tableau_label.grid(column=0, row=6, sticky="NSEW")
 
-        font_color = tk.Label(main_frame, text="couleurs des font", font=('Courier', 9, "bold"), bg=self.button_color, fg=self.fg)
-        font_color.grid(column=0, row=7)
+        self.tableau_entry = tk.Entry(main_frame, textvariable=self.tableau_color, bg=self.tableau_color.get(), fg='white')
+        self.tableau_entry.grid(column=1, row=6, sticky="NSEW")
 
-        # font_entry
-        # font_entry
+        butt_label = tk.Button(main_frame, text="couleurs bouttons", command=self.change_color_2, font=('Courier', 9, "bold"), bg=self.btn_color.get(), fg=self.fg)
+        butt_label.grid(column=0, row=7, sticky="NSEW")
 
-        font_size = tk.Label(main_frame, text="taille des font", font=('Courier', 9, "bold"), bg=self.button_color, fg=self.fg)
-        font_size.grid(column=0, row=8)
+        self.button_entry = tk.Entry(main_frame, textvariable=self.btn_color, bg=self.btn_color.get(), fg='white')
+        self.button_entry.grid(column=1, row=7, sticky="NSEW")
 
-        # font_entry
-        # font_entry
+        font_color = tk.Button(main_frame, text="couleurs des font", command=self.change_color_3, font=('Courier', 9, "bold"), bg=self.button_color, fg=self.fg)
+        font_color.grid(column=0, row=8,sticky="NSEW")
 
-        blank_label = tk.Label(main_frame, bg=self.button_color)
-        blank_label.grid(column=0, row=4, columnspan=2, sticky="NSEW")
-        button_default = tk.Button(main_frame, text="PAR DEFAUT", command="pass", borderwidth=2,
-                                      relief=tk.GROOVE,
-                                      bg=self.bg
-                                      , font=('Courier', 9, "bold"), fg=self.fg)
-        button_default.grid(column=0, row=11, sticky="NSEW")
-
-
-        button_validation = tk.Button(main_frame, text="ENREGISTRER", command=self.mod_entry, borderwidth=2, relief=tk.GROOVE,
-                                      bg=self.bg
-, font=('Courier', 9, "bold"), fg=self.fg)
-        button_validation.grid(column=1, row=11, sticky="NSEW")
+        self.font_entry = tk.Entry(main_frame, textvariable=self.fg_color, bg=self.fg_color.get(), fg='white')
+        self.font_entry.grid(column=1, row=8, sticky="NSEW")
 
         blank_label = tk.Label(main_frame, bg=self.button_color)
-        blank_label.grid(column=0, row=12, columnspan=2, sticky="NSEW")
+        blank_label.grid(column=0, row=9, columnspan=2, sticky="NSEW")
 
-        button_exit = tk.Button(main_frame, text="RETOUR", command=self.quit, borderwidth=2, relief=tk.GROOVE,
-                                bg=self.bg, font=('Courier', 9, "bold"), fg=self.fg)
-        button_exit.grid(column=1, row=13, sticky="NSEW")
+        font_size = tk.Label(main_frame, text="tableau font", font=('Courier', 9, "bold"), bg=self.button_color, fg=self.fg)
+        font_size.grid(column=0, row=10, sticky="NSEW")
+
+        size = [12, 13, 14, 15, 16]
+        font_entry = ttk.Combobox(main_frame, textvariable=self.font_size, state="readonly")
+        font_entry['values'] = size
+        font_entry.grid(column=1, row=10, sticky="NSEW")
+
+        font_size = tk.Label(main_frame, text="tableau font", font=('Courier', 9, "bold"), bg=self.button_color,
+                             fg=self.fg)
+        font_size.grid(column=0, row=10, sticky="NSEW")
+
+        # size = [8, 9, 10, 11]
+        # font_entry = ttk.Combobox(main_frame, textvariable=self.font_gui, state="readonly")
+        # font_entry['values'] = size
+        # font_entry.grid(column=1, row=10, sticky="NSEW")
+
+        blank_label = tk.Label(main_frame, bg=self.button_color)
+        blank_label.grid(column=0, row=11, columnspan=2, sticky="NSEW")
+
+        button_default = tk.Button(main_frame, text="PAR DEFAUT", command=self.default, borderwidth=2, relief=tk.GROOVE, bg=self.bg, font=('Courier', 9, "bold"), fg=self.fg)
+        button_default.grid(column=0, row=12, sticky="NSEW")
+
+
+        button_validation = tk.Button(main_frame, text="ENREGISTRER", command=self.mod_entry, borderwidth=2, relief=tk.GROOVE, bg=self.bg, font=('Courier', 9, "bold"), fg=self.fg)
+        button_validation.grid(column=1, row=12, sticky="NSEW")
+
+        blank_label = tk.Label(main_frame, bg=self.button_color)
+        blank_label.grid(column=0, row=13, columnspan=2, sticky="NSEW")
+
+        button_exit = tk.Button(main_frame, text="RETOUR", command=self.quit, borderwidth=2, relief=tk.GROOVE, bg=self.bg, font=('Courier', 9, "bold"), fg=self.fg)
+        button_exit.grid(column=1, row=14, sticky="NSEW")
 
     def quit(self):
         self.destroy()
@@ -1048,6 +1070,12 @@ class ConfigGUI(tk.Frame):
         self.config["password"] = self.password_var.get()
         self.config['SMTP'] = self.smtp_var.get()
         self.config["port"] = self.port_var.get()
+        self.config['interface']['bg'] = self.bg_color.get()
+        self.config['interface']['button_color'] = self.btn_color.get()
+        self.config['interface']['fg'] = self.fg_color.get()
+        self.config['interface']['tableau'] = self.tableau_color.get()
+        self.config['interface']['fg_size'] = self.font_size.get()
+
         with open('config.json', 'w') as json_files:
             json.dump(self.config, json_files)
         print("mise à jour du fichier config")
@@ -1057,6 +1085,39 @@ class ConfigGUI(tk.Frame):
     def config_files():
         with open('config.json', 'r') as json_files:
             return json.load(json_files)
+
+    def default(self):
+        print(self.config['default']['tableau'])
+        self.bg_color.set(self.config['default']['bg'])
+        self.bg_entry.config(bg=self.config['default']['bg'])
+        self.btn_color.set(self.config['default']['button_color'])
+        self.button_entry.config(bg=self.config['default']['button_color'])
+        self.fg_color.set(self.config['default']['fg'])
+        self.font_entry.config(bg=self.config['default']['fg'])
+        self.tableau_entry.config(bg=self.config['default']['tableau'])
+        self.tableau_color.set(self.config['default']['tableau'])
+        self.font_size.set(self.config['default']['fg_size'])
+
+    def change_color(self):
+        colors = askcolor(title="Tkinter Color Chooser")
+        self.bg_color.set(colors[1])
+        self.bg_entry.config(bg=colors[1])
+
+
+    def change_color_2(self):
+        colors = askcolor(title="Tkinter Color Chooser")
+        self.btn_color.set(colors[1])
+        self.button_entry.config(bg=colors[1])
+
+    def change_color_3(self):
+        colors = askcolor(title="Tkinter Color Chooser")
+        self.fg_color.set(colors[1])
+        self.font_entry.config(bg=colors[1])
+
+    def change_color_4(self):
+        colors = askcolor(title="Tkinter Color Chooser")
+        self.tableau_color.set(colors[1])
+        self.tableau_entry.config(bg=colors[1])
 
 
 class NewModSciGUI(tk.Frame):
@@ -1072,7 +1133,7 @@ class NewModSciGUI(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.database = sql_database()
-        self.bg, self.button_color, self.fg, self.fg_size = Gui_aspect().setting()
+        self.bg, self.button_color, self.fg, self.fg_size,  _ = Gui_aspect().setting()
         # Variables
         self.name_var = tk.StringVar()
         self.adresse_var = tk.StringVar()

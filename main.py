@@ -21,11 +21,13 @@ if not c.exists():
                   "bg": "#3D4A56",
                   "button_color": "#1A5276",
                   "fg": '#74D0F1',
+                  "tableau": "#3D4A90",
                   "fg_size": 14,
                         },
               "default": {
                   "bg": "#3D4A56",
                   "button_color": "#1A5276",
+                  "tableau": "#3D4A90",
                   "fg": '#74D0F1',
                   "fg_size": 14,
               }
