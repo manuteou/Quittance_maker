@@ -17,7 +17,11 @@ On this screen you have some informations about tenant:<br />
 
 
 #  Config Menu <br />
-On this screen you can do email configuration<br />
+On this screen you can do:<br />
+- email configuration<br />
+- change colors<br />
+- change font size<br />
+- purge the db save files<br />
 <br />
 <img src="https://github.com/manuteou/Quittance_maker/blob/master/pictures/Config.PNG" alt="drawing" width="300"/>
 
