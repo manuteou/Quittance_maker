@@ -84,7 +84,7 @@ class MainGui(tk.Frame):
         self.master.geometry("970x350")
         self.master.overrideredirect(False)
         self.master.minsize(300, 150)
-        self.master.title("Quittances Maker V1.00")
+        self.master.title("Quittances Maker V1.10")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -453,29 +453,24 @@ class CreatModGui(tk.Frame):
         self.indice_base.set(modification_table[11])
         self.selectorVar.set(modification_table[12])
 
-    # def cleaning(self, var):
-    #     return var.replace("((", "").replace(",),)", "").replace("'", "")
 
     def check_entry(self):
-        print(self.tenant_var.get())
-        print(type(self.tenant_var.get()))
-        if self.tenant_var.get() == "" or self.prenomVar.get() == "" or self.adresseVar.get() == "" \
-                or self.villeVar.get() == "":
-            print("champs vide")
-            messagebox.showinfo("Attention", "un ou plusieurs champs vides, validation impossible")
-            return False
+        check_list = [self.tenant_var.get(), self.prenomVar.get(), self.adresseVar.get(), self.villeVar.get()]
+        for e in check_list:
+            if e == "":
+                messagebox.showinfo("Attention", "un ou plusieurs champs vides, validation impossible")
+                return False
 
-        if not Verification(self.mailVar.get()).verification_mail() or\
-            not Verification(self.telVar.get()).verification_tel() or\
-            not Verification(self.date_entreeVar.get()).verification_date() or\
-            not Verification(float(self.loyerVar.get())).verification_loyer() or\
-            not Verification(float(self.chargesVar.get())).verification_charges() or\
-            not Verification(float(self.indice_base.get())).verification_indice():
-            messagebox.showinfo("Attention", "un ou plusieurs champs mal renseignés, validation impossible")
-            return False
-
-        else:
-            return True
+            else:
+                if not Verification(self.mailVar.get()).verification_mail() or\
+                    not Verification(self.telVar.get()).verification_tel() or\
+                    not Verification(self.date_entreeVar.get()).verification_date() or\
+                    not Verification(float(self.loyerVar.get())).verification_loyer() or\
+                    not Verification(float(self.chargesVar.get())).verification_charges() or\
+                    not Verification(float(self.indice_base.get())).verification_indice():
+                    messagebox.showinfo("Attention", "un ou plusieurs champs mal renseignés, validation impossible")
+                    return False
+        return True
 
     def validation_tenant(self):
         if not self.check_entry():
@@ -524,7 +519,7 @@ class DeleteGui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.title("Supression de locataire")
-        self.master.geometry("160x200")
+        self.master.geometry("160x220")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -556,17 +551,30 @@ class DeleteGui(tk.Frame):
                                )
         blank_label.grid(column=1, row=1)
 
-        button_val = tk.Button(main_frame, text="SUPPRIMER", command=self.del_entry, bg=self.bg, fg=self.fg,
-                               font=('Courier', self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
-        button_val.grid(column=1, row=2, sticky="NSEW")
+        # button_default = tk.Button(main_frame, text="nettoyage\nsave_db", command="", borderwidth=2, relief=tk.GROOVE,
+        #                            bg=self.bg, font=('Courier',
+        #                                              self.fontGui, "bold"), fg=self.fg)
+        # button_default.grid(column=0, row=7, sticky="NSEW")
 
         blank_label = tk.Label(main_frame, bg=self.button_color
                                )
-        blank_label.grid(column=1, row=3)
+        blank_label.grid(column=1, row=2)
+
+        button_val = tk.Button(main_frame, text="SUPPRIMER", command=self.del_entry, bg=self.bg, fg=self.fg,
+                               font=('Courier', self.fontGui, "bold"), bd=2, relief=tk.GROOVE)
+        button_val.grid(column=1, row=3, sticky="NSEW")
+
+        blank_label = tk.Label(main_frame, bg=self.button_color
+                               )
+        blank_label.grid(column=1, row=4)
 
         button_back = tk.Button(main_frame, text="RETOUR", command=self.quit, bg=self.bg, fg=self.fg,
-                                font=('Courier', self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
-        button_back.grid(column=1, row=4, sticky="NSEW")
+                                font=('Courier', self.fontGui, "bold"), bd=2, relief=tk.GROOVE)
+        button_back.grid(column=1, row=5, sticky="NSEW")
+
+        blank_label = tk.Label(main_frame, bg=self.button_color
+                               )
+        blank_label.grid(column=1, row=6)
 
 
     def del_entry(self):
@@ -979,7 +987,7 @@ class ConfigGUI(tk.Frame):
                                   , fg=self.fg)
         password_label.grid(column=0, row=1, sticky="NSEW")
 
-        password_entry = tk.Entry(main_frame, textvariable=self.password_var, bg="#4F7292", fg='white')
+        password_entry = tk.Entry(main_frame, textvariable=self.password_var, bg="#4F7292", fg='white', show="*")
         password_entry.grid(column=1, row=1, sticky="NSEW")
 
         smtp_label = tk.Label(main_frame, text="SMTP", font=('Courier', self.fontGui, "bold"), bg=self.button_color
@@ -1052,13 +1060,17 @@ class ConfigGUI(tk.Frame):
                                                                                                                                            self.fontGui, "bold"), fg=self.fg)
         button_default.grid(column=0, row=14, sticky="NSEW")
 
+        # button_default = tk.Button(main_frame, text="PURGE DB", command=self.default, borderwidth=2, relief=tk.GROOVE,
+        #                            bg=self.bg, font=('Courier',
+        #                                              self.fontGui, "bold"), fg=self.fg)
+        # button_default.grid(column=0, row=16, sticky="NSEW")
 
         button_validation = tk.Button(main_frame, text="ENREGISTRER", command=self.mod_entry, borderwidth=2, relief=tk.GROOVE, bg=self.bg, font=('Courier',
                                                                                                                                                  self.fontGui, "bold"), fg=self.fg)
         button_validation.grid(column=1, row=14, sticky="NSEW")
 
         blank_label = tk.Label(main_frame, bg=self.button_color)
-        blank_label.grid(column=0, row=15, columnspan=2, sticky="NSEW")
+        blank_label.grid(column=0, row=15,columnspan=2, sticky="NSEW")
 
         button_exit = tk.Button(main_frame, text="RETOUR", command=self.quit, borderwidth=2, relief=tk.GROOVE, bg=self.bg, font=('Courier',
                                                                                                                                  self.fontGui, "bold"), fg=self.fg)
@@ -1069,28 +1081,32 @@ class ConfigGUI(tk.Frame):
         MainGui().mainloop()
 
     def check_color(self):
-        check_color = [self.btn_color.get(), self.fg_color.get(), self.tableau_color.get(), self.font_size.get(), self.font_gui.get()]
-        for i in check_color():
-            if not Verification(i).verification_color():
+        check_list = [self.bg_color.get(), self.fg_color.get(), self.tableau_color.get(), self.btn_color.get()]
+        for e in check_list:
+            if not Verification(e).verification_color():
+                messagebox.showinfo("Attention", "couleur invalide, validation impossible")
                 return False
 
     def mod_entry(self):
+        if not self.check_color():
+            return "erreur de champs"
 
-        self.config["master_mail"] = self.master_mail_var.get()
-        self.config["password"] = self.password_var.get()
-        self.config['SMTP'] = self.smtp_var.get()
-        self.config["port"] = self.port_var.get()
-        self.config['interface']['bg'] = self.bg_color.get()
-        self.config['interface']['button_color'] = self.btn_color.get()
-        self.config['interface']['fg'] = self.fg_color.get()
-        self.config['interface']['tableau'] = self.tableau_color.get()
-        self.config['interface']['fg_size'] = self.font_size.get()
-        self.config['interface']['font_gui'] = self.font_gui.get()
+        else:
+            self.config["master_mail"] = self.master_mail_var.get()
+            self.config["password"] = self.password_var.get()
+            self.config['SMTP'] = self.smtp_var.get()
+            self.config["port"] = self.port_var.get()
+            self.config['interface']['bg'] = self.bg_color.get()
+            self.config['interface']['button_color'] = self.btn_color.get()
+            self.config['interface']['fg'] = self.fg_color.get()
+            self.config['interface']['tableau'] = self.tableau_color.get()
+            self.config['interface']['fg_size'] = self.font_size.get()
+            self.config['interface']['font_gui'] = self.font_gui.get()
 
-        with open('config.json', 'w') as json_files:
-            json.dump(self.config, json_files)
-        print("mise à jour du fichier config")
-        messagebox.showinfo("Information", "Modification(s) effectuée(s)")
+            with open('config.json', 'w') as json_files:
+                json.dump(self.config, json_files)
+            print("mise à jour du fichier config")
+            messagebox.showinfo("Information", "Modification(s) effectuée(s)")
 
     @staticmethod
     def config_files():
@@ -1153,8 +1169,6 @@ class NewModSciGUI(tk.Frame):
         self.mail_var = tk.StringVar()
         self.siret_var = tk.StringVar()
         # Widget
-        self.button_color\
-            = "#1A5276"
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color
                               )
         main_frame.grid(column=0, row=0, sticky="NSEW")
@@ -1305,11 +1319,9 @@ class DelSciGui(tk.Frame):
         sci_list = self.database.elt_table("nom", "sci")
         selec_entry['values'] = sci_list
 
-
         blank_label = tk.Label(main_frame, bg=self.button_color
                                )
         blank_label.grid(column=1, row=6, columnspan=2, sticky="NSEW")
-
 
         boutton_add = tk.Button(main_frame, text="Supprimer", command=self.del_entry, bg=self.bg, fg=self.fg,
                                 font=('Courier', self.fontGui, "bold"), bd=0, relief=tk.GROOVE)

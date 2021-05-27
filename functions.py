@@ -66,9 +66,10 @@ class Verification:
             return True
 
     def verification_color(self):
+        print("valeur :", self.value)
         pattern = re.compile("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
         if re.match(pattern, self.value):
-            print(" format date compatible")
+            print(" format couleur compatible")
             return True
 
 def config_data():
