@@ -5,6 +5,8 @@ import json
 from functions import directory
 from datetime import datetime, date
 import sqlite3
+import glob
+import os
 
 # initialisation
 p = Path()
@@ -51,15 +53,22 @@ if d.exists():
     path_dir = directory.joinpath("save_db")
     path_dir.mkdir(parents=True, exist_ok=True)
     path = path_dir.joinpath(f"{today}_{d}")
-    print(path)
     con = sqlite3.connect("tenant_db.db")
     back = sqlite3.connect(path)
     con.backup(back)
-
+    print(path_dir)
+    all_path = path_dir.joinpath("*")
+    list_path = []
+    for path in glob.glob(str(all_path)):
+        list_path.append(path)
+    if len(list_path) > 5:
+        for i in list_path[4:]:
+            os.remove(i)
 if not m.exists():
     text = 'Bonjour ci-joint la quittance de loyer'
     with open('message.txt', 'w') as text_file:
         text_file.write(text)
+
 
 # GUI launch
 
