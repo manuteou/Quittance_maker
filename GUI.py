@@ -1,11 +1,10 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from datetime import date
 import functions
 from tablesdb import tenant, sql_database, sci
 from pdfgenerator import PdfGenerator, IndexLetter
 from mail_sender import send_mail
-from tkinter import messagebox
 import json, re
 from reportlab.pdfgen import canvas
 from functions import Verification
@@ -77,7 +76,6 @@ class SplashScreen(tk.Frame):
 
 
 class MainGui(tk.Frame):
-
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.geometry("970x350")
@@ -254,7 +252,7 @@ class MainGui(tk.Frame):
         for elt in list_to_send:
             print(elt[0])
             path_dir = directory.joinpath(elt[0][10], year, month)
-            print (path_dir)
+            print(path_dir)
             path_dir.mkdir(parents=True, exist_ok=True)
             path = path_dir.joinpath(f"{elt[0][2]}_{elt[0][3]}" + ".pdf")
             pdf = canvas.Canvas(str(path))
@@ -320,7 +318,7 @@ class MainGui(tk.Frame):
             CreatModGui(1).mainloop()
         elif self.menu_tenant.get() == 'supression':
             self.destroy()
-            DeleteGui().mainloop()
+            DeleteGui(0).mainloop()
 
     def sci_menu_selection(self, v):
         if self.menu_sci.get() == "création":
@@ -331,7 +329,7 @@ class MainGui(tk.Frame):
             NewModSciGUI(0).mainloop()
         if self.menu_sci.get() == "suppression":
             self.destroy()
-            DelSciGui().mainloop()
+            DeleteGui(1).mainloop()
 
 
 
@@ -515,7 +513,7 @@ class CreatModGui(tk.Frame):
 
 
 class DeleteGui(tk.Frame):
-    def __init__(self):
+    def __init__(self, value):
         tk.Frame.__init__(self)
         self.master.title("Supression de locataire")
         self.master.geometry("160x220")
@@ -529,31 +527,38 @@ class DeleteGui(tk.Frame):
         self.database = sql_database()
         self.bg, self.button_color, self.fg, self.fg_size, _, self.fontGui = Gui_aspect().setting()
         # variable creation
+        self.value = value
         self.nom_var = tk.StringVar()
         self.nom_var.set("Attention action definitive")
         # widget creation
 
-        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color
-                              )
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
         main_frame.grid(column=0, row=0, sticky="NSEW")
 
-        nom_label = tk.Label(main_frame, text="Nom du loctaire", font=('Courier', self.fontGui, "bold"), bg=self.button_color
-                             , fg=self.fg)
+        if value == 0:
+            self.master.title("Supression de locataire")
+            self.list_db = self.database.elt_table("nom", "tenant")
+            self.type = "du\nlocataire"
+        if value == 1:
+            self.master.title("Supression de sci")
+            self.list_db = self.database.elt_table("nom", "sci")
+            type = "de la\nSCI"
+        if value == 2:
+            self.master.title("Supression d'actionnaire")
+            self.list_db = self.database.elt_table("nom", "shareholder")
+            self.type = "de\nl'actionnaire"
+
+        nom_label = tk.Label(main_frame, text=f"Nom\n{self.type}", font=('Courier', self.fontGui, "bold"),
+                             bg=self.button_color, fg=self.fg)
         nom_label.grid(column=0, row=0, sticky="EW")
 
-        selec_entry = ttk.Combobox(main_frame, textvariable=self.nom_var, state='readonly', style='custom.TCombobox')
-        list_tenant = self.database.elt_table("nom", "tenant")
-        selec_entry['values'] = list_tenant
+        selec_entry = ttk.Combobox(main_frame, textvariable=self.nom_var,
+                                   state='readonly')  # , style='custom.TCombobox')
+        selec_entry['values'] = self.list_db
         selec_entry.grid(column=1, row=0, sticky="EW")
 
-        blank_label = tk.Label(main_frame, bg=self.button_color
-                               )
+        blank_label = tk.Label(main_frame, bg=self.button_color)
         blank_label.grid(column=1, row=1)
-
-        # button_default = tk.Button(main_frame, text="nettoyage\nsave_db", command="", borderwidth=2, relief=tk.GROOVE,
-        #                            bg=self.bg, font=('Courier',
-        #                                              self.fontGui, "bold"), fg=self.fg)
-        # button_default.grid(column=0, row=7, sticky="NSEW")
 
         blank_label = tk.Label(main_frame, bg=self.button_color
                                )
@@ -575,13 +580,29 @@ class DeleteGui(tk.Frame):
                                )
         blank_label.grid(column=1, row=6)
 
-
     def del_entry(self):
         if self.nom_var.get() != "Attention action definitive":
             index = self.nom_var.get().split(" ")[0]
             print(index)
-            self.database.delete_entry("tenant", index)
-            self.database.delete_entry("location", index)
+
+            if self.value == 0:
+                print("tenant")
+                self.database.delete_entry("tenant", index)
+                self.database.delete_entry("location", index)
+
+            if self.value == 1:
+                print("sci")
+                self.database.delete_entry("sci", index)
+                with open('config.json', 'r') as json_files:
+                    config = json.load(json_files)
+                config["sci"].remove(self.nom_var.get().split(" ")[1])
+                with open('config.json', 'w') as json_files:
+                    json.dump(config, json_files)
+
+            if self.value == 2:
+                print("actionnaire")
+                self.database.delete_entry("shareholder", index)
+
             print("suppression effectuée")
             messagebox.showinfo("Attention", "Supression effectuée")
 
@@ -1281,70 +1302,6 @@ class NewModSciGUI(tk.Frame):
                     print("sci rajouter au json")
                     #messagebox.showinfo("Information", "modification(s) effectué(es)")
 
-
-    def quit(self):
-        self.destroy()
-        MainGui().mainloop()
-
-class DelSciGui(tk.Frame):
-    def __init__(self):
-        tk.Frame.__init__(self)
-        self.master.title("Supression SCI")
-        self.master.geometry("350x350")
-        self.combostyle = ttk.Style()
-        self.combostyle.theme_use('custom.TCombobox')
-        self.master.columnconfigure(0, weight=1)
-        self.master.rowconfigure(0, weight=1)
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-        self.grid(sticky="NSEW")
-        self.database = sql_database()
-        self.bg, self.button_color, self.fg, self.fg_size, _,  self.fontGui = Gui_aspect().setting()
-        # variable creation
-        self.nom_var = tk.StringVar()
-        self.nom_var.set("Attention action definitive")
-        # widget creation
-
-        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color
-                              )
-        main_frame.grid(column=0, row=0, sticky="NSEW")
-
-        nom_label = tk.Label(main_frame, text="Nom de la sci", font=('Courier', self.fontGui, "bold"), bg=self.button_color
-                             , fg=self.fg)
-        nom_label.grid(column=0, row=0, sticky="EW")
-
-        selec_entry = ttk.Combobox(main_frame, textvariable=self.nom_var, state='readonly', style='custom.TCombobox')
-        selec_entry.grid(column=1, row=0, sticky="EW")
-        sci_list = self.database.elt_table("nom", "sci")
-        selec_entry['values'] = sci_list
-
-        blank_label = tk.Label(main_frame, bg=self.button_color
-                               )
-        blank_label.grid(column=1, row=6, columnspan=2, sticky="NSEW")
-
-        boutton_add = tk.Button(main_frame, text="Supprimer", command=self.del_entry, bg=self.bg, fg=self.fg,
-                                font=('Courier', self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
-        boutton_add.grid(column=1, row=7, sticky="NSEW")
-
-        blank_label = tk.Label(main_frame, bg=self.button_color
-                               )
-        blank_label.grid(column=1, row=8, columnspan=2, sticky="NSEW")
-
-        boutton_quitter = tk.Button(main_frame, text="Quitter", command=self.quit, bg=self.bg, fg=self.fg,
-                                    font=('Courier', self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
-        boutton_quitter.grid(column=1, row=self.fontGui, sticky="NSEW")
-
-    def del_entry(self):
-        if self.nom_var.get() != "Attention action definitive":
-            index = self.nom_var.get().split(" ")[0]
-            self.database.delete_entry("sci", index)
-        with open('config.json', 'r') as json_files:
-            config = json.load(json_files)
-        print(self.nom_var.get().split(" ")[1])
-        config["sci"].remove(self.nom_var.get().split(" ")[1])
-        with open('config.json', 'w') as json_files:
-            json.dump(config, json_files)
-        messagebox.showinfo("Attention", "SCI supprimée")
 
     def quit(self):
         self.destroy()

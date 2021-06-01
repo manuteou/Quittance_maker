@@ -71,7 +71,7 @@ class sql_database_init():
                siret TEXT NOT NULL
                );"""
 
-        sql_create_shareholder_table = """CREATE TABLE IF NOT EXISTS actionnaire(
+        sql_create_shareholder_table = """CREATE TABLE IF NOT EXISTS shareholder(
                 id INTEGER PRIMARY KEY,
                 nom TEXT NOT NULL,
                 prenom TEXT NOT NULL,
@@ -224,6 +224,10 @@ class sql_database():
         self.c.execute(sql_maj_rent_request)
         self.conn.commit()
 
+    def shareholder_call(self):
+        sql_sharholder_table = f""" SELECT * FROM shareholder"""
+        self.c.execute(sql_sharholder_table)
+        return self.c.fetchall()
 
 if __name__ == "__main__":
     pass
