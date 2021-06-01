@@ -224,8 +224,9 @@ class sql_database():
         self.c.execute(sql_maj_rent_request)
         self.conn.commit()
 
-    def shareholder_call(self):
-        sql_sharholder_table = f""" SELECT * FROM shareholder"""
+    def shareholder_call(self, id):
+        sql_sharholder_table = f""" SELECT * FROM shareholder
+                                WHERE id = {id};"""
         self.c.execute(sql_sharholder_table)
         return self.c.fetchall()
 

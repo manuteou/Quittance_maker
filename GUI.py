@@ -347,6 +347,7 @@ class CreatModGui(tk.Frame):
         self.database = sql_database()
         self.bg, self.button_color, self.fg, self.fg_size, _, self.fontGui = Gui_aspect().setting()
         # varaibles' creation
+        self.tenant_id = tk.IntVar()
         self.tenant_var = tk.StringVar()
         self.prenomVar = tk.StringVar()
         self.adresseVar = tk.StringVar()
@@ -366,7 +367,7 @@ class CreatModGui(tk.Frame):
         main_frame.grid(column=0, row=0, sticky="NSEW")
 
         if value == 1:
-            n = 1
+            self.n = 1
             self.type_field = 1
             self.tenant_old = tk.StringVar()
             self.master.title("Modification de Locataire")
@@ -381,7 +382,7 @@ class CreatModGui(tk.Frame):
 
 
         if value == 0:
-            n = 0
+            self.n = 0
             self.type_field = 0
             self.master.title("Création de Locataire")
 
@@ -400,18 +401,18 @@ class CreatModGui(tk.Frame):
         for elt in champs:
             label = tk.Label(main_frame, text=elt, font=('Courier', self.fontGui, "bold"), bg=self.button_color
                              , fg=self.fg)
-            label.grid(column=0, row=i + n, sticky="EW")
+            label.grid(column=0, row=i + self.n, sticky="EW")
             i += 1
 
         entries = [self.tenant_var, self.prenomVar, self.adresseVar, self.villeVar, self.telVar, self.mailVar]
         i = 1
         for elt in entries:
             entry = tk.Entry(main_frame, textvariable=elt, bg="#4F7292", fg='white')
-            entry.grid(column=1, row=i + n, columnspan=2, sticky="EW")
+            entry.grid(column=1, row=i + self.n, columnspan=2, sticky="EW")
             i += 1
 
         sci_choise = ttk.Combobox(main_frame, textvariable=self.sciVar, state='readonly', style='custom.TCombobox')
-        sci_choise.grid(column=1, row=7 + n, columnspan=2, sticky="EW")
+        sci_choise.grid(column=1, row=7 + self.n, columnspan=2, sticky="EW")
         with open('config.json', 'r') as json_files:
             config = json.load(json_files)
         sci_choise['values'] = config['sci']
@@ -420,35 +421,27 @@ class CreatModGui(tk.Frame):
         i = 8
         for elt in entries:
             entry = tk.Entry(main_frame, textvariable=elt, bg="#4F7292", fg='white')
-            entry.grid(column=1, row=i + n, columnspan=2, sticky="EW")
+            entry.grid(column=1, row=i + self.n, columnspan=2, sticky="EW")
             i += 1
 
 
         button = tk.Button(main_frame, text="VALIDER", command=self.validation_tenant, bg=self.bg, fg=self.fg, font=('Courier',
                                                                                                                      self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
-        button.grid(column=2, row=13 + n, sticky='NSEW', padx=1)
+        button.grid(column=2, row=13 + self.n, sticky='NSEW', padx=1)
 
         button2 = tk.Button(main_frame, text="RETOUR", command=self.quit, bg=self.bg, fg=self.fg, font=('Courier', self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
-        button2.grid(column=1, row=13 + n, sticky='NSEW', padx=1)
+        button2.grid(column=1, row=13 + self.n, sticky='NSEW', padx=1)
 
     def observer(self, *args):
         watch = self.tenant_old.get()
         print(watch)
+        tenant_list = [self.tenant_id, self.tenant_var, self.prenomVar, self.adresseVar, self.villeVar,
+                       self.telVar, self.mailVar, self.sciVar, self.date_entreeVar, self.loyerVar,
+                       self.chargesVar, self.indice_base, self.selectorVar]
         modification_table = self.database.modification_call(watch.split(" ")[0])
         print(modification_table)
-        self.tenant_id = modification_table[0]
-        self.tenant_var.set(modification_table[1])
-        self.prenomVar.set(modification_table[2])
-        self.adresseVar.set(modification_table[3])
-        self.villeVar.set(modification_table[4])
-        self.telVar.set(modification_table[5])
-        self.mailVar.set(modification_table[6])
-        self.sciVar.set(modification_table[7])
-        self.date_entreeVar.set(modification_table[8])
-        self.loyerVar.set(modification_table[9])
-        self.chargesVar.set(modification_table[10])
-        self.indice_base.set(modification_table[11])
-        self.selectorVar.set(modification_table[12])
+        for i, tenant in enumerate(tenant_list):
+            tenant.set(modification_table[i])
 
 
     def check_entry(self):
@@ -649,7 +642,7 @@ class InfoGui(tk.Frame):
                                  ,
                                  fg=self.fg)
             nom_label.grid(column=0, row=i, sticky="EW")
-            i +=1
+            i += 1
         nom_label = tk.Label(main_frame, text="Nom du loctaire", font=('Courier', self.fontGui, "bold"), bg=self.button_color
                              ,
                              fg=self.fg)
@@ -1195,7 +1188,7 @@ class NewModSciGUI(tk.Frame):
 
         if value == 0:
             self.type_field = 0
-            n = 1
+            self.n = 1
             self.master.title("Modification sci")
             self.old_var = tk.StringVar()
             self.old_var.trace("w", self.observer)
@@ -1209,7 +1202,7 @@ class NewModSciGUI(tk.Frame):
         if value == 1:
             self.type_field = 1
             self.master.title("Nouvelle sci")
-            n = 0
+            self.n = 0
 
         champs = ["SCI", "Adresse", "CP/ville", "Tel", "Email", "SIRET"]
         i = 0
@@ -1217,7 +1210,7 @@ class NewModSciGUI(tk.Frame):
         for elt in champs:
             label = tk.Label(main_frame, text=elt, font=('Courier', self.fontGui, "bold"), bg=self.button_color
                              , fg=self.fg)
-            label.grid(column=0, row=i + n, sticky="NSEW")
+            label.grid(column=0, row=i + self.n, sticky="NSEW")
             i += 1
 
         entries = [self.name_var, self.adresse_var, self.city_var, self.tel_var, self.mail_var, self.siret_var,
@@ -1225,17 +1218,17 @@ class NewModSciGUI(tk.Frame):
         i = 0
         for elt in entries:
             entry = tk.Entry(main_frame, textvariable=elt, bg="#4F7292", fg='white')
-            entry.grid(column=1, row=i + n, sticky="NSEW", columnspan=2)
+            entry.grid(column=1, row=i + self.n, sticky="NSEW", columnspan=2)
             i += 1
 
 
         boutton_add = tk.Button(main_frame, text="VALIDER", command=self.add_sci, bg=self.bg, fg=self.fg, font=('Courier',
                                                                                                                 self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
-        boutton_add.grid(column=1, row=6 + n, sticky="NSEW")
+        boutton_add.grid(column=1, row=6 + self.n, sticky="NSEW")
 
         boutton_quitter = tk.Button(main_frame, text="QUITTER", command=self.quit, bg=self.bg, fg=self.fg, font=('Courier',
                                                                                                                  self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
-        boutton_quitter.grid(column=2, row=6 + n, sticky="NSEW")
+        boutton_quitter.grid(column=2, row=6 + self.n, sticky="NSEW")
 
     def observer(self, *args):
         watch = self.old_var.get()
@@ -1302,6 +1295,89 @@ class NewModSciGUI(tk.Frame):
                     print("sci rajouter au json")
                     #messagebox.showinfo("Information", "modification(s) effectué(es)")
 
+    class Sharholder(tk.Frame):
+        def __init__(self, value):
+            tk.Frame.__init__(self)
+            self.master.geometry("970x350")
+            self.master.overrideredirect(False)
+            self.master.minsize(300, 150)
+            self.master.columnconfigure(0, weight=1)
+            self.master.rowconfigure(0, weight=1)
+            self.columnconfigure(0, weight=1)
+            self.rowconfigure(0, weight=1)
+            self.grid(sticky="NSEW")
+            self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = Gui_aspect().setting()
+            self.combostyle = ttk.Style()
+            self.combostyle.theme_use('custom.TCombobox')
+            self.value = value
+            self.database = sql_database()
+
+            # variable's creation
+            self.shareholder_id = tk.IntVar()
+            self.shareholder_name = tk.StringVar()
+            self.shareholder_firstname = tk.StringVar()
+            self.shareholder_sci = tk.StringVar()
+            self.shareholder_part = tk.IntVar()
+
+            # widget's Creation
+
+            main_frame = tk.Frame(self, borderwidth=2)
+            main_frame.grid(column=0, row=0, sticky="NSEW")
+
+            if value == 0:
+                self.master.title("modification d'actionnaire")
+                n = 1
+                self.type_field = 1
+                self.shareholder_old = tk.StringVar()
+                selec_entry = ttk.Combobox(main_frame, textvariable=self.shareholder_old, state='readonly',
+                                           style='custom.TCombobox')
+                selec_entry.grid(column=1, row=1, columnspan=2, sticky="EW")
+
+                tenant_list = self.database.elt_table("nom", "shareholder")
+                selec_entry['values'] = tenant_list
+
+            if value == 1:
+                self.master.title("creation d'actionnaire")
+                self.n = 0
+                self.type_field = 0
+
+            champs = ["nom", "prenom", "sci", "part"]
+            i = 1
+            for elt in champs:
+                label = tk.Label(main_frame, text=elt)
+                label.grid(column=0, row=i + self.n, sticky="EW")
+                i += 1
+
+            entries = [self.shareholder_name, self.shareholder_firstname, self.sci, self.part]
+            i = 1
+            for elt in entries:
+                entry = tk.Entry(main_frame, textvariable=elt, bg="#4F7292", fg='white')
+                entry.grid(column=1, row=i + self.n, columnspan=2, sticky="EW")
+                i += 1
+
+            button = tk.Button(main_frame, text="VALIDER", command=self.validation, bg=self.bg, fg=self.fg,
+                               font=('Courier',
+                                     self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
+            button.grid(column=2, row=13 + self.n, sticky='NSEW', padx=1)
+
+            button2 = tk.Button(main_frame, text="RETOUR", command=self.quit, bg=self.bg, fg=self.fg,
+                                font=('Courier', self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
+            button2.grid(column=1, row=13 + self.n, sticky='NSEW', padx=1)
+
+        def observer(self, *args):
+            watch = self.shareholder_name.get()
+            shareholder_list = [self.shareholder_id, self.shareholder_name, self.shareholder_firstname,
+                                self.shareholder_sci, self.shareholder_part]
+            modification_table = self.database.shareholder_call(watch.split(" ")[0])
+            for i, shareholder in enumerate(shareholder_list):
+                shareholder.set(modification_table[i])
+
+        def validation(self):
+            pass
+
+        def quit(self):
+            self.destroy()
+            MainGui().mainloop()
 
     def quit(self):
         self.destroy()
