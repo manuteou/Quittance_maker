@@ -1,6 +1,6 @@
 import sqlite3
 
-class locataire:
+class tenant:
     def __init__(self, nom, prenom, adresse, ville, tel, mail, sci, loyer, charges, cat, date, indice):
         self.nom = nom
         self.prenom = prenom
@@ -23,6 +23,13 @@ class sci:
         self.tel = tel
         self.mail = mail
         self.siret = siret
+
+class shareholder:
+    def __init__(self, nom, prenom, sci, part):
+        self.nom = nom
+        self.prenom = prenom
+        self.sci = sci
+        self.part = part
 
 class sql_database_init():
     def __init__(self):
@@ -61,11 +68,21 @@ class sql_database_init():
                cp_ville TEXT NOT NULL,
                tel TEXT NOT NULL,
                mail TEXT NOT NULL,
-               siret TEXT NOT NULL);"""
+               siret TEXT NOT NULL
+               );"""
+
+        sql_create_shareholder_table = """CREATE TABLE IF NOT EXISTS actionnaire(
+                id INTEGER PRIMARY KEY,
+                nom TEXT NOT NULL,
+                prenom TEXT NOT NULL,
+                SCI TEXT NOT NULL,
+                PART INTEGER NOT NULL
+                );"""
 
         self.c.execute(sql_create_tenant_table)
         self.c.execute(sql_create_location_table)
         self.c.execute(sql_create_sci_table)
+        self.c.execute(sql_create_shareholder_table)
 
 class sql_database():
     def __init__(self):

@@ -2,13 +2,12 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import date
 import functions
-from locataire import locataire, sql_database, sci
+from tablesdb import tenant, sql_database, sci
 from pdfgenerator import PdfGenerator, IndexLetter
 from mail_sender import send_mail
 from tkinter import messagebox
 import json, re
 from reportlab.pdfgen import canvas
-from pathlib import Path
 from functions import Verification
 import webbrowser
 from tkinter.colorchooser import askcolor
@@ -477,12 +476,12 @@ class CreatModGui(tk.Frame):
             return "erreur de champs"
 
         else:
-            client = locataire(self.tenant_var.get(), self.prenomVar.get(),
-                                self.adresseVar.get(), self.villeVar.get(),
-                               self.telVar.get(), self.mailVar.get(),
-                               self.sciVar.get(), self.loyerVar.get(),
-                               self.chargesVar.get(), self.selectorVar.get()
-                               , self.date_entreeVar.get(), self.indice_base.get())
+            client = tenant(self.tenant_var.get(), self.prenomVar.get(),
+                            self.adresseVar.get(), self.villeVar.get(),
+                            self.telVar.get(), self.mailVar.get(),
+                            self.sciVar.get(), self.loyerVar.get(),
+                            self.chargesVar.get(), self.selectorVar.get()
+                            , self.date_entreeVar.get(), self.indice_base.get())
             print(self.selectorVar.get())
             insert_tenant = {'nom': client.nom, 'prenom': client.prenom, 'adresse': client.adresse,
                              'CP_ville': client.cp_ville, 'tel': client.tel, 'mail': client.mail.lower(),

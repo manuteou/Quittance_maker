@@ -1,5 +1,5 @@
 from GUI import SplashScreen
-from locataire import sql_database_init
+from tablesdb import sql_database_init
 from pathlib import Path
 import json
 from functions import directory
@@ -11,7 +11,7 @@ import os
 # initialisation
 p = Path()
 c = p / 'config.json'
-d = p / 'tenant_db.db'
+database = p / 'tenant_db.db'
 m = p / 'message.txt'
 today = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
 #today = date.today()
@@ -44,15 +44,15 @@ if not c.exists():
         json.dump(config, json_files)
     print("création fichier config")
 
-if not d.exists():
+if not database.exists():
     print("création base de données")
     sql_database_init()
 
-if d.exists():
+if database.exists():
     directory = directory()
     path_dir = directory.joinpath("save_db")
     path_dir.mkdir(parents=True, exist_ok=True)
-    path = path_dir.joinpath(f"{today}_{d}")
+    path = path_dir.joinpath(f"{today}_{database}")
     con = sqlite3.connect("tenant_db.db")
     back = sqlite3.connect(path)
     con.backup(back)

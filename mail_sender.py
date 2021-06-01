@@ -2,7 +2,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
-from locataire import locataire, sql_database
+from tablesdb import tenant, sql_database
 import json
 import os
 

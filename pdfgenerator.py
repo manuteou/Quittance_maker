@@ -1,4 +1,4 @@
-from locataire import sql_database
+from tablesdb import sql_database
 from pathlib import Path
 import os
 
