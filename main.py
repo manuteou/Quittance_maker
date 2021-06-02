@@ -1,4 +1,4 @@
-from tenant_GUI import SplashScreen
+from GUI import SplashScreen
 from tablesdb import sql_database_init
 from pathlib import Path
 import json
