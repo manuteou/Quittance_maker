@@ -10,6 +10,7 @@ from reportlab.pdfgen import canvas
 from functions import Verification
 import webbrowser
 from tkinter.colorchooser import askcolor
+#from shareholder_GUI import Shareholder_GUI
 
 class Gui_aspect:
     def __init__(self):
@@ -158,7 +159,7 @@ class MainGui(tk.Frame):
                 c += 1
             r += 1
 
-        # widgets under
+        # FRAME2
         date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1, bg=self.button_color
                                 , font=('Courier', 10, "bold"), fg=self.fg)
         date_s_label.grid(column=0, row=0, sticky='NW')
@@ -174,7 +175,7 @@ class MainGui(tk.Frame):
         button_selection.grid(column=0, row=9, sticky='NSEW')
 
 
-        # widgets on right
+        # FRAME3
         button_config = tk.Button(frame3, text='CONFIG', borderwidth=2, relief=tk.GROOVE, command=self.config, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"))
         button_config.grid(column=0, row=0, sticky='NSEW')
 
@@ -195,8 +196,8 @@ class MainGui(tk.Frame):
 
         # menu tenant
         self.menu_tenant = tk.StringVar()
-        menu_tenant_list = ["info", "création", "modification", "supression"]
-        self.menu_tenant.set("LOCATAIRE")
+        menu_tenant_list = ["info", "création", "modification", "suppression"]
+        self.menu_tenant.set("LOCATAIRES")
         tenantMenu = tk.OptionMenu(frame3, self.menu_tenant, *menu_tenant_list, command=self.tenant_menu_selection)
         tenantMenu.configure(bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"), bd=0)
         tenantMenu.grid(column=0, row=4, sticky='NSEW')
@@ -204,7 +205,7 @@ class MainGui(tk.Frame):
         button_blk2 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
                                 )
         button_blk2.grid(column=0, row=5, sticky='NSEW')
-
+        # menu sci
         self.menu_index = tk.StringVar()
         menu_index_list = ["Lettre", "MAJ Loyer"]
         self.menu_index.set("INDEXATION")
@@ -215,15 +216,16 @@ class MainGui(tk.Frame):
         button_blk3 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
                                 )
         button_blk3.grid(column=0, row=7, sticky='NSEW')
+        # menu shareholder
+
+        shareholder_button = tk.Button(frame3,text="ACTIONNAIRES",  borderwidth=2, relief=tk.GROOVE,
+                               command=self.go_shareholder, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"),
+                               bd=0)
+        shareholder_button .grid(column=0, row=8, sticky='NSEW')
 
         button_blk4 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
                                 )
-        button_blk4.grid(column=0, row=8, sticky='NSEW')
-
-        button_blk5 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
-                                )
-
-        button_blk5.grid(column=0, row=9, sticky='NSEW')
+        button_blk4.grid(column=0, row=9, sticky='NSEW')
 
         button_end = tk.Button(frame3, text="FERMER", borderwidth=2, relief=tk.GROOVE,
                                command=self.closing, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"), bd=0)
@@ -245,14 +247,19 @@ class MainGui(tk.Frame):
             if value:
                 list_to_send.append(self.database.pdf_table_single(i+1))
 
+        for tenant in list_to_send:
+            for elt in tenant:
+                if not self.statut_check(elt[2], elt[3], elt[10]):
+                    records_tenant = {"nom": elt[2], "prenom": elt[3], "SCI": elt[10], "loyer": elt[6],
+                                      "charges": elt[7], "date": self.date_s.get()}
+                    self.database.create_entry("records_tenant", records_tenant)
+
         directory = functions.directory()
         config = functions.config_data()
         day, month, year = self.date_s.get().split("/")
 
         for elt in list_to_send:
-            print(elt[0])
             path_dir = directory.joinpath(elt[0][10], year, month)
-            print(path_dir)
             path_dir.mkdir(parents=True, exist_ok=True)
             path = path_dir.joinpath(f"{elt[0][2]}_{elt[0][3]}" + ".pdf")
             pdf = canvas.Canvas(str(path))
@@ -316,7 +323,7 @@ class MainGui(tk.Frame):
         elif self.menu_tenant.get() == 'modification':
             self.destroy()
             CreatModGui(1).mainloop()
-        elif self.menu_tenant.get() == 'supression':
+        elif self.menu_tenant.get() == 'suppression':
             self.destroy()
             DeleteGui(0).mainloop()
 
@@ -331,7 +338,9 @@ class MainGui(tk.Frame):
             self.destroy()
             DeleteGui(1).mainloop()
 
-
+    def go_shareholder(self):
+        self.destroy()
+        Shareholder_GUI().mainloop()
 
 class CreatModGui(tk.Frame):
     def __init__(self, value):
@@ -524,7 +533,7 @@ class DeleteGui(tk.Frame):
         self.nom_var = tk.StringVar()
         self.nom_var.set("Attention action definitive")
         # widget creation
-
+        print(value)
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
         main_frame.grid(column=0, row=0, sticky="NSEW")
 
@@ -535,7 +544,7 @@ class DeleteGui(tk.Frame):
         if value == 1:
             self.master.title("Supression de sci")
             self.list_db = self.database.elt_table("nom", "sci")
-            type = "de la\nSCI"
+            self.type = "de la\nSCI"
         if value == 2:
             self.master.title("Supression d'actionnaire")
             self.list_db = self.database.elt_table("nom", "shareholder")
@@ -853,7 +862,8 @@ class LetterGui(tk.Frame):
                               , font=('Courier', self.fontGui, "bold"), fg=self.fg)
         label_name.grid(column=0, row=3, sticky="W")
 
-        selec_name_entry = ttk.Combobox(main_frame, textvariable=self.tenant_name, state='readonly', style='custom.TCombobox')
+        selec_name_entry = ttk.Combobox(main_frame, textvariable=self.tenant_name, state='readonly',
+                                        style='custom.TCombobox')
         selec_name_entry.grid(column=1, row=3, sticky="NSEW")
 
         select_name = self.database.elt_table("nom", "tenant")
@@ -1073,10 +1083,6 @@ class ConfigGUI(tk.Frame):
                                                                                                                                            self.fontGui, "bold"), fg=self.fg)
         button_default.grid(column=0, row=14, sticky="NSEW")
 
-        # button_default = tk.Button(main_frame, text="PURGE DB", command=self.default, borderwidth=2, relief=tk.GROOVE,
-        #                            bg=self.bg, font=('Courier',
-        #                                              self.fontGui, "bold"), fg=self.fg)
-        # button_default.grid(column=0, row=16, sticky="NSEW")
 
         button_validation = tk.Button(main_frame, text="ENREGISTRER", command=self.mod_entry, borderwidth=2, relief=tk.GROOVE, bg=self.bg, font=('Courier',
                                                                                                                                                  self.fontGui, "bold"), fg=self.fg)
@@ -1163,7 +1169,6 @@ class ConfigGUI(tk.Frame):
 class NewModSciGUI(tk.Frame):
     def __init__(self, value):
         tk.Frame.__init__(self)
-
         self.master.geometry("350x350")
         self.combostyle = ttk.Style()
         self.combostyle.theme_use('custom.TCombobox')
@@ -1293,96 +1298,106 @@ class NewModSciGUI(tk.Frame):
                     with open('config.json', 'w') as json_files:
                         json.dump(config, json_files)
                     print("sci rajouter au json")
-                    #messagebox.showinfo("Information", "modification(s) effectué(es)")
-
-    class Sharholder(tk.Frame):
-        def __init__(self, value):
-            tk.Frame.__init__(self)
-            self.master.geometry("970x350")
-            self.master.overrideredirect(False)
-            self.master.minsize(300, 150)
-            self.master.columnconfigure(0, weight=1)
-            self.master.rowconfigure(0, weight=1)
-            self.columnconfigure(0, weight=1)
-            self.rowconfigure(0, weight=1)
-            self.grid(sticky="NSEW")
-            self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = Gui_aspect().setting()
-            self.combostyle = ttk.Style()
-            self.combostyle.theme_use('custom.TCombobox')
-            self.value = value
-            self.database = sql_database()
-
-            # variable's creation
-            self.shareholder_id = tk.IntVar()
-            self.shareholder_name = tk.StringVar()
-            self.shareholder_firstname = tk.StringVar()
-            self.shareholder_sci = tk.StringVar()
-            self.shareholder_part = tk.IntVar()
-
-            # widget's Creation
-
-            main_frame = tk.Frame(self, borderwidth=2)
-            main_frame.grid(column=0, row=0, sticky="NSEW")
-
-            if value == 0:
-                self.master.title("modification d'actionnaire")
-                n = 1
-                self.type_field = 1
-                self.shareholder_old = tk.StringVar()
-                selec_entry = ttk.Combobox(main_frame, textvariable=self.shareholder_old, state='readonly',
-                                           style='custom.TCombobox')
-                selec_entry.grid(column=1, row=1, columnspan=2, sticky="EW")
-
-                tenant_list = self.database.elt_table("nom", "shareholder")
-                selec_entry['values'] = tenant_list
-
-            if value == 1:
-                self.master.title("creation d'actionnaire")
-                self.n = 0
-                self.type_field = 0
-
-            champs = ["nom", "prenom", "sci", "part"]
-            i = 1
-            for elt in champs:
-                label = tk.Label(main_frame, text=elt)
-                label.grid(column=0, row=i + self.n, sticky="EW")
-                i += 1
-
-            entries = [self.shareholder_name, self.shareholder_firstname, self.sci, self.part]
-            i = 1
-            for elt in entries:
-                entry = tk.Entry(main_frame, textvariable=elt, bg="#4F7292", fg='white')
-                entry.grid(column=1, row=i + self.n, columnspan=2, sticky="EW")
-                i += 1
-
-            button = tk.Button(main_frame, text="VALIDER", command=self.validation, bg=self.bg, fg=self.fg,
-                               font=('Courier',
-                                     self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
-            button.grid(column=2, row=13 + self.n, sticky='NSEW', padx=1)
-
-            button2 = tk.Button(main_frame, text="RETOUR", command=self.quit, bg=self.bg, fg=self.fg,
-                                font=('Courier', self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
-            button2.grid(column=1, row=13 + self.n, sticky='NSEW', padx=1)
-
-        def observer(self, *args):
-            watch = self.shareholder_name.get()
-            shareholder_list = [self.shareholder_id, self.shareholder_name, self.shareholder_firstname,
-                                self.shareholder_sci, self.shareholder_part]
-            modification_table = self.database.shareholder_call(watch.split(" ")[0])
-            for i, shareholder in enumerate(shareholder_list):
-                shareholder.set(modification_table[i])
-
-        def validation(self):
-            pass
-
-        def quit(self):
-            self.destroy()
-            MainGui().mainloop()
+                    messagebox.showinfo("Information", "modification(s) effectué(es)")
 
     def quit(self):
         self.destroy()
         MainGui().mainloop()
 
+
+class Shareholder_GUI(tk.Frame):
+    def __init__(self):
+        tk.Frame.__init__(self)
+        self.master.geometry("970x350")
+        self.master.overrideredirect(False)
+        self.master.minsize(300, 150)
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.grid(sticky="NSEW")
+        self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = Gui_aspect().setting()
+        self.combostyle = ttk.Style()
+        self.combostyle.theme_use('custom.TCombobox')
+        self.database = sql_database()
+
+        # variable's creation
+        self.shareholder_id = tk.IntVar()
+        self.shareholder_name = tk.StringVar()
+        self.shareholder_firstname = tk.StringVar()
+        self.shareholder_sci = tk.StringVar()
+        self.shareholder_part = tk.IntVar()
+
+        # widget's Creation
+
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
+        main_frame.grid(column=0, row=0, sticky="NSEW")
+
+        frame1 = tk.LabelFrame(self, main_frame, text="ACTIONNAIRES", font=('Courier', self.fg_size, "bold"), fg=self.fg,
+                               borderwidth=4, relief=tk.GROOVE, bg=self.tableau)
+        frame1.grid(column=0, row=0, sticky='NSEW')
+
+        frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
+        frame2.grid(column=0, row=1, sticky='NSEW')
+
+        frame3 = tk.Frame(self, main_frame, bg=self.button_color)
+        frame3.grid(column=1, row=0, rowspan=2, sticky='NSEW')
+
+        column = ["Select", "sci", "nom", "prenom", "part", "statut"]
+        i = 0
+        for e in column:
+            label = tk.Label(frame1, text=e.upper(), font=('Courier', self.fg_size, "bold"), fg=self.fg,
+                             bg=self.tableau)
+            label.grid(column=i, row=0, sticky='W', padx=10)
+            i += 1
+
+
+        # Frame 3
+        self.menu_shareholder = tk.StringVar()
+        menu_shareholder_list = ["Création", "Modification", "Suppression"]
+        self.menu_shareholder.set("ACTIONNAIRES")
+        shareholder_menu = tk.OptionMenu(frame3, self.menu_shareholder, *menu_shareholder_list,
+                                         command=self.shareholder_menu_selection)
+        shareholder_menu.configure(bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"), bd=0)
+        shareholder_menu.grid(column=0, row=2, sticky='NSEW')
+
+        button_blk4 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
+                                )
+        button_blk4.grid(column=0, row=3, sticky='NSEW')
+
+        button_blk4 = tk.Button(frame3,text="LOCATAIRES",  borderwidth=2, relief=tk.GROOVE,
+                               command=self.go_tenant, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"),
+                               bd=0)
+
+        button_blk4.grid(column=0, row=4, sticky='NSEW')
+
+        button_blk4 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
+                                )
+        button_blk4.grid(column=0, row=5, sticky='NSEW')
+
+        button_end = tk.Button(frame3, text="FERMER", borderwidth=2, relief=tk.GROOVE,
+                               command=self.closing, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"),
+                               bd=0)
+        button_end.grid(column=0, row=6, sticky='NSEW')
+
+
+    def shareholder_menu_selection(self, v):
+        if self.menu_shareholder.get() == "Création":
+            self.destroy()
+
+        if self.menu_shareholder.get() == "Modification":
+            self.destroy()
+
+        if self.menu_shareholder.get() == "Suppression":
+            self.destroy()
+            DeleteGui(2).mainloop()
+
+    def go_tenant(self):
+        self.destroy()
+        MainGui().mainloop()
+
+    def closing(self):
+        self.master.destroy()
 
 if __name__ == "__main__":
     SplashScreen().mainloop()

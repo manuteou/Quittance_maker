@@ -1,4 +1,4 @@
-from GUI import SplashScreen
+from tenant_GUI import SplashScreen
 from tablesdb import sql_database_init
 from pathlib import Path
 import json
@@ -49,6 +49,7 @@ if not database.exists():
     sql_database_init()
 
 if database.exists():
+    sql_database_init()
     directory = directory()
     path_dir = directory.joinpath("save_db")
     path_dir.mkdir(parents=True, exist_ok=True)
@@ -56,6 +57,7 @@ if database.exists():
     con = sqlite3.connect("tenant_db.db")
     back = sqlite3.connect(path)
     con.backup(back)
+    back.close()
     print(path_dir)
     all_path = path_dir.joinpath("*")
     list_path = []
@@ -64,6 +66,8 @@ if database.exists():
     if len(list_path) > 5:
         for i in list_path[4:]:
             os.remove(i)
+        print(f"remove {i}")
+
 if not m.exists():
     text = 'Bonjour ci-joint la quittance de loyer'
     with open('message.txt', 'w') as text_file:

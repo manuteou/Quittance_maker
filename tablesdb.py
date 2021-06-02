@@ -71,7 +71,7 @@ class sql_database_init():
                siret TEXT NOT NULL
                );"""
 
-        sql_create_shareholder_table = """CREATE TABLE IF NOT EXISTS shareholder(
+        sql_create_shareholder_table = """ CREATE TABLE IF NOT EXISTS shareholder(
                 id INTEGER PRIMARY KEY,
                 nom TEXT NOT NULL,
                 prenom TEXT NOT NULL,
@@ -79,11 +79,30 @@ class sql_database_init():
                 PART INTEGER NOT NULL
                 );"""
 
+        sql_create_records_tenant = """ CREATE TABLE IF NOT EXISTS records_tenant(
+                    id INTEGER PRIMARY KEY,
+                    nom TEXT NOT NULL,
+                    prenom TEXT NOT NULL,
+                    SCI TEXT NOT NULL,
+                    loyer INTEGER NOT NULL,
+                    charges INTEGER NOT NULL,
+                    date DATE NOT NULL
+                    );"""
+
+        sql_create_records_shareholder = """ CREATE TABLE IF NOT EXISTS records_shareholder(
+                    id INTEGER PRIMARY KEY,
+                    nom TEXT NOT NULL,
+                    prenom TEXT NOT NULL,
+                    SCI TEXT NOT NULL
+                    );"""
+
         self.c.execute(sql_create_tenant_table)
         self.c.execute(sql_create_location_table)
         self.c.execute(sql_create_sci_table)
         self.c.execute(sql_create_shareholder_table)
-
+        self.c.execute(sql_create_records_tenant)
+        self.c.execute(sql_create_records_shareholder)
+        
 class sql_database():
     def __init__(self):
         self.conn = sqlite3.connect("tenant_db.db")
