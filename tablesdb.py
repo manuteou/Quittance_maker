@@ -76,6 +76,7 @@ class sql_database_init():
                 nom TEXT NOT NULL,
                 prenom TEXT NOT NULL,
                 SCI TEXT NOT NULL,
+                email TEXT NOT NULL,
                 PART INTEGER NOT NULL
                 );"""
 
