@@ -1,6 +1,6 @@
 import sqlite3
 
-class tenant:
+class Tenant:
     def __init__(self, nom, prenom, adresse, ville, tel, mail, sci, loyer, charges, cat, date, indice):
         self.nom = nom
         self.prenom = prenom
@@ -15,7 +15,8 @@ class tenant:
         self.date_entree = date
         self.base_indice = indice
 
-class sci:
+
+class Sci:
     def __init__(self, nom, adresse, cp_ville, tel, mail, siret):
         self.nom = nom
         self.adresse = adresse
@@ -24,14 +25,16 @@ class sci:
         self.mail = mail
         self.siret = siret
 
-class shareholder:
-    def __init__(self, nom, prenom, sci, part):
+
+class Shareholder:
+    def __init__(self, nom, prenom, sci, part, mail):
         self.nom = nom
         self.prenom = prenom
         self.sci = sci
         self.part = part
+        self.email = mail
 
-class sql_database_init():
+class Sql_database_init():
     def __init__(self):
         self.conn = sqlite3.connect("tenant_db.db")
         self.c = self.conn.cursor()
@@ -75,16 +78,16 @@ class sql_database_init():
                 id INTEGER PRIMARY KEY,
                 nom TEXT NOT NULL,
                 prenom TEXT NOT NULL,
-                SCI TEXT NOT NULL,
-                email TEXT NOT NULL,
-                PART INTEGER NOT NULL
+                sci TEXT NOT NULL,
+                mail TEXT NOT NULL,
+                part INTEGER NOT NULL
                 );"""
 
         sql_create_records_tenant = """ CREATE TABLE IF NOT EXISTS records_tenant(
                     id INTEGER PRIMARY KEY,
                     nom TEXT NOT NULL,
                     prenom TEXT NOT NULL,
-                    SCI TEXT NOT NULL,
+                    sci TEXT NOT NULL,
                     loyer INTEGER NOT NULL,
                     charges INTEGER NOT NULL,
                     date DATE NOT NULL
@@ -94,7 +97,7 @@ class sql_database_init():
                     id INTEGER PRIMARY KEY,
                     nom TEXT NOT NULL,
                     prenom TEXT NOT NULL,
-                    SCI TEXT NOT NULL
+                    sci TEXT NOT NULL
                     );"""
 
         self.c.execute(sql_create_tenant_table)
@@ -103,8 +106,9 @@ class sql_database_init():
         self.c.execute(sql_create_shareholder_table)
         self.c.execute(sql_create_records_tenant)
         self.c.execute(sql_create_records_shareholder)
-        
-class sql_database():
+
+
+class Sql_database():
     def __init__(self):
         self.conn = sqlite3.connect("tenant_db.db")
         self.c = self.conn.cursor()
@@ -248,6 +252,12 @@ class sql_database():
         sql_sharholder_table = f""" SELECT * FROM shareholder
                                 WHERE id = {id};"""
         self.c.execute(sql_sharholder_table)
+        return self.c.fetchall()
+
+    def shareholder_aff(self):
+        sql_shareholder_aff = """SELECT id, sci, nom, prenom, part
+                                FROM shareholder"""
+        self.c.execute(sql_shareholder_aff)
         return self.c.fetchall()
 
 if __name__ == "__main__":

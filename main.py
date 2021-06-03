@@ -1,5 +1,5 @@
 from GUI import SplashScreen
-from tablesdb import sql_database_init
+from tablesdb import Sql_database_init
 from pathlib import Path
 import json
 from functions import directory
@@ -46,10 +46,10 @@ if not c.exists():
 
 if not database.exists():
     print("création base de données")
-    sql_database_init()
+    Sql_database_init()
 
 if database.exists():
-    sql_database_init()
+    Sql_database_init()
     directory = directory()
     path_dir = directory.joinpath("save_db")
     path_dir.mkdir(parents=True, exist_ok=True)

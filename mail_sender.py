@@ -2,7 +2,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
-from tablesdb import tenant, sql_database
+from tablesdb import Tenant, Sql_database
 import json
 import os
 
@@ -44,7 +44,7 @@ class send_mail:
 
 if __name__ == "__main__":
 
-    database = sql_database()
+    database = Sql_database()
 
     directory = os.path.dirname(__file__)
     years = "2021"

@@ -1,4 +1,4 @@
-from tablesdb import sql_database
+from tablesdb import Sql_database
 from pathlib import Path
 import os
 
@@ -30,7 +30,7 @@ class PdfGenerator:
         self.sci_tel = sci_tel
         self.sci_mail = sci_mail
         self.sci_siret = sci_siret
-        self.database = sql_database()
+        self.database = Sql_database()
 
     def generator(self):
         self.pdf.setFont("Helvetica", 15)
@@ -120,7 +120,7 @@ class IndexLetter:
         self.new_indice = indice_new
         self.cat = cat
         self.date_entree = date_entree
-        self.database = sql_database()
+        self.database = Sql_database()
         if self.cat == 1:
             self.type ="loyers commerciaux"
         else:
