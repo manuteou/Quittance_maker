@@ -17,13 +17,14 @@ class Tenant:
 
 
 class Sci:
-    def __init__(self, nom, adresse, cp_ville, tel, mail, siret):
+    def __init__(self, nom, adresse, cp_ville, tel, mail, siret, solde=0):
         self.nom = nom
         self.adresse = adresse
         self.cp_ville = cp_ville
         self.tel = tel
         self.mail = mail
         self.siret = siret
+        self.solde = solde
 
 
 class Shareholder:
@@ -71,7 +72,9 @@ class Sql_database_init():
                cp_ville TEXT NOT NULL,
                tel TEXT NOT NULL,
                mail TEXT NOT NULL,
-               siret TEXT NOT NULL
+               siret TEXT NOT NULL,
+               solde REAL,
+               frais REAL
                );"""
 
         sql_create_shareholder_table = """ CREATE TABLE IF NOT EXISTS shareholder(
@@ -99,6 +102,8 @@ class Sql_database_init():
                     prenom TEXT NOT NULL,
                     sci TEXT NOT NULL
                     );"""
+
+
 
         self.c.execute(sql_create_tenant_table)
         self.c.execute(sql_create_location_table)
@@ -256,8 +261,16 @@ class Sql_database():
 
     def shareholder_aff(self):
         sql_shareholder_aff = """SELECT id, sci, nom, prenom, part
-                                FROM shareholder"""
+                                FROM shareholder
+                                ORDER BY sci;"""
         self.c.execute(sql_shareholder_aff)
+        return self.c.fetchall()
+
+    def sum_sci(self):
+        sql_sum_sci = """SELECT id, SUM(loyer), sci
+                        FROM "records_tenant"
+                        GROUP BY sci;"""
+        self.c.execute(sql_sum_sci)
         return self.c.fetchall()
 
 if __name__ == "__main__":

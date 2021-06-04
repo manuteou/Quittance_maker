@@ -69,7 +69,7 @@ if database.exists():
         print(f"remove {i}")
 
 if not m.exists():
-    text = 'Bonjour ci-joint la quittance de loyer'
+    text = 'Quittance Maker/Author: SEBAN Emmanuel/eseban78@free.fr'
     with open('message.txt', 'w') as text_file:
         text_file.write(text)
 

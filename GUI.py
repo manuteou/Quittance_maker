@@ -10,6 +10,7 @@ from reportlab.pdfgen import canvas
 from functions import Verification
 import webbrowser
 from tkinter.colorchooser import askcolor
+from math import floor
 #from shareholder_GUI import Shareholder_GUI
 
 class Gui_aspect:
@@ -1188,6 +1189,7 @@ class NewModSciGUI(tk.Frame):
         self.tel_var = tk.StringVar()
         self.mail_var = tk.StringVar()
         self.siret_var = tk.StringVar()
+        self.solde = tk.DoubleVar()
         # Widget
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color
                               )
@@ -1211,7 +1213,7 @@ class NewModSciGUI(tk.Frame):
             self.master.title("Nouvelle sci")
             self.n = 0
 
-        champs = ["SCI", "Adresse", "CP/ville", "Tel", "Email", "SIRET"]
+        champs = ["SCI", "Adresse", "CP/ville", "Tel", "Email", "SIRET", "Solde"]
         i = 0
 
         for elt in champs:
@@ -1221,7 +1223,7 @@ class NewModSciGUI(tk.Frame):
             i += 1
 
         entries = [self.name_var, self.adresse_var, self.city_var, self.tel_var, self.mail_var, self.siret_var,
-                   self.add_sci]
+                   self.solde, self.add_sci]
         i = 0
         for elt in entries:
             entry = tk.Entry(main_frame, textvariable=elt, bg="#4F7292", fg='white')
@@ -1231,11 +1233,11 @@ class NewModSciGUI(tk.Frame):
 
         boutton_add = tk.Button(main_frame, text="VALIDER", command=self.add_sci, bg=self.bg, fg=self.fg, font=('Courier',
                                                                                                                 self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
-        boutton_add.grid(column=1, row=6 + self.n, sticky="NSEW")
+        boutton_add.grid(column=1, row=7 + self.n, sticky="NSEW")
 
         boutton_quitter = tk.Button(main_frame, text="QUITTER", command=self.quit, bg=self.bg, fg=self.fg, font=('Courier',
                                                                                                                  self.fontGui, "bold"), bd=0, relief=tk.GROOVE)
-        boutton_quitter.grid(column=2, row=6 + self.n, sticky="NSEW")
+        boutton_quitter.grid(column=2, row=7 + self.n, sticky="NSEW")
 
     def observer(self, *args):
         watch = self.old_var.get()
@@ -1248,6 +1250,7 @@ class NewModSciGUI(tk.Frame):
         self.tel_var.set(result[0][4])
         self.mail_var.set(result[0][5])
         self.siret_var.set(result[0][6])
+        self.solde.set(result[0][7])
 
     def check_entry(self):
         if self.name_var.get() == "" or self.adresse_var.get() == "" or self.city_var.get() == "":
@@ -1270,13 +1273,13 @@ class NewModSciGUI(tk.Frame):
 
         elif self.check_entry():
             new_sci = Sci(self.name_var.get().upper(), self.adresse_var.get(), self.city_var.get(),
-                          self.tel_var.get(), self.mail_var.get(), self.siret_var.get())
+                          self.tel_var.get(), self.mail_var.get(), self.siret_var.get(), self.solde.get())
 
             insert_sci = {'nom': new_sci.nom, 'adresse': new_sci.adresse, 'cp_ville': new_sci.cp_ville,
-                          'tel': new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret}
+                          'tel': new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret, 'solde': new_sci.solde}
 
             print({'nom': new_sci.nom, 'adresse': new_sci.adresse, 'cp_ville': new_sci.cp_ville,
-                   'tel': new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret})
+                   'tel': new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret, 'solde': new_sci.solde})
 
             if self.type_field == 0:
                 id = self.old_var.get().split(" ")[0]
@@ -1334,6 +1337,7 @@ class Shareholder_GUI(tk.Frame):
         self.date_s.set(f"{self.today.day}/{self.today.month}/{self.today.year}")
         self.frais = tk.DoubleVar()
         self.sci = tk.StringVar()
+
         # widget's Creation
 
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
@@ -1364,7 +1368,7 @@ class Shareholder_GUI(tk.Frame):
             c = 1
             self.selection.append(tk.BooleanVar(value=0))
             check_box = tk.Checkbutton(frame1, variable=self.selection[i], bg=self.tableau)
-            check_box.grid(column=0, row=r)
+            check_box.grid(column=0, row=r, sticky='NSEW')
 
             for e in elt[1:]:
                 label = tk.Label(frame1, text=e, bg=self.tableau, fg='white', font=("Times", self.fg_size))
@@ -1372,6 +1376,14 @@ class Shareholder_GUI(tk.Frame):
                 c += 1
             r += 1
 
+        virement = self.virement()
+        print(virement)
+        # affichage du virement
+        i = 1
+        for e in virement:
+            label = tk.Label(frame1, text=e, bg=self.tableau, fg='white', font=("Times", self.fg_size))
+            label.grid(column=5, row=i, sticky='NSEW')
+            i += 1
 
         # Frame 2
         date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1, bg=self.button_color
@@ -1474,10 +1486,37 @@ class Shareholder_GUI(tk.Frame):
         MainGui().mainloop()
 
     def validation_shareholder(self):
-        pass            # send mail and create pdf
-                        # record data
+        sum_sci = self.database.sum_sci()
+        shareholder_list = self.database.shareholder_aff()
+        for sci in sum_sci:
+            for elt in shareholder_list:
+                if sci[2] == elt[1]:
+                    solde = {"solde": sci[1] - floor(sci[1] / 1000) * 1000}
+                    self.database.update_entry(sci[0], "sci", solde)
+                   # send mail and create pdf
+                    # record data
+
     def frais_calcul(self):
-        pass            # impute shareholder
+        value = self.frais.get()
+        sci = self.sci.get()
+        insert = {"frais": value}
+        self.database.update_entry(sci, "sci", insert)
+
+    def virement(self):
+        result = []
+        sum_sci = self.database.sum_sci()
+        shareholder_list = self.database.shareholder_aff()
+        for sci in sum_sci:
+            for elt in shareholder_list:
+                if sci[2] == elt[1]:
+                    solde = self.database.one_elt("solde", "sci", sci[0])[0][0]
+                    frais = self.database.one_elt("frais", "sci", sci[0])[0][0]
+                    montant = sci[1] + solde - frais
+                    result.append(floor(montant/1000)*1000 * elt[4] / 100)
+
+
+
+        return result
 
     def closing(self):
         self.master.destroy()
