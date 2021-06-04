@@ -185,7 +185,7 @@ class Sql_database():
                                 ON l.id = t.id
                                 INNER JOIN sci as s
                                 ON l.sci = s.nom
-                                WHERE l.id = {index};"""
+                                WHERE t.id = {index};"""
         #print(sql_pdf_table_single)
         self.c.execute(sql_pdf_table_single)
         pdf_table = self.c.fetchall()

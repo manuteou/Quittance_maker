@@ -38,6 +38,7 @@ class send_mail:
                 smtpObj.starttls()
                 smtpObj.login(self.sender_email, self.password)
                 smtpObj.sendmail(self.sender_email, self.receiver_email, msg.as_string())
+                print("mail send at:", self.receiver_email)
         except Exception as e:
             print(e)
 

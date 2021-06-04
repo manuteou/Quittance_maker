@@ -11,7 +11,7 @@ from functions import Verification
 import webbrowser
 from tkinter.colorchooser import askcolor
 from math import floor
-#from shareholder_GUI import Shareholder_GUI
+from ttkwidgets import CheckboxTreeview
 
 class Gui_aspect:
     def __init__(self):
@@ -76,7 +76,6 @@ class SplashScreen(tk.Frame):
         self.destroy()
         MainGui().mainloop()
 
-
 class MainGui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
@@ -91,6 +90,11 @@ class MainGui(tk.Frame):
         self.grid(sticky="NSEW")
         self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = Gui_aspect().setting()
         self.database = Sql_database()
+        self.style = ttk.Style()
+        print(self.style.theme_names())
+        self.style.theme_use('vista')
+        self.style.configure("Treeview", background=self.tableau, foreground=self.fg, rowheight=25,
+                             fieldbackground=self.tableau)
         # variable's creation
         self.today = date.today()
         self.date_s = tk.StringVar()
@@ -102,7 +106,8 @@ class MainGui(tk.Frame):
         main_frame.columnconfigure(0, weight=0)
         main_frame.columnconfigure(1, weight=1)
 
-        frame1 = tk.LabelFrame(self, main_frame, text="LOCATAIRES", font=('Courier', self.fg_size, "bold"), fg=self.fg, borderwidth=4, relief=tk.GROOVE, bg=self.tableau)
+        frame1 = tk.LabelFrame(self, main_frame, text="LOCATAIRES", font=('Courier', self.fg_size, "bold"),
+                               fg=self.fg, borderwidth=4, relief=tk.GROOVE, bg=self.tableau)
         frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE, bg=self.button_color
                           )
         frame3 = tk.Frame(self, main_frame, bg=self.button_color
@@ -114,51 +119,31 @@ class MainGui(tk.Frame):
 
         self.selection = []
         # widgets on the left side
-        #
-        column = ["Select", "nom", "prenom", "loyer", "charges", "info", "statut"]
-        i = 0
-        for e in column:
-            label = tk.Label(frame1, text=e.upper(), font=('Courier', self.fg_size, "bold"), fg=self.fg, bg=self.tableau)
-            label.grid(column=i, row=0, sticky='W', padx=10)
-            i += 1
-
+        self.tree_scroll = tk.Scrollbar(frame1)
+        self.tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        self.tree = CheckboxTreeview(frame1, yscrollcommand=self.tree_scroll.set, selectmode="extended")
+        self.tree['columns'] = ("NOM", "PRENOM", "LOYER", "CHARGES", "INFO", "STATUT")
+        columns = ["#0", "NOM", "PRENOM", "LOYER", "CHARGES", "INFO", "STATUT"]
         aff_list = self.database.test_table()
-
-        # variable_list = []
-        # for e in aff_list:
-        #     variable_list.append(e[2])
-
-        r = 1
-        for i, elt in enumerate(aff_list):
-            c = 1
-            self.selection.append(tk.BooleanVar(value=0))
-            check_box = tk.Checkbutton(frame1, variable=self.selection[i], bg=self.tableau)
-            check_box.grid(column=0, row=r)
-
-
+        for c in columns:
+            self.tree.column(c, width=120)
+            self.tree.heading(c, text=c, anchor=tk.W)
+        for elt in aff_list:
+            result = list(elt[2:6])
             if self.info_tenant(elt[7]) == 0:
-                info_field = tk.Label(frame1, text="MAJ Loyer", bg=self.tableau, fg='white', font=("Times", self.fg_size))
-                info_field.grid(column=5, row=r)
-            if self.info_tenant(elt[7]) == 1:
-                info_field = tk.Label(frame1, text="Lettre d'indexation", bg=self.tableau, fg='white', font=("Times", self.fg_size))
-                info_field.grid(column=5, row=r)
+                result.append("MAJ Loyer")
+            elif self.info_tenant(elt[7]) == 1:
+                result.append("Lettre d'indexation")
             else:
-                info_field = tk.Label(frame1, bg=self.tableau, fg='white', font=("Times", self.fg_size))
-                info_field.grid(column=5, row=r)
-
+                result.append("")
             if not self.statut_check(elt[2], elt[3], elt[6]):
-
-                statut_field = tk.Label(frame1, text="NOT SEND", bg=self.tableau, fg='white', font=("Times", self.fg_size))
-                statut_field.grid(column=6, row=r)
+                result.append("NOT SEND")
             else:
-                statut_field = tk.Label(frame1, text="SEND", bg=self.tableau, fg='green', font=("Times", self.fg_size))
-                statut_field.grid(column=6, row=r)
+                result.append("SEND")
+            self.tree.insert(parent='', index='end', iid=elt[0], values=result)
+        self.tree.pack()
 
-            for e in elt[2:-2]:
-                label = tk.Label(frame1, text=e, bg=self.tableau, fg='white', font=("Times", self.fg_size))
-                label.grid(column=c, row=r, sticky='NSEW', padx=10)
-                c += 1
-            r += 1
+        self.tree_scroll.config(command=self.tree.yview)
 
         # FRAME2
         date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1, bg=self.button_color
@@ -238,16 +223,13 @@ class MainGui(tk.Frame):
     def validation_all_tenant(self):
         pass
 
+
     def validation_select_tenant(self):
-        result_selection = []
+        result_selection = (self.tree.get_checked())
         list_to_send = []
-        for i, e in enumerate(self.selection):
-            result_selection.append(self.selection[i].get())
-
-        for i, value in enumerate(result_selection):
-            if value:
-                list_to_send.append(self.database.pdf_table_single(i+1))
-
+        for result in result_selection:
+            list_to_send.append(self.database.pdf_table_single(result))
+        print("list_to-send", list_to_send)
         for tenant in list_to_send:
             for elt in tenant:
                 if not self.statut_check(elt[2], elt[3], elt[10]):
@@ -258,8 +240,9 @@ class MainGui(tk.Frame):
         directory = functions.directory()
         config = functions.config_data()
         day, month, year = self.date_s.get().split("/")
-
+        print("list_to-send", list_to_send)
         for elt in list_to_send:
+            print(elt)
             path_dir = directory.joinpath(elt[0][10], year, month)
             path_dir.mkdir(parents=True, exist_ok=True)
             path = path_dir.joinpath(f"{elt[0][2]}_{elt[0][3]}" + ".pdf")
@@ -272,8 +255,8 @@ class MainGui(tk.Frame):
             mail = send_mail("Quittance", config["master_mail"], config["password"], elt[0][8], config["SMTP"],
                                  config["port"], path)
             mail.send()
-            self.destroy()
-            MainGui().mainloop()
+        self.destroy()
+        MainGui().mainloop()
 
     def config(self):
         self.destroy()
@@ -284,7 +267,6 @@ class MainGui(tk.Frame):
         date = self.date_s.get()
         _, month, year = date.split("/")
         path_dir = directory.joinpath(sci, year, month, f"{nom}_{prenom}" + ".pdf")
-
         if path_dir.exists():
             return True
         else:
