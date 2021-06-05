@@ -160,22 +160,19 @@ class Sql_database():
     def elt_table(self, elt, table):
         sql_elt_table = f"""SELECT id, {elt} FROM {table} """
         self.c.execute(sql_elt_table)
-        elt = self.c.fetchall()
-        return elt
+        return self.c.fetchall()
 
     def elt_table_one(self, elt, table, champs):
         sql_elt_table = f"""SELECT * FROM {table} 
                             WHERE {elt}= "{champs}";"""
         self.c.execute(sql_elt_table)
-        elt = self.c.fetchall()
-        return elt
+        return self.c.fetchall()
 
     def one_elt(self, elt, table, id):
         sql_one_elt = f"""SELECT {elt} FROM {table}
                             WHERE id = {id}"""
         self.c.execute(sql_one_elt)
-        elt = self.c.fetchall()
-        return elt
+        return self.c.fetchall()
 
     def pdf_table_single(self, index):
         sql_pdf_table_single = f"""SELECT  t.id, l.id,   t.nom, prenom, t.adresse, t.CP_ville, loyer, charges, t.mail, cat, s.nom, 
@@ -188,8 +185,7 @@ class Sql_database():
                                 WHERE t.id = {index};"""
         #print(sql_pdf_table_single)
         self.c.execute(sql_pdf_table_single)
-        pdf_table = self.c.fetchall()
-        return pdf_table
+        return self.c.fetchall()
 
     def letter_request(self, index):
         sql_letter_request = f"""SELECT t.id, t.nom, prenom, t.adresse, t.cp_ville, indice_base, l.id, s.nom,
@@ -203,8 +199,7 @@ class Sql_database():
                             WHERE t.id = {index};
                                                     """
         self.c.execute(sql_letter_request)
-        pdf_table = self.c.fetchall()
-        return pdf_table
+        return self.c.fetchall()
 
     def test_table(self):
         sql_test_table = f"""SELECT t.id, l.id, t.nom, prenom, loyer, charges,sci, date_entree
@@ -212,8 +207,8 @@ class Sql_database():
                                 INNER JOIN location as l
                                 ON t.id = l.id;"""
         self.c.execute(sql_test_table)
-        affichage_table = self.c.fetchall()
-        return affichage_table
+        return  self.c.fetchall()
+
 
     def info_table(self, id):
         sql_info_table = f"""SELECT t.id, prenom, adresse, cp_ville, tel, mail, sci, cat, date_entree
@@ -222,27 +217,24 @@ class Sql_database():
                                 ON t.id = l.id
                                 WHERE t.id = {id};"""
         self.c.execute(sql_info_table)
-        affichage_table = self.c.fetchall()
-        return affichage_table
+        return self.c.fetchall()
 
     def info_sci(self, id):
         sql_info_sci = f"""SELECT *
                             FROM sci
                             WHERE id ={id}"""
         self.c.execute(sql_info_sci)
-        affichage_table = self.c.fetchall()
-        return affichage_table
+        return self.c.fetchall()
 
     def modification_call(self, id):
         sql_affichage_table = f"""SELECT t.id, t.nom, prenom, t.adresse, t.CP_ville, tel, t.mail, l.sci, date_entree, loyer, charges, indice_base, cat
                                 FROM tenant as t
                                 INNER JOIN location as l
-                                ON t.nom = l.nom
+                                ON t.id = l.id
                                 WHERE t.id = "{id}";"""
 
         self.c.execute(sql_affichage_table)
-        affichage_table = self.c.fetchone()
-        return affichage_table
+        return self.c.fetchone()
 
     def maj_rent_request(self, value, index):
         sql_maj_rent_request = f"""UPDATE location 
@@ -266,10 +258,11 @@ class Sql_database():
         self.c.execute(sql_shareholder_aff)
         return self.c.fetchall()
 
-    def sum_sci(self):
-        sql_sum_sci = """SELECT id, SUM(loyer), sci
+    def sum_sci(self, sci, month, year):
+        sql_sum_sci = f"""SELECT SUM(loyer)
                         FROM "records_tenant"
-                        GROUP BY sci;"""
+                        WHERE sci = "{sci}" AND strftime('%m', date) = "{month}" AND strftime('%Y', date) = "{year}";"""
+        print(sql_sum_sci)
         self.c.execute(sql_sum_sci)
         return self.c.fetchall()
 

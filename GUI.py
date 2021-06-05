@@ -91,14 +91,14 @@ class MainGui(tk.Frame):
         self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = Gui_aspect().setting()
         self.database = Sql_database()
         self.style = ttk.Style()
-        print(self.style.theme_names())
         self.style.theme_use('vista')
         self.style.configure("Treeview", background=self.tableau, foreground=self.fg, rowheight=25,
                              fieldbackground=self.tableau)
         # variable's creation
         self.today = date.today()
         self.date_s = tk.StringVar()
-        self.date_s.set(f"{self.today.day}/{self.today.month}/{self.today.year}")
+        year, month, day = str(self.today).split('-')
+        self.date_s.set(f"{day}/{month}/{year}")
         self.info = tk.StringVar()
         # widget's Creation
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color
@@ -153,8 +153,6 @@ class MainGui(tk.Frame):
         date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE, bg="#4F7292", bd=0, font=('Courier', 10, "bold"), fg="white")
         date_s_entry.grid(column=1, row=0, sticky='NE')
 
-        # button_all = tk.Button(frame2, text=" ENVOIE TOUS", height=2, borderwidth=2, relief=tk.GROOVE, bg=se, font=('Courier', 9, "bold"), fg='#74D0F1', command=self.validation_all_tenant)
-        # button_all.grid(column=0, row=10, sticky='NSEW')
 
         button_selection = tk.Button(frame2, text="ENVOIE SELECTION", height=2, borderwidth=2, bg=self.bg
                             , font=('Courier', 9, "bold"), fg=self.fg, relief=tk.GROOVE, command=self.validation_select_tenant)
@@ -233,8 +231,11 @@ class MainGui(tk.Frame):
         for tenant in list_to_send:
             for elt in tenant:
                 if not self.statut_check(elt[2], elt[3], elt[10]):
+                    day, month, year = self.date_s.get().split("/")
+                    date = f"{year}-{month}-{day}"
+                    print(self.today)
                     records_tenant = {"nom": elt[2], "prenom": elt[3], "SCI": elt[10], "loyer": elt[6],
-                                      "charges": elt[7], "date": self.date_s.get()}
+                                      "charges": elt[7], "date": date}
                     self.database.create_entry("records_tenant", records_tenant)
 
         directory = functions.directory()
@@ -386,6 +387,7 @@ class CreatModGui(tk.Frame):
                                    relief=tk.FLAT, bg=self.button_color
                                    , fg=self.fg, font=('Courier', self.fontGui))
         selector2.grid(column=2, row=0, sticky="NSEW", padx=1)
+
         champs = ["Nom", "Prenom", "Adresse", "CP_ville", "Telephone", "Email", "SCI", "Date d'entrée", "Loyer",
                   "Charges", "Indice"]
         i = 1
@@ -406,7 +408,7 @@ class CreatModGui(tk.Frame):
         sci_choise.grid(column=1, row=7 + self.n, columnspan=2, sticky="EW")
         with open('config.json', 'r') as json_files:
             config = json.load(json_files)
-        sci_choise['values'] = config['sci']
+            sci_choise['values'] = config['sci']
 
         entries = [self.date_entreeVar, self.loyerVar, self.chargesVar, self.indice_base]
         i = 8
@@ -425,13 +427,12 @@ class CreatModGui(tk.Frame):
 
     def observer(self, *args):
         watch = self.tenant_old.get()
-        print(watch)
         tenant_list = [self.tenant_id, self.tenant_var, self.prenomVar, self.adresseVar, self.villeVar,
                        self.telVar, self.mailVar, self.sciVar, self.date_entreeVar, self.loyerVar,
                        self.chargesVar, self.indice_base, self.selectorVar]
         modification_table = self.database.modification_call(watch.split(" ")[0])
-        print(modification_table)
         for i, tenant in enumerate(tenant_list):
+            print(modification_table[i])
             tenant.set(modification_table[i])
 
 
@@ -515,7 +516,6 @@ class DeleteGui(tk.Frame):
         self.nom_var = tk.StringVar()
         self.nom_var.set("Attention action definitive")
         # widget creation
-        print(value)
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
         main_frame.grid(column=0, row=0, sticky="NSEW")
 
@@ -1165,6 +1165,7 @@ class NewModSciGUI(tk.Frame):
         self.database = Sql_database()
         self.bg, self.button_color, self.fg, self.fg_size,  _, self.fontGui = Gui_aspect().setting()
         # Variables
+        self.value = value
         self.name_var = tk.StringVar()
         self.adresse_var = tk.StringVar()
         self.city_var = tk.StringVar()
@@ -1177,8 +1178,7 @@ class NewModSciGUI(tk.Frame):
                               )
         main_frame.grid(column=0, row=0, sticky="NSEW")
 
-        if value == 0:
-            self.type_field = 0
+        if self.value == 0:
             self.n = 1
             self.master.title("Modification sci")
             self.old_var = tk.StringVar()
@@ -1190,8 +1190,7 @@ class NewModSciGUI(tk.Frame):
             sci_list = self.database.elt_table("nom", "sci")
             selec_entry['values'] = sci_list
 
-        if value == 1:
-            self.type_field = 1
+        if self.value == 1:
             self.master.title("Nouvelle sci")
             self.n = 0
 
@@ -1263,29 +1262,29 @@ class NewModSciGUI(tk.Frame):
             print({'nom': new_sci.nom, 'adresse': new_sci.adresse, 'cp_ville': new_sci.cp_ville,
                    'tel': new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret, 'solde': new_sci.solde})
 
-            if self.type_field == 0:
+            if self.value == 0:
                 id = self.old_var.get().split(" ")[0]
                 self.database.update_entry(id, "sci", insert_sci)
 
-            if self.type_field == 1:
+            if self.value == 1:
                 self.database.create_entry("sci", insert_sci)
                 messagebox.showinfo("Information", "SCI enregistrée")
 
-                with open('config.json', 'r') as json_files:
-                    config = json.load(json_files)
-                    print("Ouverture config")
-                try:
-                    print("tentative de remove")
-                    config['sci'].remove(self.old_var.get().split(" ")[1])
-                except AttributeError as e:
-                    print("supression non realisée car création")
-                finally:
-                    print("ecriture de la sci")
-                    config["sci"].append(new_sci.nom)
-                    with open('config.json', 'w') as json_files:
-                        json.dump(config, json_files)
-                    print("sci rajouter au json")
-                messagebox.showinfo("Information", "modification(s) effectué(es)")
+            with open('config.json', 'r') as json_files:
+                config = json.load(json_files)
+                print("Ouverture config")
+            try:
+                print("tentative de remove")
+                config['sci'].remove(self.old_var.get().split(" ")[1])
+            except AttributeError as e:
+                print("supression non realisée car création")
+            finally:
+                print("ecriture de la sci")
+                config["sci"].append(new_sci.nom)
+                with open('config.json', 'w') as json_files:
+                    json.dump(config, json_files)
+                print("sci rajouter au json")
+            messagebox.showinfo("Information", "modification(s) effectué(es)")
 
     def quit(self):
         self.destroy()
@@ -1306,6 +1305,8 @@ class Shareholder_GUI(tk.Frame):
         self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = Gui_aspect().setting()
         self.combostyle = ttk.Style()
         self.combostyle.theme_use('custom.TCombobox')
+        self.style = ttk.Style()
+        self.style.theme_use('vista')
         self.database = Sql_database()
         self.today = date.today()
         # variable's creation
@@ -1316,90 +1317,90 @@ class Shareholder_GUI(tk.Frame):
         self.shareholder_sci = tk.StringVar()
         self.shareholder_part = tk.IntVar()
         self.date_s = tk.StringVar()
-        self.date_s.set(f"{self.today.day}/{self.today.month}/{self.today.year}")
+        year, month, day = str(self.today).split('-')
+        self.date_s.set(f"{day}/{month}/{year}")
         self.frais = tk.DoubleVar()
         self.sci = tk.StringVar()
-
+        self.sum_sci = tk.DoubleVar()
+        self.sci.trace("w", self.observer)
         # widget's Creation
 
-        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
-        main_frame.grid(column=0, row=0, sticky="NSEW")
+        self.main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
+        self.main_frame.grid(column=0, row=0, sticky="NSEW")
 
-        frame1 = tk.LabelFrame(self, main_frame, text="ACTIONNAIRES", font=('Courier', self.fg_size, "bold"), fg=self.fg,
+        self.frame1 = tk.LabelFrame(self, self.main_frame, text="ACTIONNAIRES", font=('Courier', self.fg_size, "bold"), fg=self.fg,
                                borderwidth=4, relief=tk.GROOVE, bg=self.tableau)
-        frame1.grid(column=0, row=0, sticky='NSEW')
+        self.frame1.grid(column=0, row=0, sticky='NSEW')
 
-        frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
-        frame2.grid(column=0, row=1, sticky='NSEW')
+        self.frame2 = tk.Frame(self, self.main_frame, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
+        self.frame2.grid(column=0, row=1, sticky='NSEW')
 
-        frame3 = tk.Frame(self, main_frame, bg=self.button_color)
+        frame3 = tk.Frame(self, self.main_frame, bg=self.button_color)
         frame3.grid(column=1, row=0, rowspan=2, sticky='NSEW')
 
-        column = ["Select", "sci", "nom", "prenom", "part", "virement", "statut"]
-
-        i = 0
-        for e in column:
-            label = tk.Label(frame1, text=e.upper(), font=('Courier', self.fg_size, "bold"), fg=self.fg,
-                             bg=self.tableau)
-            label.grid(column=i, row=0, sticky='W', padx=10)
-            i += 1
+        self.tree_scroll = tk.Scrollbar(self.frame1)
+        self.tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        self.tree = CheckboxTreeview(self.frame1, yscrollcommand=self.tree_scroll.set, selectmode="extended")
+        self.tree['columns'] = ("SCI", "NOM", "PRENOM", "PART", "VIREMENT", "STATUT")
+        columns = ["#0", "SCI", "NOM", "PRENOM", "PART", "VIREMENT", "STATUT"]
         aff_list = self.database.shareholder_aff()
+        for c in columns:
+            self.tree.column(c, width=120)
+            self.tree.heading(c, text=c, anchor=tk.W)
+        for elt in aff_list:
+            result = list(elt[1:])
+            self.tree.insert(parent='', index='end', iid=elt[0], values=result)
+        self.tree.pack()
+        self.tree_scroll.config(command=self.tree.yview)
 
-        r = 1
-        for i, elt in enumerate(aff_list):
-            c = 1
-            self.selection.append(tk.BooleanVar(value=0))
-            check_box = tk.Checkbutton(frame1, variable=self.selection[i], bg=self.tableau)
-            check_box.grid(column=0, row=r, sticky='NSEW')
-
-            for e in elt[1:]:
-                label = tk.Label(frame1, text=e, bg=self.tableau, fg='white', font=("Times", self.fg_size))
-                label.grid(column=c, row=r, sticky='NSEW', padx=10)
-                c += 1
-            r += 1
-
-        virement = self.virement()
-        print(virement)
-        # affichage du virement
-        i = 1
-        for e in virement:
-            label = tk.Label(frame1, text=e, bg=self.tableau, fg='white', font=("Times", self.fg_size))
-            label.grid(column=5, row=i, sticky='NSEW')
-            i += 1
 
         # Frame 2
-        date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1, bg=self.button_color
+        date_s_label = tk.Label(self.frame2, text="Jour d'édition", borderwidth=2, padx=-1, bg=self.button_color
                                 , font=('Courier', 10, "bold"), fg=self.fg)
         date_s_label.grid(column=0, row=0, sticky='NW')
 
-        date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE, bg="#4F7292", bd=0,
+        date_s_entry = tk.Entry(self.frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE, bg="#4F7292", bd=0,
                                 font=('Courier', 10, "bold"), fg="white")
         date_s_entry.grid(column=1, row=0, sticky='NE')
 
-        button_selection = tk.Button(frame2, text="ENVOIE SELECTION", height=2, borderwidth=2, bg=self.bg
+        button_selection = tk.Button(self.frame2, text="ENVOIE SELECTION", height=2, borderwidth=2, bg=self.bg
                                      , font=('Courier', 9, "bold"), fg=self.fg, relief=tk.GROOVE,
                                      command=self.validation_shareholder)
 
         button_selection.grid(column=0, row=1, sticky='NSEW')
-        button = tk.Button(frame2, state='disabled', bd=0, bg=self.button_color)
+        button = tk.Button(self.frame2, state='disabled', bd=0, bg=self.button_color)
         button.grid(column=3, row=0, rowspan=2, sticky='NSEW')
 
-        label = tk.Label(frame2, text="Frais du mois", borderwidth=2, padx=-1, bg=self.button_color
-                                , font=('Courier', 10, "bold"), fg=self.fg)
+        label = tk.Label(self.frame2, text="Crédit", borderwidth=2, padx=-1, bg=self.button_color
+                         , font=('Courier', 10, "bold"), fg=self.fg)
         label.grid(column=4, row=0, sticky='NSEW')
 
-        entry = tk.Entry(frame2, textvariable=self.frais, borderwidth=2, relief=tk.GROOVE, bg="#4F7292", bd=0,
-                                font=('Courier', 10, "bold"), fg="white")
-        entry.grid(column=5, row=0, sticky='NSEW')
+        label = tk.Entry(self.frame2, text=self.sum_sci, borderwidth=2, relief=tk.GROOVE, bg=self.button_color, bd=0,
+                         font=('Courier', 10, "bold"), fg="white")
+        label.grid(column=5, row=0, sticky='NSEW')
 
-        button_selection = tk.Button(frame2, text="CALCULER", height=2, borderwidth=2, bg=self.bg
+        label = tk.Label(self.frame2, text="Débit", borderwidth=2, padx=-1, bg=self.button_color
+                                , font=('Courier', 10, "bold"), fg=self.fg)
+        label.grid(column=4, row=1, sticky='NSEW')
+
+        entry = tk.Entry(self.frame2, textvariable=self.frais, borderwidth=2, relief=tk.GROOVE, bg="#4F7292", bd=0,
+                                font=('Courier', 10, "bold"), fg="white")
+        entry.grid(column=5, row=1, sticky='NSEW')
+
+        button_selection = tk.Button(self.frame2, text="CALCULER", height=2, borderwidth=2, bg=self.bg
                                      , font=('Courier', 9, "bold"), fg=self.fg, relief=tk.GROOVE,
                                      command=self.frais_calcul)
 
-        button_selection.grid(column=6, row=1, sticky='NSEW')
+        button_selection.grid(column=7, row=1, sticky='NSEW')
 
-        sci_choise = ttk.Combobox(frame2, textvariable=self.sci, state='readonly', style='custom.TCombobox')
-        sci_choise.grid(column=6, row=0, columnspan=2, sticky="NSEW")
+        button_selection = tk.Button(self.frame2, text="VALIDER", height=2, borderwidth=2, bg=self.bg
+                                     , font=('Courier', 9, "bold"), fg=self.fg, relief=tk.GROOVE,
+                                     command=self.frais_calcul)
+
+        button_selection.grid(column=8, row=1, sticky='NSEW')
+
+        sci_choise = ttk.Combobox(self.frame2, textvariable=self.sci, state='readonly', style='custom.TCombobox')
+        sci_choise.grid(column=6, row=0, sticky="NSEW")
         with open('config.json', 'r') as json_files:
             config = json.load(json_files)
         sci_choise['values'] = config['sci']
@@ -1460,6 +1461,12 @@ class Shareholder_GUI(tk.Frame):
             self.destroy()
             DeleteGui(2).mainloop()
 
+    def observer(self, *args):
+        watch = self.sci.get()
+        day, month, year = str(self.date_s.get()).split("/")
+        self.result = self.database.sum_sci(watch, month, year)
+        self.sum_sci.set(self.result)
+
     def stat(self):
         pass                # stat.py ---> pandas/ plotly
 
@@ -1478,11 +1485,15 @@ class Shareholder_GUI(tk.Frame):
                    # send mail and create pdf
                     # record data
 
+
     def frais_calcul(self):
         value = self.frais.get()
-        sci = self.sci.get()
-        insert = {"frais": value}
-        self.database.update_entry(sci, "sci", insert)
+        for elt in self.database.shareholder_aff():
+            if self.sci.get() == elt[1]:
+                virement = ((self.result[0][0] - value) * float(elt[4]) / 100.)
+                elt = list(elt)
+                elt.append(virement)
+                self.tree.item(elt[0], values=elt[1:])
 
     def virement(self):
         result = []
