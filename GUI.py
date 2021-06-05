@@ -1325,22 +1325,22 @@ class Shareholder_GUI(tk.Frame):
         self.sci.trace("w", self.observer)
         # widget's Creation
 
-        self.main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
-        self.main_frame.grid(column=0, row=0, sticky="NSEW")
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
+        main_frame.grid(column=0, row=0, sticky="NSEW")
 
-        self.frame1 = tk.LabelFrame(self, self.main_frame, text="ACTIONNAIRES", font=('Courier', self.fg_size, "bold"), fg=self.fg,
+        frame1 = tk.LabelFrame(self, main_frame, text="ACTIONNAIRES", font=('Courier', self.fg_size, "bold"), fg=self.fg,
                                borderwidth=4, relief=tk.GROOVE, bg=self.tableau)
-        self.frame1.grid(column=0, row=0, sticky='NSEW')
+        frame1.grid(column=0, row=0, sticky='NSEW')
 
-        self.frame2 = tk.Frame(self, self.main_frame, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
-        self.frame2.grid(column=0, row=1, sticky='NSEW')
+        frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
+        frame2.grid(column=0, row=1, sticky='NSEW')
 
-        frame3 = tk.Frame(self, self.main_frame, bg=self.button_color)
+        frame3 = tk.Frame(self, main_frame, bg=self.button_color)
         frame3.grid(column=1, row=0, rowspan=2, sticky='NSEW')
 
-        self.tree_scroll = tk.Scrollbar(self.frame1)
+        self.tree_scroll = tk.Scrollbar(frame1)
         self.tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
-        self.tree = CheckboxTreeview(self.frame1, yscrollcommand=self.tree_scroll.set, selectmode="extended")
+        self.tree = CheckboxTreeview(frame1, yscrollcommand=self.tree_scroll.set, selectmode="extended")
         self.tree['columns'] = ("SCI", "NOM", "PRENOM", "PART", "VIREMENT", "STATUT")
         columns = ["#0", "SCI", "NOM", "PRENOM", "PART", "VIREMENT", "STATUT"]
         aff_list = self.database.shareholder_aff()
@@ -1355,51 +1355,51 @@ class Shareholder_GUI(tk.Frame):
 
 
         # Frame 2
-        date_s_label = tk.Label(self.frame2, text="Jour d'édition", borderwidth=2, padx=-1, bg=self.button_color
+        date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1, bg=self.button_color
                                 , font=('Courier', 10, "bold"), fg=self.fg)
         date_s_label.grid(column=0, row=0, sticky='NW')
 
-        date_s_entry = tk.Entry(self.frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE, bg="#4F7292", bd=0,
+        date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE, bg="#4F7292", bd=0,
                                 font=('Courier', 10, "bold"), fg="white")
         date_s_entry.grid(column=1, row=0, sticky='NE')
 
-        button_selection = tk.Button(self.frame2, text="ENVOIE SELECTION", height=2, borderwidth=2, bg=self.bg
+        button_selection = tk.Button(frame2, text="ENVOIE SELECTION", height=2, borderwidth=2, bg=self.bg
                                      , font=('Courier', 9, "bold"), fg=self.fg, relief=tk.GROOVE,
                                      command=self.validation_shareholder)
 
         button_selection.grid(column=0, row=1, sticky='NSEW')
-        button = tk.Button(self.frame2, state='disabled', bd=0, bg=self.button_color)
+        button = tk.Button(frame2, state='disabled', bd=0, bg=self.button_color)
         button.grid(column=3, row=0, rowspan=2, sticky='NSEW')
 
-        label = tk.Label(self.frame2, text="Crédit", borderwidth=2, padx=-1, bg=self.button_color
+        label = tk.Label(frame2, text="Crédit", borderwidth=2, padx=-1, bg=self.button_color
                          , font=('Courier', 10, "bold"), fg=self.fg)
         label.grid(column=4, row=0, sticky='NSEW')
 
-        label = tk.Entry(self.frame2, text=self.sum_sci, borderwidth=2, relief=tk.GROOVE, bg=self.button_color, bd=0,
+        label = tk.Entry(frame2, text=self.sum_sci, borderwidth=2, relief=tk.GROOVE, bg=self.button_color, bd=0,
                          font=('Courier', 10, "bold"), fg="white")
         label.grid(column=5, row=0, sticky='NSEW')
 
-        label = tk.Label(self.frame2, text="Débit", borderwidth=2, padx=-1, bg=self.button_color
+        label = tk.Label(frame2, text="Débit", borderwidth=2, padx=-1, bg=self.button_color
                                 , font=('Courier', 10, "bold"), fg=self.fg)
         label.grid(column=4, row=1, sticky='NSEW')
 
-        entry = tk.Entry(self.frame2, textvariable=self.frais, borderwidth=2, relief=tk.GROOVE, bg="#4F7292", bd=0,
+        entry = tk.Entry(frame2, textvariable=self.frais, borderwidth=2, relief=tk.GROOVE, bg="#4F7292", bd=0,
                                 font=('Courier', 10, "bold"), fg="white")
         entry.grid(column=5, row=1, sticky='NSEW')
 
-        button_selection = tk.Button(self.frame2, text="CALCULER", height=2, borderwidth=2, bg=self.bg
+        button_selection = tk.Button(frame2, text="CALCULER", height=2, borderwidth=2, bg=self.bg
                                      , font=('Courier', 9, "bold"), fg=self.fg, relief=tk.GROOVE,
                                      command=self.frais_calcul)
 
         button_selection.grid(column=7, row=1, sticky='NSEW')
 
-        button_selection = tk.Button(self.frame2, text="VALIDER", height=2, borderwidth=2, bg=self.bg
+        button_selection = tk.Button(frame2, text="VALIDER", height=2, borderwidth=2, bg=self.bg
                                      , font=('Courier', 9, "bold"), fg=self.fg, relief=tk.GROOVE,
                                      command=self.frais_calcul)
 
         button_selection.grid(column=8, row=1, sticky='NSEW')
 
-        sci_choise = ttk.Combobox(self.frame2, textvariable=self.sci, state='readonly', style='custom.TCombobox')
+        sci_choise = ttk.Combobox(frame2, textvariable=self.sci, state='readonly', style='custom.TCombobox')
         sci_choise.grid(column=6, row=0, sticky="NSEW")
         with open('config.json', 'r') as json_files:
             config = json.load(json_files)
@@ -1464,8 +1464,8 @@ class Shareholder_GUI(tk.Frame):
     def observer(self, *args):
         watch = self.sci.get()
         day, month, year = str(self.date_s.get()).split("/")
-        self.result = self.database.sum_sci(watch, month, year)
-        self.sum_sci.set(self.result)
+        result = self.database.sum_sci(watch, month, year)
+        self.sum_sci.set(result)
 
     def stat(self):
         pass                # stat.py ---> pandas/ plotly
@@ -1490,23 +1490,23 @@ class Shareholder_GUI(tk.Frame):
         value = self.frais.get()
         for elt in self.database.shareholder_aff():
             if self.sci.get() == elt[1]:
-                virement = ((self.result[0][0] - value) * float(elt[4]) / 100.)
+                virement = (value * float(elt[4]) / 100.)
                 elt = list(elt)
                 elt.append(virement)
                 self.tree.item(elt[0], values=elt[1:])
 
     def virement(self):
-        result = []
-        sum_sci = self.database.sum_sci()
-        shareholder_list = self.database.shareholder_aff()
-        for sci in sum_sci:
-            for elt in shareholder_list:
-                if sci[2] == elt[1]:
-                    solde = self.database.one_elt("solde", "sci", sci[0])[0][0]
-                    frais = self.database.one_elt("frais", "sci", sci[0])[0][0]
-                    montant = sci[1] + solde - frais
-                    result.append(floor(montant/1000)*1000 * elt[4] / 100)
-
+        # result = []
+        # sum_sci = self.database.sum_sci()
+        # shareholder_list = self.database.shareholder_aff()
+        # for sci in sum_sci:
+        #     for elt in shareholder_list:
+        #         if sci[2] == elt[1]:
+        #             solde = self.database.one_elt("solde", "sci", sci[0])[0][0]
+        #             frais = self.database.one_elt("frais", "sci", sci[0])[0][0]
+        #             montant = sci[1] + solde - frais
+        #             result.append(floor(montant/1000)*1000 * elt[4] / 100)
+        pass
 
 
         return result
