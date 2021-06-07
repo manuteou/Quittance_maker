@@ -91,8 +91,8 @@ class Sql_database_init():
                     nom TEXT NOT NULL,
                     prenom TEXT NOT NULL,
                     sci TEXT NOT NULL,
-                    loyer INTEGER NOT NULL,
-                    charges INTEGER NOT NULL,
+                    loyer REAL NOT NULL,
+                    charges REAL NOT NULL,
                     date DATE NOT NULL
                     );"""
 
@@ -100,7 +100,9 @@ class Sql_database_init():
                     id INTEGER PRIMARY KEY,
                     nom TEXT NOT NULL,
                     prenom TEXT NOT NULL,
-                    sci TEXT NOT NULL
+                    sci TEXT NOT NULL,
+                    virement REAL NOT NULL,
+                    date DATE NOT NULL
                     );"""
 
 

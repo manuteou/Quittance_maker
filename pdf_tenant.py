@@ -4,7 +4,7 @@ import os
 
 
 # pdf function generator
-class PdfGenerator:
+class Pdf_tenant:
 
     def __init__(self, pdf, nom, prenom, adresse, ville, loyer, charge, day, month, years, cat,
                  sci_nom, sci_adresse, sci_cp_ville, sci_tel, sci_mail, sci_siret):
@@ -180,6 +180,30 @@ class IndexLetter:
         self.pdf.showPage()
         self.pdf.save()
 
+class Pdf_shareholder:
+    def __init__(self, pdf, nom, prenom, sci, date, montant):
+        self.pdf = pdf
+        self.nom = nom
+        self.prenom = prenom
+        self.sci = sci
+        self.date = date
+        self.montant = montant
+
+    def generator(self):
+        self.pdf.drawString(20, 800, f"SCI {self.sci}")
+        self.pdf.drawString(350, 613, f"le {self.date}")
+        self.pdf.drawString(350, 700, f"{self.nom} {self.prenom}")
+        self.pdf.drawString(20, 460, f" Un virement de {self.montant} à été éffectué sur votre compte")
+        self.pdf.drawString(20, 220,
+                            "Je reste à votre dispositionpour de plus amples renseignements. Dans cette attente")
+        self.pdf.drawString(20, 200, "veuillez agréer, Madame, Monsieur, l'expression de mes salutaions distinguées")
+        self.pdf.drawString(20, 160, "Le Gérant.")
+        p = Path()
+        s = p / 'sign.PNG'
+        if s.exists():
+            self.pdf.drawImage("sign.PNG", 20, 30, width=120, height=120)
+        self.pdf.showPage()
+        self.pdf.save()
 
 if __name__ == "__main__":
     from reportlab.pdfgen import canvas
@@ -188,11 +212,11 @@ if __name__ == "__main__":
     directory.mkdir(parents=True, exist_ok=True)
     path = directory.joinpath("test.pdf")
     pdf = canvas.Canvas(str(path))
-    pdf_gen = PdfGenerator(pdf, nom="SEBAN", prenom="Emmanuel", adresse="7 rue ducis", ville="78000 VERSAILLES",
-                          loyer=1000, charge="200", day="12", month="05", years="2020", cat=1,
-                           sci_nom="JOMO",
-                           sci_adresse="19 rue laurent Gaudet", sci_cp_ville="78150 LE CHESNAY",
-                           sci_tel="01 39 55 16 69", sci_mail="marcelseban@hotmail.fr", sci_siret="155522220")
+    pdf_gen = Pdf_tenant(pdf, nom="SEBAN", prenom="Emmanuel", adresse="7 rue ducis", ville="78000 VERSAILLES",
+                         loyer=1000, charge="200", day="12", month="05", years="2020", cat=1,
+                         sci_nom="JOMO",
+                         sci_adresse="19 rue laurent Gaudet", sci_cp_ville="78150 LE CHESNAY",
+                         sci_tel="01 39 55 16 69", sci_mail="marcelseban@hotmail.fr", sci_siret="155522220")
 
     #pdf_gen = IndexLetter(pdf, nom="SEBAN", prenom="Emmanuel", adresse="7 rue ducis", ville="78000 VERSAILLES",
                           # loyer="1000", charge="200", day="12", month="5", year="2020", sci_nom="JOMO",
