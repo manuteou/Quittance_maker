@@ -10,9 +10,8 @@ from reportlab.pdfgen import canvas
 from functions import Verification
 import webbrowser
 from tkinter.colorchooser import askcolor
-from math import floor
 from ttkwidgets import CheckboxTreeview
-
+from tkinter.ttk import Treeview
 
 class GuiAspect:
     def __init__(self):
@@ -94,10 +93,10 @@ class SplashScreen(tk.Frame):
 
     def quit(self):
         self.destroy()
-        MainGui().mainloop()
+        SciGui().mainloop()
 
 
-class MainGui(tk.Frame):
+class TenantGui(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.master.geometry("970x350")
@@ -182,60 +181,55 @@ class MainGui(tk.Frame):
 
 
         # FRAME3
-        button_config = tk.Button(frame3, text='CONFIG', borderwidth=2, relief=tk.GROOVE, command=self.config, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"))
-        button_config.grid(column=0, row=0, sticky='NSEW')
 
         button_blk0 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
                                 )
         button_blk0.grid(column=0, row=1, sticky='NSEW')
 
-        self.menu_sci = tk.StringVar()
-        menu_sci_list = ["création", "modification", "suppression"]
-        self.menu_sci.set("SCI")
-        SciMenu = tk.OptionMenu(frame3, self.menu_sci, *menu_sci_list, command=self.sci_menu_selection)
-        SciMenu.configure(bg=self.bg, font=('Courier', self.fg_size, "bold"), fg=self.fg, bd=0)
-        SciMenu.grid(column=0, row=2, sticky='NSEW')
-
-        button_blk1 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
-                                )
-        button_blk1.grid(column=0, row=3, sticky='NSEW')
-
-        # menu tenant
         self.menu_tenant = tk.StringVar()
         menu_tenant_list = ["info", "création", "modification", "suppression"]
         self.menu_tenant.set("LOCATAIRES")
         tenantMenu = tk.OptionMenu(frame3, self.menu_tenant, *menu_tenant_list, command=self.tenant_menu_selection)
         tenantMenu.configure(bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"), bd=0)
-        tenantMenu.grid(column=0, row=4, sticky='NSEW')
+        tenantMenu.grid(column=0, row=2, sticky='NSEW')
 
         button_blk2 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
                                 )
-        button_blk2.grid(column=0, row=5, sticky='NSEW')
-        # menu sci
+        button_blk2.grid(column=0, row=4, sticky='NSEW')
+
         self.menu_index = tk.StringVar()
         menu_index_list = ["Lettre", "MAJ Loyer"]
         self.menu_index.set("INDEXATION")
         indexMenu = tk.OptionMenu(frame3, self.menu_index, *menu_index_list, command=self.index_menu_selection)
         indexMenu.configure(bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"), bd=0)
-        indexMenu.grid(column=0, row=6, sticky='NSEW')
+        indexMenu.grid(column=0, row=5, sticky='NSEW')
 
         button_blk3 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
                                 )
-        button_blk3.grid(column=0, row=7, sticky='NSEW')
-        # menu shareholder
+        button_blk3.grid(column=0, row=6, sticky='NSEW')
 
-        shareholder_button = tk.Button(frame3,text="ACTIONNAIRES",  borderwidth=2, relief=tk.GROOVE,
-                               command=self.go_shareholder, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"),
-                               bd=0)
-        shareholder_button .grid(column=0, row=8, sticky='NSEW')
+        # acess other menu
+        sci_button = tk.Button(frame3, text="SCI", borderwidth=2, relief=tk.GROOVE,
+                                       command=self.go_sci, bg=self.bg, fg=self.fg,
+                                       font=('Courier', self.fg_size, "bold"),
+                                       bd=0)
+        sci_button.grid(column=0, row=7, sticky='NSEW')
 
         button_blk4 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
                                 )
-        button_blk4.grid(column=0, row=9, sticky='NSEW')
+        button_blk4.grid(column=0, row=8, sticky='NSEW')
+        shareholder_button = tk.Button(frame3,text="ASSOCIES",  borderwidth=2, relief=tk.GROOVE,
+                               command=self.go_shareholder, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"),
+                               bd=0)
+        shareholder_button .grid(column=0, row=9, sticky='NSEW')
+
+        button_blk4 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
+                                )
+        button_blk4.grid(column=0, row=10, sticky='NSEW')
 
         button_end = tk.Button(frame3, text="FERMER", borderwidth=2, relief=tk.GROOVE,
                                command=self.closing, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"), bd=0)
-        button_end.grid(column=0, row=10, sticky='NSEW')
+        button_end.grid(column=0, row=11, sticky='NSEW')
 
     def closing(self):
         self.master.destroy()
@@ -279,7 +273,7 @@ class MainGui(tk.Frame):
                                  config["port"], path)
             mail.send()
         self.destroy()
-        MainGui().mainloop()
+        TenantGui().mainloop()
 
     def config(self):
         self.destroy()
@@ -333,16 +327,9 @@ class MainGui(tk.Frame):
             self.destroy()
             DeleteGui(0).mainloop()
 
-    def sci_menu_selection(self, v):
-        if self.menu_sci.get() == "création":
-            self.destroy()
-            NewModSciGUI(1).mainloop()
-        if self.menu_sci.get() == "modification":
-            self.destroy()
-            NewModSciGUI(0).mainloop()
-        if self.menu_sci.get() == "suppression":
-            self.destroy()
-            DeleteGui(1).mainloop()
+    def go_sci(self):
+        self.destroy()
+        SciGui().mainloop()
 
     def go_shareholder(self):
         self.destroy()
@@ -516,7 +503,7 @@ class CreatModGui(tk.Frame):
 
     def quit(self):
         self.destroy()
-        MainGui().mainloop()
+        TenantGui().mainloop()
 
 
 class DeleteGui(tk.Frame):
@@ -617,7 +604,7 @@ class DeleteGui(tk.Frame):
         if self.value == 2:
             Shareholder_GUI().mainloop()
 
-        MainGui().mainloop()
+        TenantGui().mainloop()
 
 
 class InfoGui(tk.Frame):
@@ -703,7 +690,7 @@ class InfoGui(tk.Frame):
 
     def quit(self):
         self.destroy()
-        MainGui().mainloop()
+        TenantGui().mainloop()
 
 class MajRentGui(tk.Frame):
     def __init__(self):
@@ -824,7 +811,7 @@ class MajRentGui(tk.Frame):
 
     def quitter(self):
         self.destroy()
-        MainGui().mainloop()
+        TenantGui().mainloop()
 
 class LetterGui(tk.Frame):
     def __init__(self):
@@ -960,7 +947,7 @@ class LetterGui(tk.Frame):
 
     def quitter(self):
         self.destroy()
-        MainGui().mainloop()
+        TenantGui().mainloop()
 
 
 class ConfigGUI(tk.Frame):
@@ -1104,7 +1091,7 @@ class ConfigGUI(tk.Frame):
 
     def quit(self):
         self.destroy()
-        MainGui().mainloop()
+        TenantGui().mainloop()
 
     def check_color(self):
         check_list = [self.bg_color.get(), self.fg_color.get(), self.tableau_color.get(), self.btn_color.get()]
@@ -1310,7 +1297,7 @@ class NewModSciGUI(tk.Frame):
 
     def quit(self):
         self.destroy()
-        MainGui().mainloop()
+        TenantGui().mainloop()
 
 
 class Shareholder_GUI(tk.Frame):
@@ -1352,7 +1339,7 @@ class Shareholder_GUI(tk.Frame):
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
         main_frame.grid(column=0, row=0, sticky="NSEW")
 
-        frame1 = tk.LabelFrame(self, main_frame, text="ACTIONNAIRES", font=('Courier', self.fg_size, "bold"), fg=self.fg,
+        frame1 = tk.LabelFrame(self, main_frame, text="ASSOCIES", font=('Courier', self.fg_size, "bold"), fg=self.fg,
                                borderwidth=4, relief=tk.GROOVE, bg=self.tableau)
         frame1.grid(column=0, row=0, sticky='NSEW')
 
@@ -1436,10 +1423,10 @@ class Shareholder_GUI(tk.Frame):
         sci_choise['values'] = list_sci
 
         # Frame 3
-        stat_label = tk.Button(frame3, text="STAT", borderwidth=2, relief=tk.GROOVE,
-                               command=self.stat, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"),
-                               bd=0)
-        stat_label.grid(column=0, row=0, sticky='NSEW')
+        # stat_label = tk.Button(frame3, text="STAT", borderwidth=2, relief=tk.GROOVE,
+        #                        command=self.stat, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"),
+        #                        bd=0)
+        # stat_label.grid(column=0, row=0, sticky='NSEW')
 
         button_blk4 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
                                 )
@@ -1461,19 +1448,29 @@ class Shareholder_GUI(tk.Frame):
                                 )
         button_blk4.grid(column=0, row=4, sticky='NSEW')
 
+        sci_button = tk.Button(frame3, text="SCI", borderwidth=2, relief=tk.GROOVE,
+                               command=self.go_sci, bg=self.bg, fg=self.fg,
+                               font=('Courier', self.fg_size, "bold"),
+                               bd=0)
+        sci_button.grid(column=0, row=5, sticky='NSEW')
+
+        button_blk4 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
+                                )
+        button_blk4.grid(column=0, row=6, sticky='NSEW')
+
         button_blk4 = tk.Button(frame3,text="LOCATAIRES",  borderwidth=2, relief=tk.GROOVE,
                                command=self.go_tenant, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"),
                                bd=0)
 
-        button_blk4.grid(column=0, row=5, sticky='NSEW')
+        button_blk4.grid(column=0, row=7, sticky='NSEW')
 
         button = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color)
-        button.grid(column=0, row=6, sticky='NSEW')
+        button.grid(column=0, row=8, sticky='NSEW')
 
         button_end = tk.Button(frame3, text="FERMER", borderwidth=2, relief=tk.GROOVE,
                                command=self.closing, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"),
                                bd=0)
-        button_end.grid(column=0, row=7, sticky='NSEW')
+        button_end.grid(column=0, row=9, sticky='NSEW')
 
 
     def shareholder_menu_selection(self, v):
@@ -1498,12 +1495,16 @@ class Shareholder_GUI(tk.Frame):
         sci_solde = self.database.one_elt("solde", "sci", watch)[0][0]
         self.sum_sci.set(sum_sci_tenant + sci_solde)
 
-    def stat(self):
-        pass                # stat.py ---> pandas/ plotly
+    # def stat(self):           #move to sci menu
+    #     pass                # stat.py ---> pandas/ plotly
 
     def go_tenant(self):
         self.destroy()
-        MainGui().mainloop()
+        TenantGui().mainloop()
+
+    def go_sci(self):
+        self.destroy()
+        SciGui().mainloop()
 
     def validation_shareholder(self):
         # mettre une verification de champs vide sur virement
@@ -1668,6 +1669,200 @@ class Cr_mod_SO(tk.Frame):
     def quit(self):
         self.destroy()
         Shareholder_GUI().mainloop()
+
+
+class SciGui(tk.Frame):
+    def __init__(self):
+        tk.Frame.__init__(self)
+        self.master.geometry("970x350")
+        self.master.overrideredirect(False)
+        self.master.minsize(300, 150)
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.grid(sticky="NSEW")
+        self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = GuiAspect().setting()
+
+        self.style = ttk.Style()
+        self.style.theme_settings("default", {
+            "TCombobox": {'configure': {
+                'selectbackground': "#347083",
+                'fieldbackground': '#4F7292',
+                'background': '#4F7292',
+                'fontground': 'white'
+            }
+            },
+            "Treeview": {"configure": {
+                "background": self.tableau,
+                "foreground": self.fg,
+                "rowheight": 50,
+                "fieldbackground": self.tableau,
+            }
+            }})
+        self.style.theme_use('default')
+
+        self.database = Sql_database()
+        self.today = date.today()
+        # variable's creation
+        self.selection = []
+        self.date_s = tk.StringVar()
+        self.date_s.set(f"{self.today.day}/{self.today.month}/{self.today.year}")
+        self.solde = tk.DoubleVar()
+        self.charges = tk.DoubleVar()
+        self.sci = tk.StringVar()
+        # widget's Creation
+
+        main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
+        main_frame.grid(column=0, row=0, sticky="NSEW")
+
+        frame1 = tk.LabelFrame(self, main_frame, text="SCI", font=('Courier', self.fg_size, "bold"), fg=self.fg,
+                               borderwidth=4, relief=tk.GROOVE, bg=self.tableau)
+        frame1.grid(column=0, row=0, sticky='NSEW')
+
+        frame2 = tk.Frame(self, main_frame, borderwidth=2, relief=tk.GROOVE, bg=self.button_color)
+        frame2.grid(column=0, row=1, sticky='NSEW')
+
+        frame3 = tk.Frame(self, main_frame, bg=self.button_color)
+        frame3.grid(column=1, row=0, rowspan=2, sticky='NSEW')
+
+        self.tree_scroll = tk.Scrollbar(frame1)
+        self.tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.tree = Treeview(frame1, yscrollcommand=self.tree_scroll.set, selectmode="extended")
+        self.tree.pack()
+
+        self.tree_scroll.config(command=self.tree.yview)
+
+        self.tree['columns'] = ("SCI", "Solde", "Provision sur charges")
+        columns = ["#0", "SCI", "Solde", "Provision sur charges"]
+        self.tree.tag_configure('row', background=self.tableau)
+        aff_list = self.database.sci_aff()
+        for c in columns:
+            self.tree.column(c, width=300)
+            self.tree.heading(c, text=c, anchor=tk.W)
+
+        for elt in aff_list:
+            result = list(elt[:])
+            self.tree.insert(parent='', index='end', iid=elt[0], values=result, tags=('row',))
+        self.tree.column("#0", width=0, stretch=tk.NO)
+        self.tree.bind("<ButtonRelease-1>", self.focus_row)
+
+        # Frame 2
+        date_s_label = tk.Label(frame2, text="Jour d'édition", borderwidth=2, padx=-1, bg=self.button_color
+                                , font=('Courier', 10, "bold"), fg=self.fg)
+        date_s_label.grid(column=0, row=0, sticky='NW')
+
+        date_s_entry = tk.Entry(frame2, textvariable=self.date_s, borderwidth=2, relief=tk.GROOVE, bg="#4F7292", bd=0,
+                                font=('Courier', 10, "bold"), fg="white")
+        date_s_entry.grid(column=1, row=0, sticky='NE')
+
+        label = tk.Label(frame2, text="Solde hors charges", borderwidth=2, padx=-1, bg=self.button_color
+                         , font=('Courier', 10, "bold"), fg=self.fg)
+        label.grid(column=3, row=0, sticky='NSEW')
+
+        self.entry_solde = tk.Entry(frame2, textvariable=self.solde, borderwidth=2, relief=tk.GROOVE, bg="#4F7292",
+                                    bd=0,
+                                    font=('Courier', 10, "bold"), fg="white")
+        self.entry_solde.grid(column=4, row=0, sticky='NSEW')
+
+        label = tk.Label(frame2, text="charges", borderwidth=2, padx=-1, bg=self.button_color
+                         , font=('Courier', 10, "bold"), fg=self.fg)
+        label.grid(column=3, row=1, sticky='NSEW')
+
+        self.entry_charges = tk.Entry(frame2, textvariable=self.charges, borderwidth=2, relief=tk.GROOVE, bg="#4F7292",
+                                      bd=0,
+                                      font=('Courier', 10, "bold"), fg="white")
+        self.entry_charges.grid(column=4, row=1, sticky='NSEW')
+
+        button_selection = tk.Button(frame2, text="Mise a Jour", height=2, borderwidth=2, bg=self.bg
+                                     , font=('Courier', 9, "bold"), fg=self.fg, relief=tk.GROOVE,
+                                     command="")
+
+        button_selection.grid(column=5, row=0, rowspan=2, columnspan=2, sticky='NSEW')
+
+        # Frame 3
+        button_config = tk.Button(frame3, text='CONFIG', borderwidth=2, relief=tk.GROOVE, command=self.config,
+                                  bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"))
+        button_config.grid(column=0, row=0, sticky='NSEW')
+
+        button_blk0 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
+                                )
+        button_blk0.grid(column=0, row=1, sticky='NSEW')
+
+        self.menu_sci = tk.StringVar()
+        menu_sci_list = ["création", "modification", "suppression"]
+        self.menu_sci.set("SCI")
+        SciMenu = tk.OptionMenu(frame3, self.menu_sci, *menu_sci_list, command=self.sci_menu_selection)
+        SciMenu.configure(bg=self.bg, font=('Courier', self.fg_size, "bold"), fg=self.fg, bd=0)
+        SciMenu.grid(column=0, row=2, sticky='NSEW')
+
+        button_blk1 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
+                                )
+        button_blk1.grid(column=0, row=3, sticky='NSEW')
+
+        button_tenant = tk.Button(frame3, text="LOCATAIRES", borderwidth=2, relief=tk.GROOVE,
+                                  command=self.go_tenant, bg=self.bg, fg=self.fg,
+                                  font=('Courier', self.fg_size, "bold"),
+                                  bd=0)
+
+        button_tenant.grid(column=0, row=5, sticky='NSEW')
+
+        button_shareholder = tk.Button(frame3, text="ASSOCIES", borderwidth=2, relief=tk.GROOVE,
+                                       command=self.go_shareholder, bg=self.bg, fg=self.fg,
+                                       font=('Courier', self.fg_size, "bold"),
+                                       bd=0)
+
+        button_shareholder.grid(column=0, row=7, sticky='NSEW')
+
+        button = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color)
+        button.grid(column=0, row=6, sticky='NSEW')
+
+        button = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color)
+        button.grid(column=0, row=8, sticky='NSEW')
+
+        button_end = tk.Button(frame3, text="FERMER", borderwidth=2, relief=tk.GROOVE,
+                               command=self.closing, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"),
+                               bd=0)
+        button_end.grid(column=0, row=9, sticky='NSEW')
+
+    def sci_menu_selection(self, v):
+        if self.menu_sci.get() == "création":
+            self.destroy()
+            NewModSciGUI(1).mainloop()
+        if self.menu_sci.get() == "modification":
+            self.destroy()
+            NewModSciGUI(0).mainloop()
+        if self.menu_sci.get() == "suppression":
+            self.destroy()
+            DeleteGui(1).mainloop()
+
+    def go_tenant(self):
+        self.destroy()
+        TenantGui().mainloop()
+
+    def go_shareholder(self):
+        self.destroy()
+        Shareholder_GUI().mainloop()
+
+    def focus_row(self, e):
+        self.entry_solde.delete(0, tk.END)
+        self.entry_charges.delete(0, tk.END)
+        selected = self.tree.focus()
+        values = self.tree.item(selected, 'values')
+        self.entry_solde.insert(0, values[1])
+        self.entry_charges.insert(0, values[2])
+
+    def charges(self):
+        pass
+
+    def config(self):
+        self.destroy()
+        ConfigGUI().mainloop()
+
+    def closing(self):
+        self.master.destroy()
+
 
 if __name__ == "__main__":
     SplashScreen().mainloop()
