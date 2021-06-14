@@ -138,7 +138,7 @@ class TenantGui(tk.Frame):
         frame3.grid(column=1, row=0, rowspan=2, sticky='NSEW')
         # widgets menu*
 
-        self.selection = []
+        # self.selection = []
         # widgets on the left side
         self.tree_scroll = tk.Scrollbar(frame1)
         self.tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
@@ -601,10 +601,13 @@ class DeleteGui(tk.Frame):
 
     def quit(self):
         self.destroy()
+        if self.value == 0:
+            TenantGui().mainloop()
+        if self.value == 1:
+            SciGui().mainloop()
         if self.value == 2:
             Shareholder_GUI().mainloop()
 
-        TenantGui().mainloop()
 
 
 class InfoGui(tk.Frame):
@@ -1297,7 +1300,7 @@ class NewModSciGUI(tk.Frame):
 
     def quit(self):
         self.destroy()
-        TenantGui().mainloop()
+        SciGui().mainloop()
 
 
 class Shareholder_GUI(tk.Frame):
@@ -1321,7 +1324,7 @@ class Shareholder_GUI(tk.Frame):
         self.database = Sql_database()
         self.today = date.today()
         # variable's creation
-        self.selection = []
+        # self.selection = []
         self.shareholder_id = tk.IntVar()
         self.shareholder_name = tk.StringVar()
         self.shareholder_firstname = tk.StringVar()
@@ -1705,7 +1708,7 @@ class SciGui(tk.Frame):
         self.database = Sql_database()
         self.today = date.today()
         # variable's creation
-        self.selection = []
+        # self.selection = []
         self.date_s = tk.StringVar()
         self.date_s.set(f"{self.today.day}/{self.today.month}/{self.today.year}")
         self.solde = tk.DoubleVar()
