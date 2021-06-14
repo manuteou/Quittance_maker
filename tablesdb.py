@@ -74,7 +74,8 @@ class Sql_database_init():
                mail TEXT NOT NULL,
                siret TEXT NOT NULL,
                solde REAL,
-               frais REAL
+               frais REAL,
+               charges REAL
                );"""
 
         sql_create_shareholder_table = """ CREATE TABLE IF NOT EXISTS shareholder(
@@ -260,12 +261,18 @@ class Sql_database():
         self.c.execute(sql_shareholder_aff)
         return self.c.fetchall()
 
-    def sum_sci(self, sci, month, year):
+    def sum_sci(self, id, month, year):
         sql_sum_sci = f"""SELECT SUM(loyer)
                         FROM "records_tenant"
-                        WHERE sci = "{sci}" AND strftime('%m', date) = "{month}" AND strftime('%Y', date) = "{year}";"""
+                        WHERE id = "{id}" AND strftime('%m', date) = "{month}" AND strftime('%Y', date) = "{year}";"""
         print(sql_sum_sci)
         self.c.execute(sql_sum_sci)
+        return self.c.fetchall()
+
+    def sci_aff(self):
+        sql_sci_aff = f"""SELECT nom, solde, charges
+                        FROM sci"""
+        self.c.execute(sql_sci_aff)
         return self.c.fetchall()
 
 if __name__ == "__main__":

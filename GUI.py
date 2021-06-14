@@ -40,17 +40,35 @@ class SplashScreen(tk.Frame):
         self.master.overrideredirect(True)
         self.master.configure(bg='#1A5276')
         self.splash_screen()
+        self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = GuiAspect().setting()
         self.combostyle = ttk.Style()
-        self.combostyle.theme_create('custom.TCombobox', parent='clam',
-                                     settings={'custom.TCombobox':
-                                                   {'configure':
-                                                        {'selectbackground': '#4F7292',
-                                                         'fieldbackground': '#4F7292',
-                                                         'background': '#4F7292',
-                                                         'fontground': 'white'
+        # self.combostyle.theme_create('custom.TCombobox', parent='clam',
+        #                              settings={'custom.TCombobox':
+        #                                            {'configure':
+        #                                                 {'selectbackground': '#4F7292',
+        #                                                  'fieldbackground': '#4F7292',
+        #                                                  'background': '#4F7292',
+        #                                                  'fontground': 'white'
+        #
+        #                                                  }}}
+        #                              )
+        # )
+        self.combostyle.theme_settings("default", {
+            "TCombobox": {'configure': {
+                'selectbackground': "#347083",
+                'fieldbackground': '#4F7292',
+                'background': '#4F7292',
+                'fontground': 'white'
+            }
+            },
+            "Treeview": {"configure": {
+                "background": self.tableau,
+                "foreground": self.fg,
+                "rowheight": 50,
+                "fieldbackground": self.tableau,
+            }
+            }})
 
-                                                         }}}
-                                     )
         self.pack(expand=True)
 
     def splash_screen(self):
@@ -94,9 +112,10 @@ class MainGui(tk.Frame):
         self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = GuiAspect().setting()
         self.database = Sql_database()
         self.style = ttk.Style()
-        self.style.theme_use('vista')
-        self.style.configure("Treeview", background=self.tableau, foreground=self.fg, rowheight=25,
-                             fieldbackground=self.tableau)
+        self.style.theme_use('default')
+        # self.style.theme_use('vista')
+        # self.style.configure("Treeview", background=self.tableau, foreground=self.fg, rowheight=25,
+        #                      fieldbackground=self.tableau)
         # variable's creation
         self.today = date.today()
         self.date_s = tk.StringVar()
@@ -333,8 +352,8 @@ class CreatModGui(tk.Frame):
     def __init__(self, value):
         tk.Frame.__init__(self)
         self.master.geometry("360x350")
-        self.combostyle = ttk.Style()
-        self.combostyle.theme_use('custom.TCombobox')
+        self.style = ttk.Style()
+        self.style.theme_use('default')
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -510,8 +529,8 @@ class DeleteGui(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
-        self.combostyle = ttk.Style()
-        self.combostyle.theme_use('custom.TCombobox')
+        self.style = ttk.Style()
+        self.style.theme_use('default')
         self.database = Sql_database()
         self.bg, self.button_color, self.fg, self.fg_size, _, self.fontGui = GuiAspect().setting()
         # variable creation
@@ -611,8 +630,8 @@ class InfoGui(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
-        self.combostyle = ttk.Style()
-        self.combostyle.theme_use('custom.TCombobox')
+        self.style = ttk.Style()
+        self.style.theme_use('default')
         self.database = Sql_database()
         self.bg, self.button_color, self.fg, self.fg_size, _, self.fontGui = GuiAspect().setting()
         #variables
@@ -698,8 +717,8 @@ class MajRentGui(tk.Frame):
         self.grid(sticky="NSEW")
         self.database = Sql_database()
         self.bg, self.button_color, self.fg, self.fg_size, _, self.fontGui = GuiAspect().setting()
-        self.combostyle = ttk.Style()
-        self.combostyle.theme_use('custom.TCombobox')
+        self.style = ttk.Style()
+        self.style.theme_use('default')
         # variables
         self.tenant_name = tk.StringVar()
         self.tenant_name.trace("w", self.observer)
@@ -819,8 +838,8 @@ class LetterGui(tk.Frame):
         self.grid(sticky="NSEW")
         self.database = Sql_database()
         self.bg, self.button_color, self.fg, self.fg_size, _, self.fontGui = GuiAspect().setting()
-        self.combostyle = ttk.Style()
-        self.combostyle.theme_use('custom.TCombobox')
+        self.style = ttk.Style()
+        self.style.theme_use('default')
         # variables
         self.tenant_name = tk.StringVar()
         self.new_indice = tk.IntVar()
@@ -1158,8 +1177,8 @@ class NewModSciGUI(tk.Frame):
     def __init__(self, value):
         tk.Frame.__init__(self)
         self.master.geometry("350x350")
-        self.combostyle = ttk.Style()
-        self.combostyle.theme_use('custom.TCombobox')
+        self.style = ttk.Style()
+        self.style.theme_use('default')
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -1306,10 +1325,12 @@ class Shareholder_GUI(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = GuiAspect().setting()
-        self.combostyle = ttk.Style()
-        self.combostyle.theme_use('custom.TCombobox')
         self.style = ttk.Style()
-        self.style.theme_use('vista')
+        self.style.theme_use('default')
+        # self.combostyle = ttk.Style()
+        # self.combostyle.theme_use('custom.TCombobox')
+        # self.style = ttk.Style()
+        # self.style.theme_use('vista')
         self.database = Sql_database()
         self.today = date.today()
         # variable's creation
@@ -1401,17 +1422,18 @@ class Shareholder_GUI(tk.Frame):
 
         button_selection.grid(column=7, row=1, sticky='NSEW')
 
-        button_selection = tk.Button(frame2, text="VALIDER", height=2, borderwidth=2, bg=self.bg
-                                     , font=('Courier', 9, "bold"), fg=self.fg, relief=tk.GROOVE,
-                                     command=self.frais_calcul)
-
-        button_selection.grid(column=8, row=1, sticky='NSEW')
+        # button_selection = tk.Button(frame2, text="VALIDER", height=2, borderwidth=2, bg=self.bg
+        #                              , font=('Courier', 9, "bold"), fg=self.fg, relief=tk.GROOVE,
+        #                              command=self.frais_calcul)
+        #
+        # button_selection.grid(column=8, row=1, sticky='NSEW')
 
         sci_choise = ttk.Combobox(frame2, textvariable=self.sci, state='readonly', style='custom.TCombobox')
         sci_choise.grid(column=6, row=0, sticky="NSEW")
         with open('config.json', 'r') as json_files:
             config = json.load(json_files)
-        sci_choise['values'] = config['sci']
+        list_sci = [(n + 1, sci) for n, sci in enumerate(config["sci"])]
+        sci_choise['values'] = list_sci
 
         # Frame 3
         stat_label = tk.Button(frame3, text="STAT", borderwidth=2, relief=tk.GROOVE,
@@ -1425,7 +1447,7 @@ class Shareholder_GUI(tk.Frame):
 
         self.menu_shareholder = tk.StringVar()
         menu_shareholder_list = ["Création", "Modification", "Suppression"]
-        self.menu_shareholder.set("ACTIONNAIRES")
+        self.menu_shareholder.set("ASSOCIES")
         shareholder_menu = tk.OptionMenu(frame3, self.menu_shareholder, *menu_shareholder_list,
                                          command=self.shareholder_menu_selection)
         shareholder_menu.configure(bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"), bd=0)
@@ -1468,10 +1490,13 @@ class Shareholder_GUI(tk.Frame):
             DeleteGui(2).mainloop()
 
     def observer(self, *args):
-        watch = self.sci.get()
+        watch = self.sci.get().split()[0]
         day, month, year = str(self.date_s.get()).split("/")
-        result = self.database.sum_sci(watch, month, year)
-        self.sum_sci.set(result)
+        sum_sci_tenant = self.database.sum_sci(watch, month, year)[0][0]
+        if sum_sci_tenant is None:
+            sum_sci_tenant = 0
+        sci_solde = self.database.one_elt("solde", "sci", watch)[0][0]
+        self.sum_sci.set(sum_sci_tenant + sci_solde)
 
     def stat(self):
         pass                # stat.py ---> pandas/ plotly
@@ -1498,28 +1523,30 @@ class Shareholder_GUI(tk.Frame):
                                   "date": date}
                 self.database.create_entry("records_shareholder", records_shareholder)
 
-            path_dir = directory.joinpath(elt[0][10], year, month)
+            path_dir = directory.joinpath(elt[0], year, month)
             path_dir.mkdir(parents=True, exist_ok=True)
-            path = path_dir.joinpath(f"{elt[0][2]}_{elt[0][3]}" + ".pdf")
+            path = path_dir.joinpath(f"{elt[2]}_{elt[3]}" + ".pdf")
             pdf = canvas.Canvas(str(path))
-            pdf_gen = Pdf_shareholder(pdf, nom=elt[0][1], prenom=elt[0][2], sci=elt[0][0], date=date, montant=elt[0][4])
+            pdf_gen = Pdf_shareholder(pdf, nom=elt[1], prenom=elt[2], sci=elt[0], date=date, montant=elt[4])
             pdf_gen.generator()
-            mail = send_mail("Quittance", config["master_mail"], config["password"], elt[0][5], config["SMTP"],
+            mail = send_mail("Quittance", config["master_mail"], config["password"], elt[6], config["SMTP"],
                              config["port"], path)
             mail.send()
 
         self.destroy()
         Shareholder_GUI().mainloop()
 
-
-
     def frais_calcul(self):
         value = self.frais.get()
+        print(value)
         for elt in self.database.shareholder_aff():
-            if self.sci.get() == elt[1]:
+            if self.sci.get().split()[1] == elt[1]:
                 virement = (value * float(elt[4]) / 100.)
                 elt = list(elt)
-                elt.append(virement)
+                if not self.statut_check(elt[2], elt[3], elt[1]):
+                    elt.extend([virement, "NOT SEND"])
+                else:
+                    elt.extend([virement, "SEND"])
                 self.tree.item(elt[0], values=elt[1:])
 
     def statut_check(self, nom, prenom, sci):
@@ -1548,8 +1575,8 @@ class Cr_mod_SO(tk.Frame):
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
         self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = GuiAspect().setting()
-        self.combostyle = ttk.Style()
-        self.combostyle.theme_use('custom.TCombobox')
+        self.style = ttk.Style()
+        self.style.theme_use('default')
         self.database = Sql_database()
         self.value = value
 
