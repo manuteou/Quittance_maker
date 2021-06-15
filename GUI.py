@@ -41,17 +41,7 @@ class SplashScreen(tk.Frame):
         self.splash_screen()
         self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = GuiAspect().setting()
         self.combostyle = ttk.Style()
-        # self.combostyle.theme_create('custom.TCombobox', parent='clam',
-        #                              settings={'custom.TCombobox':
-        #                                            {'configure':
-        #                                                 {'selectbackground': '#4F7292',
-        #                                                  'fieldbackground': '#4F7292',
-        #                                                  'background': '#4F7292',
-        #                                                  'fontground': 'white'
-        #
-        #                                                  }}}
-        #                              )
-        # )
+
         self.combostyle.theme_settings("default", {
             "TCombobox": {'configure': {
                 'selectbackground': "#347083",
@@ -112,9 +102,6 @@ class TenantGui(tk.Frame):
         self.database = Sql_database()
         self.style = ttk.Style()
         self.style.theme_use('default')
-        # self.style.theme_use('vista')
-        # self.style.configure("Treeview", background=self.tableau, foreground=self.fg, rowheight=25,
-        #                      fieldbackground=self.tableau)
         # variable's creation
         self.today = date.today()
         self.date_s = tk.StringVar()
@@ -138,7 +125,6 @@ class TenantGui(tk.Frame):
         frame3.grid(column=1, row=0, rowspan=2, sticky='NSEW')
         # widgets menu*
 
-        # self.selection = []
         # widgets on the left side
         self.tree_scroll = tk.Scrollbar(frame1)
         self.tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
@@ -243,24 +229,26 @@ class TenantGui(tk.Frame):
         list_to_send = []
         for result in result_selection:
             list_to_send.append(self.database.pdf_table_single(result))
-        print("list_to-send", list_to_send)
         for tenant in list_to_send:
             for elt in tenant:
                 if not self.statut_check(elt[2], elt[3], elt[10]):
                     day, month, year = self.date_s.get().split("/")
                     date = f"{year}-{month}-{day}"
-                    print(self.today)
                     records_tenant = {"nom": elt[2], "prenom": elt[3], "SCI": elt[10], "loyer": elt[6],
                                       "charges": elt[7], "date": date}
                     self.database.create_entry("records_tenant", records_tenant)
+                    result = list(self.database.solde_sci(elt[0])[0])
+                    result[0] += elt[6]
+                    result[1] += elt[7]
+                    insert = {"solde": result[0], "charges": result[1]}
+                    self.database.update_entry(elt[0], "sci", insert)
+
 
         directory = functions.directory()
         config = functions.config_data()
         day, month, year = self.date_s.get().split("/")
-        print("list_to-send", list_to_send)
         for elt in list_to_send:
-            print(elt)
-            path_dir = directory.joinpath(elt[0][10], year, month)
+            path_dir = directory.joinpath(elt[0][10], year, month, "locataire")
             path_dir.mkdir(parents=True, exist_ok=True)
             path = path_dir.joinpath(f"{elt[0][2]}_{elt[0][3]}" + ".pdf")
             pdf = canvas.Canvas(str(path))
@@ -283,7 +271,7 @@ class TenantGui(tk.Frame):
         directory = functions.directory()
         date = self.date_s.get()
         _, month, year = date.split("/")
-        path_dir = directory.joinpath(sci, year, month, f"{nom}_{prenom}" + ".pdf")
+        path_dir = directory.joinpath(sci, year, month, "locataire", f"{nom}_{prenom}" + ".pdf")
         if path_dir.exists():
             return True
         else:
@@ -1317,14 +1305,10 @@ class Shareholder_GUI(tk.Frame):
         self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = GuiAspect().setting()
         self.style = ttk.Style()
         self.style.theme_use('default')
-        # self.combostyle = ttk.Style()
-        # self.combostyle.theme_use('custom.TCombobox')
-        # self.style = ttk.Style()
-        # self.style.theme_use('vista')
         self.database = Sql_database()
         self.today = date.today()
         # variable's creation
-        # self.selection = []
+
         self.shareholder_id = tk.IntVar()
         self.shareholder_name = tk.StringVar()
         self.shareholder_firstname = tk.StringVar()
@@ -1412,11 +1396,7 @@ class Shareholder_GUI(tk.Frame):
 
         button_selection.grid(column=7, row=1, sticky='NSEW')
 
-        # button_selection = tk.Button(frame2, text="VALIDER", height=2, borderwidth=2, bg=self.bg
-        #                              , font=('Courier', 9, "bold"), fg=self.fg, relief=tk.GROOVE,
-        #                              command=self.frais_calcul)
-        #
-        # button_selection.grid(column=8, row=1, sticky='NSEW')
+
 
         sci_choise = ttk.Combobox(frame2, textvariable=self.sci, state='readonly', style='custom.TCombobox')
         sci_choise.grid(column=6, row=0, sticky="NSEW")
@@ -1511,25 +1491,34 @@ class Shareholder_GUI(tk.Frame):
 
     def validation_shareholder(self):
         # mettre une verification de champs vide sur virement
-        directory = functions.directory()
         config = functions.config_data()
+        directory = functions.directory()
         day, month, year = self.date_s.get().split("/")
         mails = self.database.elt_table("mail", "shareholder")
         id_select = self.tree.get_checked()
         list_mail = [mail for mail in mails if str(mail[0]) in id_select]
         list_selection = [self.tree.item(n)['values'] for n in id_select]
+        id_sci = [[i+1, sci] for i, sci in enumerate(functions.config_data()['sci'])]
+        for elt in id_sci:
+            for list_sci in list_selection:
+                if elt[1] in list_sci:
+                    list_sci.append(elt[0])
         for n, elt in enumerate(list_selection):
             elt.append(list_mail[n][1])
         for elt in list_selection:
             date = f"{year}-{month}-{day}"
             if not self.statut_check(elt[1], elt[2], elt[0]):
-                records_shareholder = {"nom": elt[1], "prenom": elt[2], "sci": elt[0], "virement": elt[4],
+                records_shareholder = {"nom": elt[1], "prenom": elt[1][2], "sci": elt[0], "virement": elt[4],
                                   "date": date}
                 self.database.create_entry("records_shareholder", records_shareholder)
+                result = list(self.database.solde_sci(elt[6])[0])
+                result[0] -= float(elt[4])
+                insert = {"solde": result[0]}
+                self.database.update_entry(elt[6], "sci", insert)
 
-            path_dir = directory.joinpath(elt[0], year, month)
+            path_dir = directory.joinpath(elt[0], year, month, "associés")
             path_dir.mkdir(parents=True, exist_ok=True)
-            path = path_dir.joinpath(f"{elt[2]}_{elt[3]}" + ".pdf")
+            path = path_dir.joinpath(f"{elt[1]}_{elt[2]}" + ".pdf")
             pdf = canvas.Canvas(str(path))
             pdf_gen = Pdf_shareholder(pdf, nom=elt[1], prenom=elt[2], sci=elt[0], date=date, montant=elt[4])
             pdf_gen.generator()
@@ -1537,12 +1526,12 @@ class Shareholder_GUI(tk.Frame):
                              config["port"], path)
             mail.send()
 
+
         self.destroy()
         Shareholder_GUI().mainloop()
 
     def frais_calcul(self):
         value = self.frais.get()
-        print(value)
         for elt in self.database.shareholder_aff():
             if self.sci.get().split()[1] == elt[1]:
                 virement = (value * float(elt[4]) / 100.)
@@ -1557,7 +1546,7 @@ class Shareholder_GUI(tk.Frame):
         directory = functions.directory()
         date = self.date_s.get()
         _, month, year = date.split("/")
-        path_dir = directory.joinpath(sci, year, month, "associées", f"{nom}_{prenom}" + ".pdf")
+        path_dir = directory.joinpath(sci, year, month, "associés", f"{nom}_{prenom}" + ".pdf")
         if path_dir.exists():
             return True
         else:
@@ -1688,27 +1677,11 @@ class SciGui(tk.Frame):
         self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = GuiAspect().setting()
 
         self.style = ttk.Style()
-        self.style.theme_settings("default", {
-            "TCombobox": {'configure': {
-                'selectbackground': "#347083",
-                'fieldbackground': '#4F7292',
-                'background': '#4F7292',
-                'fontground': 'white'
-            }
-            },
-            "Treeview": {"configure": {
-                "background": self.tableau,
-                "foreground": self.fg,
-                "rowheight": 50,
-                "fieldbackground": self.tableau,
-            }
-            }})
         self.style.theme_use('default')
 
         self.database = Sql_database()
         self.today = date.today()
         # variable's creation
-        # self.selection = []
         self.date_s = tk.StringVar()
         self.date_s.set(f"{self.today.day}/{self.today.month}/{self.today.year}")
         self.solde = tk.DoubleVar()
@@ -1739,7 +1712,7 @@ class SciGui(tk.Frame):
 
         self.tree['columns'] = ("SCI", "Solde", "Provision sur charges")
         columns = ["#0", "SCI", "Solde", "Provision sur charges"]
-        self.tree.tag_configure('row', background=self.tableau)
+
         aff_list = self.database.sci_aff()
         for c in columns:
             self.tree.column(c, width=300)
@@ -1747,7 +1720,7 @@ class SciGui(tk.Frame):
 
         for elt in aff_list:
             result = list(elt[:])
-            self.tree.insert(parent='', index='end', iid=elt[0], values=result, tags=('row',))
+            self.tree.insert(parent='', index='end', iid=elt[0], values=result)
         self.tree.column("#0", width=0, stretch=tk.NO)
         self.tree.bind("<ButtonRelease-1>", self.focus_row)
 
@@ -1780,7 +1753,7 @@ class SciGui(tk.Frame):
 
         button_selection = tk.Button(frame2, text="Mise a Jour", height=2, borderwidth=2, bg=self.bg
                                      , font=('Courier', 9, "bold"), fg=self.fg, relief=tk.GROOVE,
-                                     command="")
+                                     command=self.maj)
 
         button_selection.grid(column=5, row=0, rowspan=2, columnspan=2, sticky='NSEW')
 
@@ -1856,8 +1829,16 @@ class SciGui(tk.Frame):
         self.entry_solde.insert(0, values[1])
         self.entry_charges.insert(0, values[2])
 
-    def charges(self):
-        pass
+    def maj(self):
+        new_solde = self.entry_solde.get()
+        new_charges = self.entry_charges.get()
+        selected = self.tree.focus()
+        sci_id = self.tree.index(selected) + 1
+        insert = {"solde": new_solde, "charges": new_charges}
+        self.database.update_entry(sci_id, "sci", insert)
+        messagebox.showinfo("Information", "Mise à jour effectuée")
+        self.destroy()
+        SciGui().mainloop()
 
     def config(self):
         self.destroy()

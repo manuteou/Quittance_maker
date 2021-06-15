@@ -178,7 +178,7 @@ class Sql_database():
         return self.c.fetchall()
 
     def pdf_table_single(self, index):
-        sql_pdf_table_single = f"""SELECT  t.id, l.id,   t.nom, prenom, t.adresse, t.CP_ville, loyer, charges, t.mail, cat, s.nom, 
+        sql_pdf_table_single = f"""SELECT  t.id, l.id,   t.nom, prenom, t.adresse, t.CP_ville, loyer, l.charges, t.mail, cat, s.nom, 
                                 s.adresse, s.cp_ville, s.tel, s.mail, s.siret
                                 FROM location as l
                                 INNER JOIN tenant as t
@@ -262,10 +262,9 @@ class Sql_database():
         return self.c.fetchall()
 
     def sum_sci(self, id, month, year):
-        sql_sum_sci = f"""SELECT SUM(loyer)
+        sql_sum_sci = f"""SELECT SUM(loyer), SUM(charges)
                         FROM "records_tenant"
                         WHERE id = "{id}" AND strftime('%m', date) = "{month}" AND strftime('%Y', date) = "{year}";"""
-        print(sql_sum_sci)
         self.c.execute(sql_sum_sci)
         return self.c.fetchall()
 
@@ -273,6 +272,13 @@ class Sql_database():
         sql_sci_aff = f"""SELECT nom, solde, charges
                         FROM sci"""
         self.c.execute(sql_sci_aff)
+        return self.c.fetchall()
+
+    def solde_sci(self, id):
+        sql_solde_sci = f"""SELECT solde, charges
+                        FROM sci
+                        WHERE id={id};"""
+        self.c.execute(sql_solde_sci)
         return self.c.fetchall()
 
 if __name__ == "__main__":
