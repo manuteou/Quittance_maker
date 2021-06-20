@@ -192,7 +192,7 @@ class Sql_database():
 
     def letter_request(self, index):
         sql_letter_request = f"""SELECT t.id, t.nom, prenom, t.adresse, t.cp_ville, indice_base, l.id, s.nom,
-                            loyer, charges, cat, s.nom, s.adresse, s.cp_ville, s.tel, s.mail, s.siret, t.mail,
+                            loyer, l.charges, cat, s.nom, s.adresse, s.cp_ville, s.tel, s.mail, s.siret, t.mail,
                             date_entree
                             FROM tenant as t
                             INNER JOIN location as l

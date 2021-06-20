@@ -32,7 +32,6 @@ class SplashScreen(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         height, width = self.get_display_size()
-        print(height, width)
         height = int(height/2) - 175
         width = int(width/2) - 425
         self.master.geometry(f"850x350+{width}+{height}")
@@ -41,7 +40,6 @@ class SplashScreen(tk.Frame):
         self.splash_screen()
         self.bg, self.button_color, self.fg, self.fg_size, self.tableau, self.fontGui = GuiAspect().setting()
         self.combostyle = ttk.Style()
-
         self.combostyle.theme_settings("default", {
             "TCombobox": {'configure': {
                 'selectbackground': "#347083",
@@ -53,17 +51,16 @@ class SplashScreen(tk.Frame):
             "Treeview": {"configure": {
                 "background": self.tableau,
                 "foreground": self.fg,
-                "rowheight": 50,
+                "rowheight": 40,
                 "fieldbackground": self.tableau,
             }
             }})
-
         self.pack(expand=True)
 
     def splash_screen(self):
         splash_frame = tk.Frame(self)
-        splash_label = tk.Label(splash_frame, text="  QUITTANCE MAKER  ", font=('Courier', 40, "bold"), bg="#1A5276", fg="#74D0F1")
-        splash_label2 = tk.Label(splash_frame, text="\nfaciliter la gestion de vos locataires", font=(
+        splash_label = tk.Label(splash_frame, text="QUITTANCE MAKER", font=('Courier', 40, "bold"), bg="#1A5276", fg="#74D0F1")
+        splash_label2 = tk.Label(splash_frame, text="\nfaciliter la  gestion locative", font=(
             'Courier', 20, "bold"), bg="#1A5276", fg="#74D0F1")
         splash_frame.pack()
         splash_label.pack(expand=True)
@@ -92,7 +89,7 @@ class TenantGui(tk.Frame):
         self.master.geometry("970x350")
         self.master.overrideredirect(False)
         self.master.minsize(300, 150)
-        self.master.title("Quittances Maker V1.10")
+        self.master.title("QUITTANCE MAKER")
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -105,8 +102,7 @@ class TenantGui(tk.Frame):
         # variable's creation
         self.today = date.today()
         self.date_s = tk.StringVar()
-        year, month, day = str(self.today).split('-')
-        self.date_s.set(f"{day}/{month}/{year}")
+        self.date_s.set(f"{self.today:%d/%m/%Y}")
         self.info = tk.StringVar()
         # widget's Creation
         main_frame = tk.Frame(self, borderwidth=2, relief=tk.GROOVE, bg=self.button_color
@@ -225,39 +221,45 @@ class TenantGui(tk.Frame):
 
 
     def validation_select_tenant(self):
-        result_selection = self.tree.get_checked()
-        list_to_send = []
-        for result in result_selection:
-            list_to_send.append(self.database.pdf_table_single(result))
-        for tenant in list_to_send:
-            for elt in tenant:
-                if not self.statut_check(elt[2], elt[3], elt[10]):
-                    day, month, year = self.date_s.get().split("/")
-                    date = f"{year}-{month}-{day}"
-                    records_tenant = {"nom": elt[2], "prenom": elt[3], "SCI": elt[10], "loyer": elt[6],
-                                      "charges": elt[7], "date": date}
-                    self.database.create_entry("records_tenant", records_tenant)
-                    result = list(self.database.solde_sci(elt[0])[0])
-                    result[0] += elt[6]
-                    result[1] += elt[7]
-                    insert = {"solde": result[0], "charges": result[1]}
-                    self.database.update_entry(elt[0], "sci", insert)
+        id_select = self.tree.get_checked()
+        list_selection = [self.database.pdf_table_single(n) for n in id_select]
+        id_sci = [[i + 1, sci] for i, sci in enumerate(functions.config_data()['sci'])]
+        list_to_send = [list(tenant[0]) for tenant in list_selection]
+        for elt in id_sci:
+            for tenant in list_to_send:
+                if elt[1] in tenant:
+                    tenant.append(elt[0])
+
+        for elt in list_to_send:
+            if not self.statut_check(elt[2], elt[3], elt[10]):
+                day, month, year = self.date_s.get().split("/")
+                date = f"{year}-{month}-{day}"
+                records_tenant = {"nom": elt[2], "prenom": elt[3], "SCI": elt[10], "loyer": elt[6],
+                                  "charges": elt[7], "date": date}
+                self.database.create_entry("records_tenant", records_tenant)
+                result = list(self.database.solde_sci(elt[16])[0])
+                if result[1] is None:
+                    result[1] = 0
+                result[0] += elt[6]
+                result[1] += elt[7]
+                insert = {"solde": result[0], "charges": result[1]}
+                self.database.update_entry(elt[16], "sci", insert)
 
 
         directory = functions.directory()
         config = functions.config_data()
         day, month, year = self.date_s.get().split("/")
         for elt in list_to_send:
-            path_dir = directory.joinpath(elt[0][10], year, month, "locataire")
+            path_dir = directory.joinpath(elt[10], year, month, "locataire")
             path_dir.mkdir(parents=True, exist_ok=True)
-            path = path_dir.joinpath(f"{elt[0][2]}_{elt[0][3]}" + ".pdf")
+            path = path_dir.joinpath(f"{elt[2]}_{elt[3]}" + ".pdf")
             pdf = canvas.Canvas(str(path))
-            pdf_gen = Pdf_tenant(pdf, nom=elt[0][2], prenom=elt[0][3], adresse=elt[0][4], ville=elt[0][5],
-                                 loyer=elt[0][6], charge=elt[0][7], day=day, month=month, years=year, cat=elt[0][9],
-                                 sci_nom=elt[0][10], sci_adresse=elt[0][11], sci_cp_ville=elt[0][12],
-                                 sci_tel=elt[0][13], sci_mail=elt[0][14], sci_siret=elt[0][15])
+            pdf_gen = Pdf_tenant(pdf, nom=elt[2], prenom=elt[3], adresse=elt[4], ville=elt[5],
+                                 loyer=elt[6], charge=elt[7], day=day, month=month, years=year, cat=elt[9],
+                                 sci_nom=elt[10], sci_adresse=elt[11], sci_cp_ville=elt[12],
+                                 sci_tel=elt[13], sci_mail=elt[14], sci_siret=elt[15])
             pdf_gen.generator()
-            mail = send_mail("Quittance", config["master_mail"], config["password"], elt[0][8], config["SMTP"],
+            mail = send_mail("Quittance", config["master_mail"], config["password"], elt[8], config["SMTP"],
                                  config["port"], path)
             mail.send()
         self.destroy()
@@ -300,17 +302,11 @@ class TenantGui(tk.Frame):
             self.destroy()
             InfoGui().mainloop()
         elif self.menu_tenant.get() == 'création':
-            with open('config.json', 'r') as json_files:
-                config = json.load(json_files)
-            if not config['sci']:
-                messagebox.showinfo("Attention", "Renseigner un SCI, avant de pouvoir acceder à ce menu")
-                pass
-            else:
-                self.destroy()
-                CreatModGui(0).mainloop()
+            self.destroy()
+            CreatModTenant(0).mainloop()
         elif self.menu_tenant.get() == 'modification':
             self.destroy()
-            CreatModGui(1).mainloop()
+            CreatModTenant(1).mainloop()
         elif self.menu_tenant.get() == 'suppression':
             self.destroy()
             DeleteGui(0).mainloop()
@@ -323,7 +319,7 @@ class TenantGui(tk.Frame):
         self.destroy()
         Shareholder_GUI().mainloop()
 
-class CreatModGui(tk.Frame):
+class CreatModTenant(tk.Frame):
     def __init__(self, value):
         tk.Frame.__init__(self)
         self.master.geometry("360x350")
@@ -348,7 +344,7 @@ class CreatModGui(tk.Frame):
         self.loyerVar = tk.StringVar()
         self.chargesVar = tk.StringVar()
         self.selectorVar = tk.StringVar()
-        self.selectorVar.set(1)
+        self.selectorVar.set(0)
         self.date_entreeVar = tk.StringVar()
         self.indice_base = tk.StringVar()
         self.value = value
@@ -1259,12 +1255,10 @@ class NewModSciGUI(tk.Frame):
             insert_sci = {'nom': new_sci.nom, 'adresse': new_sci.adresse, 'cp_ville': new_sci.cp_ville,
                           'tel': new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret, 'solde': new_sci.solde}
 
-            print({'nom': new_sci.nom, 'adresse': new_sci.adresse, 'cp_ville': new_sci.cp_ville,
-                   'tel': new_sci.tel, 'mail': new_sci.mail, 'siret': new_sci.siret, 'solde': new_sci.solde})
-
             if self.value == 0:
                 id = self.old_var.get().split(" ")[0]
                 self.database.update_entry(id, "sci", insert_sci)
+                messagebox.showinfo("Information", "modification(s) effectué(es)")
 
             if self.value == 1:
                 self.database.create_entry("sci", insert_sci)
@@ -1272,19 +1266,16 @@ class NewModSciGUI(tk.Frame):
 
             with open('config.json', 'r') as json_files:
                 config = json.load(json_files)
-                print("Ouverture config")
             try:
-                print("tentative de remove")
                 config['sci'].remove(self.old_var.get().split(" ")[1])
             except AttributeError as e:
                 print("supression non realisée car création")
             finally:
-                print("ecriture de la sci")
                 config["sci"].append(new_sci.nom)
                 with open('config.json', 'w') as json_files:
                     json.dump(config, json_files)
-                print("sci rajouter au json")
-            messagebox.showinfo("Information", "modification(s) effectué(es)")
+
+
 
     def quit(self):
         self.destroy()
@@ -1299,6 +1290,7 @@ class Shareholder_GUI(tk.Frame):
         self.master.minsize(300, 150)
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
+        self.master.title("QUITTANCE MAKER")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
@@ -1315,8 +1307,7 @@ class Shareholder_GUI(tk.Frame):
         self.shareholder_sci = tk.StringVar()
         self.shareholder_part = tk.IntVar()
         self.date_s = tk.StringVar()
-        year, month, day = str(self.today).split('-')
-        self.date_s.set(f"{day}/{month}/{year}")
+        self.date_s.set(f"{self.today:%d/%m/%Y}")
         self.frais = tk.DoubleVar()
         self.sci = tk.StringVar()
         self.sum_sci = tk.DoubleVar()
@@ -1405,12 +1396,6 @@ class Shareholder_GUI(tk.Frame):
         list_sci = [(n + 1, sci) for n, sci in enumerate(config["sci"])]
         sci_choise['values'] = list_sci
 
-        # Frame 3
-        # stat_label = tk.Button(frame3, text="STAT", borderwidth=2, relief=tk.GROOVE,
-        #                        command=self.stat, bg=self.bg, fg=self.fg, font=('Courier', self.fg_size, "bold"),
-        #                        bd=0)
-        # stat_label.grid(column=0, row=0, sticky='NSEW')
-
         button_blk4 = tk.Button(frame3, state='disabled', bd=0, bg=self.button_color
                                 )
         button_blk4.grid(column=0, row=1, sticky='NSEW')
@@ -1477,9 +1462,6 @@ class Shareholder_GUI(tk.Frame):
             sum_sci_tenant = 0
         sci_solde = self.database.one_elt("solde", "sci", watch)[0][0]
         self.sum_sci.set(sum_sci_tenant + sci_solde)
-
-    # def stat(self):           #move to sci menu
-    #     pass                # stat.py ---> pandas/ plotly
 
     def go_tenant(self):
         self.destroy()
@@ -1585,7 +1567,7 @@ class Cr_mod_SO(tk.Frame):
 
         if self.value == 0:
             self.n = 0
-            self.master.title("Création d'Actionnaire")
+            self.master.title("Création d'Associées")
 
         if self.value == 1:
             self.n = 1
@@ -1671,6 +1653,7 @@ class SciGui(tk.Frame):
         self.master.minsize(300, 150)
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
+        self.master.title("QUITTANCE MAKER")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.grid(sticky="NSEW")
@@ -1683,7 +1666,7 @@ class SciGui(tk.Frame):
         self.today = date.today()
         # variable's creation
         self.date_s = tk.StringVar()
-        self.date_s.set(f"{self.today.day}/{self.today.month}/{self.today.year}")
+        self.date_s.set(f"{self.today:%d/%m/%Y}")
         self.solde = tk.DoubleVar()
         self.charges = tk.DoubleVar()
         self.sci = tk.StringVar()
@@ -1814,12 +1797,22 @@ class SciGui(tk.Frame):
             DeleteGui(1).mainloop()
 
     def go_tenant(self):
-        self.destroy()
-        TenantGui().mainloop()
+        with open('config.json', 'r') as json_files:
+            config = json.load(json_files)
+        if not config['sci']:
+            messagebox.showinfo("Attention", "Renseigner un SCI, avant de pouvoir acceder à ce menu")
+        else:
+            self.destroy()
+            TenantGui().mainloop()
 
     def go_shareholder(self):
-        self.destroy()
-        Shareholder_GUI().mainloop()
+        with open('config.json', 'r') as json_files:
+            config = json.load(json_files)
+        if not config['sci']:
+            messagebox.showinfo("Attention", "Renseigner un SCI, avant de pouvoir acceder à ce menu")
+        else:
+            self.destroy()
+            Shareholder_GUI().mainloop()
 
     def focus_row(self, e):
         self.entry_solde.delete(0, tk.END)

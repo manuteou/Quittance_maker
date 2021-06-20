@@ -42,10 +42,8 @@ if not c.exists():
 
     with open('config.json', 'w') as json_files:
         json.dump(config, json_files)
-    print("création fichier config")
 
 if not database.exists():
-    print("création base de données")
     Sql_database_init()
 
 if database.exists():
@@ -58,7 +56,6 @@ if database.exists():
     back = sqlite3.connect(path)
     con.backup(back)
     back.close()
-    print(path_dir)
     all_path = path_dir.joinpath("*")
     list_path = []
     for path in glob.glob(str(all_path)):
@@ -66,15 +63,11 @@ if database.exists():
     if len(list_path) > 5:
         for i in list_path[4:]:
             os.remove(i)
-        print(f"remove {i}")
 
 if not m.exists():
     text = 'Quittance Maker/Author: SEBAN Emmanuel/eseban78@free.fr'
     with open('message.txt', 'w') as text_file:
         text_file.write(text)
 
-
 # GUI launch
-
-
 SplashScreen().mainloop()
